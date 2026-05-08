@@ -167,7 +167,7 @@ function renderCurrentTab(container) {
 
 async function toggleSession(container, workerId) {
   const worker = state.workers.find((item) => String(item.id) === String(workerId));
-  const current = worker?.today_session || worker?.current_session;
+  const current = worker?.today_session;
   if (!state.workers.length) {
     window.oikos?.showToast(t('housekeeping.checkInDisabled'), 'warning');
     return;
@@ -202,16 +202,12 @@ function renderWorkerSummary() {
           <h2>${esc(t('housekeeping.noWorkerTitle'))}</h2>
           <p>${esc(t('housekeeping.noWorkerHint'))}</p>
         </div>
-        <button class="btn btn--secondary housekeeping-check-small" type="button" disabled>
-          <i data-lucide="log-in" aria-hidden="true"></i>
-          <span>${esc(t('housekeeping.checkIn'))}</span>
-        </button>
       </section>
     `;
   }
   const rows = state.workers.map((worker) => {
-    const checkedIn = !!(worker.today_session || worker.current_session);
-    const session = worker.today_session || worker.current_session;
+    const checkedIn = !!worker.today_session;
+    const session = worker.today_session;
     return `
     <section class="housekeeping-worker-strip">
       <div class="housekeeping-avatar" style="background:${esc(worker.avatar_color) || 'var(--module-housekeeping)'}">
