@@ -447,6 +447,7 @@
     "iconFlight": "Lot",
     "iconFuel": "Tankowanie",
     "iconNavigation": "Nawigacja",
+    "iconBike": "Rower",
     "iconWork": "Praca",
     "iconLaptop": "Laptop",
     "iconPresentation": "Prezentacja",
@@ -1085,7 +1086,7 @@
     "title": "Zainstaluj Oikos",
     "subtitle": "Dodaj do aplikacji",
     "iosTip1": "Stuknij ",
-    "iosTip2": " → „Dodaj do ekranu głównego”",
+    “iosTip2”: “ → Dodaj do ekranu głównego”,
     "installButton": "Zainstaluj",
     "dismissLabel": "Zamknij"
   },
