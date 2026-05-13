@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.52.5] - 2026-05-13
+
+### Fixed
+- Translate `backupCliHint` string into 10 missing locales (ar, el, es, fr, hi, it, ja, ru, tr, zh)
+
 ## [0.52.4] - 2026-05-13
 
 ### Added

@@ -971,7 +971,7 @@
     "backupRestoring": "Γίνεται επαναφορά...",
     "backupRestoredToast": "Η βάση επαναφέρθηκε. Επαναφόρτωση...",
     "backupCliTitle": "Επαναφορά CLI / Docker Compose",
-    "backupCliHint": "For operational restores, stop the app, mount the backup in a temporary container and replace the database file.",
+    "backupCliHint": "Για λειτουργικές επαναφορές, σταματήστε την εφαρμογή, τοποθετήστε το αντίγραφο σε έναν προσωρινό container και αντικαταστήστε το αρχείο βάσης δεδομένων.",
     "backupCliBackupHint": "Μπορείτε επίσης να δημιουργήσετε αντίγραφο απευθείας με Docker Compose:",
     "tabSync": "Synchronization",
     "sectionContactSync": "Contact Synchronization",

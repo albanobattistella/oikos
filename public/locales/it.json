@@ -971,7 +971,7 @@
     "backupRestoring": "Ripristino...",
     "backupRestoredToast": "Database ripristinato. Ricaricamento...",
     "backupCliTitle": "Ripristino CLI / Docker Compose",
-    "backupCliHint": "For operational restores, stop the app, mount the backup in a temporary container and replace the database file.",
+    "backupCliHint": "Per ripristini operativi, ferma l'applicazione, monta il backup in un container temporaneo e sostituisci il file del database.",
     "backupCliBackupHint": "Puoi anche creare un backup direttamente con Docker Compose:",
     "tabSync": "Synchronization",
     "sectionContactSync": "Contact Synchronization",

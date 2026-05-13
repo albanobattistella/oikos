@@ -971,7 +971,7 @@
     "backupRestoring": "جارٍ الاستعادة...",
     "backupRestoredToast": "تمت استعادة قاعدة البيانات. جارٍ إعادة التحميل...",
     "backupCliTitle": "استعادة CLI / Docker Compose",
-    "backupCliHint": "For operational restores, stop the app, mount the backup in a temporary container and replace the database file.",
+    "backupCliHint": "لإجراء عمليات استعادة تشغيلية، أوقف التطبيق، وقم بتحميل النسخة الاحتياطية في حاوية مؤقتة واستبدل ملف قاعدة البيانات.",
     "backupCliBackupHint": "يمكنك أيضًا إنشاء نسخة مباشرة عبر Docker Compose:",
     "tabSync": "Synchronization",
     "sectionContactSync": "Contact Synchronization",

@@ -971,7 +971,7 @@
     "backupRestoring": "復元中...",
     "backupRestoredToast": "データベースを復元しました。再読み込み中...",
     "backupCliTitle": "CLI / Docker Compose 復元",
-    "backupCliHint": "For operational restores, stop the app, mount the backup in a temporary container and replace the database file.",
+    "backupCliHint": "運用環境での復元には、アプリを停止し、バックアップを一時コンテナにマウントしてデータベースファイルを置き換えてください。",
     "backupCliBackupHint": "Docker Compose から直接バックアップを作成することもできます:",
     "tabSync": "Synchronization",
     "sectionContactSync": "Contact Synchronization",

@@ -971,7 +971,7 @@
     "backupRestoring": "正在恢复...",
     "backupRestoredToast": "数据库已恢复。正在重新加载...",
     "backupCliTitle": "CLI / Docker Compose 恢复",
-    "backupCliHint": "For operational restores, stop the app, mount the backup in a temporary container and replace the database file.",
+    "backupCliHint": "对于生产环境的恢复，请停止应用，将备份挂载到临时容器中并替换数据库文件。",
     "backupCliBackupHint": "也可以直接通过 Docker Compose 创建备份：",
     "tabSync": "Synchronization",
     "sectionContactSync": "Contact Synchronization",
