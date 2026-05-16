@@ -604,6 +604,8 @@ function renderAppShell(container) {
     navItems().filter((i) => !i.kitchenGroup).slice(PRIMARY_NAV).forEach((item) => moreSheet.appendChild(moreItemEl(item)));
   }
 
+  bottomNav.appendChild(bottomItems);
+
   const searchOverlay = document.createElement('div');
   searchOverlay.className = 'search-overlay';
   searchOverlay.id = 'search-overlay';

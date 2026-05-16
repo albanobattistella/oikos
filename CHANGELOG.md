@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.52.7] - 2026-05-16
+
+### Fixed
+- Bottom navigation bar is no longer invisible on mobile; `bottomNav.appendChild(bottomItems)` was accidentally dropped during the split-guest refactor in v0.52.6
+
 ## [0.52.6] - 2026-05-16
 
 ### Fixed
