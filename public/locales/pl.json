@@ -224,7 +224,10 @@
     "bulkArchived": "Zadania zarchiwizowane.",
     "bulkDeleted": "Zadania usunięte.",
     "kanbanArchived": "Zarchiwizowane",
-    "reminderNeedsDueDate": "Ustaw datę terminu, aby włączyć przypomnienia o zadaniu."
+    "reminderNeedsDueDate": "Ustaw datę terminu, aby włączyć przypomnienia o zadaniu.",
+    "startDateLabel": "Data rozpoczęcia",
+    "startsOn": "Zaczyna się {{date}}",
+    "showFuture": "Pokaż zaplanowane"
   },
   "shopping": {
     "title": "Zakupy",

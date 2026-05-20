@@ -98,6 +98,7 @@ function validateTaskInput(body, isCreate = true) {
     v.oneOf(body.priority,  VALID_PRIORITIES, 'priority'),
     v.oneOf(body.status,    VALID_STATUSES,   'status'),
     v.oneOf(body.category,  VALID_CATEGORIES, 'category'),
+    v.date(body.start_date, 'start_date'),
     v.date(body.due_date,   'due_date'),
     v.time(body.due_time,   'due_time'),
     v.rrule(body.recurrence_rule, 'recurrence_rule'),
@@ -112,7 +113,7 @@ function validateTaskInput(body, isCreate = true) {
 // --------------------------------------------------------
 router.get('/', (req, res) => {
   try {
-    const { status, priority, assigned_to, category } = req.query;
+    const { status, priority, assigned_to, category, include_future } = req.query;
 
     let sql = `
       SELECT
@@ -127,6 +128,10 @@ router.get('/', (req, res) => {
       WHERE t.parent_task_id IS NULL
     `;
     const params = [];
+
+    if (!include_future) {
+      sql += ` AND (t.start_date IS NULL OR t.start_date <= date('now'))`;
+    }
 
     if (status)      { sql += ' AND t.status = ?';      params.push(status); }
     if (priority)    { sql += ' AND t.priority = ?';    params.push(priority); }
@@ -195,6 +200,7 @@ router.post('/', (req, res) => {
       description     = null,
       category        = 'Sonstiges',
       priority        = 'none',
+      start_date      = null,
       due_date        = null,
       due_time        = null,
       parent_task_id  = null,
@@ -217,12 +223,12 @@ router.post('/', (req, res) => {
     const taskId = db.get().transaction(() => {
       const result = db.get().prepare(`
         INSERT INTO tasks
-          (title, description, category, priority, due_date, due_time,
+          (title, description, category, priority, start_date, due_date, due_time,
            assigned_to, created_by, parent_task_id, is_recurring, recurrence_rule)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         title.trim(), description, category, priority,
-        due_date, due_time, firstUid, req.session.userId, parent_task_id,
+        start_date, due_date, due_time, firstUid, req.session.userId, parent_task_id,
         is_recurring ? 1 : 0, recurrence_rule
       );
       setAssignments(db.get(), result.lastInsertRowid, userIds);
@@ -264,6 +270,7 @@ router.put('/:id', (req, res) => {
       category        = task.category,
       priority        = task.priority,
       status          = task.status,
+      start_date      = task.start_date,
       due_date        = task.due_date,
       due_time        = task.due_time,
       is_recurring    = task.is_recurring,
@@ -280,11 +287,11 @@ router.put('/:id', (req, res) => {
       db.get().prepare(`
         UPDATE tasks SET
           title = ?, description = ?, category = ?, priority = ?,
-          status = ?, due_date = ?, due_time = ?, assigned_to = ?,
+          status = ?, start_date = ?, due_date = ?, due_time = ?, assigned_to = ?,
           is_recurring = ?, recurrence_rule = ?
         WHERE id = ?
       `).run(title.trim(), description, category, priority,
-             status, due_date, due_time, firstUid,
+             status, start_date, due_date, due_time, firstUid,
              is_recurring ? 1 : 0, recurrence_rule, req.params.id);
       setAssignments(db.get(), task.id, userIds);
       syncHousekeepingPaymentStatus(db.get(), req.params.id, status);

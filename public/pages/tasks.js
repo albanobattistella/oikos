@@ -143,6 +143,17 @@ function renderDueDate(dateStr, timeStr) {
   </span>`;
 }
 
+function renderStartDateBadge(startDateStr) {
+  if (!startDateStr) return '';
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const startDay = new Date(`${startDateStr}T00:00:00`);
+  if (startDay <= today) return '';
+  return `<span class="due-date">
+    <i data-lucide="calendar-clock" class="icon-11" aria-hidden="true"></i> ${t('tasks.startsOn', { date: formatDate(startDay) })}
+  </span>`;
+}
+
 function renderSwipeRow(task, innerHtml) {
   const isDone = task.status === 'done';
   return `
@@ -198,6 +209,7 @@ function renderTaskCard(task, opts = {}) {
           </div>
           <div class="task-card__meta">
             ${renderPriorityBadge(task.priority)}
+            ${renderStartDateBadge(task.start_date)}
             ${renderDueDate(task.due_date, task.due_time)}
             ${task.is_recurring ? `<span class="due-date" aria-label="${t('tasks.recurring')}"><i data-lucide="repeat" class="icon-sm" aria-hidden="true"></i></span>` : ''}
             ${task.category !== 'misc' ? `<span class="due-date">${CATEGORY_LABELS()[task.category] ?? task.category}</span>` : ''}
@@ -355,6 +367,12 @@ function renderModalContent({ task = null, users = [], reminder = null } = {}) {
         </div>
       </div>
 
+      <div class="form-group" style="margin-top:var(--space-4)">
+        <label class="label" for="task-start-date">${t('tasks.startDateLabel')}</label>
+        <input class="input js-date-input" type="text" id="task-start-date" name="start_date"
+               value="${formatDateInput(task?.start_date)}" placeholder="${dateInputPlaceholder()}" inputmode="numeric">
+      </div>
+
       <div class="modal-grid modal-grid--2" style="margin-top:var(--space-4)">
         <div class="form-group">
           <label class="label" for="task-due-date">${t('tasks.dueDateLabel')}</label>
@@ -409,6 +427,7 @@ let state = {
   filters:         { status: 'open', priority: '', assigned_to: '' },
   groupMode:       'category',   // 'category' | 'due'
   viewMode:        'list',       // 'list' | 'kanban' (resolved at render time)
+  showFuture:      false,
   expandedTasks:   new Set(),
   dragTaskId:      null,
   filterPanelOpen: false,
@@ -425,6 +444,7 @@ async function loadTasks(container) {
   if (state.filters.status)      params.set('status',      state.filters.status);
   if (state.filters.priority)    params.set('priority',    state.filters.priority);
   if (state.filters.assigned_to) params.set('assigned_to', state.filters.assigned_to);
+  if (state.showFuture)          params.set('include_future', '1');
 
   const query = params.toString() ? `?${params}` : '';
   const data  = await api.get(`/tasks${query}`);
@@ -604,11 +624,13 @@ async function handleFormSubmit(e, container) {
 
   const originalLabel = taskId ? t('common.save') : t('common.create');
 
+  const startDateRaw = form.start_date?.value || '';
+  const startDate = parseDateInput(startDateRaw);
   const dueDateRaw = form.due_date?.value || '';
   const dueDate = parseDateInput(dueDateRaw);
   const rrule = getRRuleValues(document, 'task');
   const reminderToggle = form.querySelector('#reminder-toggle');
-  if (!isDateInputValid(dueDateRaw) || !rrule.valid_until) {
+  if ((startDateRaw && !isDateInputValid(startDateRaw)) || !isDateInputValid(dueDateRaw) || !rrule.valid_until) {
     errorEl.textContent = t('calendar.invalidDate');
     errorEl.hidden = false;
     submitBtn.disabled = false;
@@ -620,6 +642,7 @@ async function handleFormSubmit(e, container) {
     description:     form.description.value.trim() || null,
     priority:        form.priority.value,
     category:        form.category.value,
+    start_date:      startDate || null,
     due_date:        dueDate || null,
     assigned_to:     getSelectedUserIds(form, 'task_assigned'),
     is_recurring:    rrule.is_recurring ? 1 : 0,
@@ -791,7 +814,7 @@ function renderKanban(container) {
     grouped[col.status].sort((a, b) => sortTasks(a, b, now));
   }
 
-  listEl.innerHTML = `
+  const kanbanHtml = `
     <div class="kanban-board">
       ${cols.map((col) => `
         <div class="kanban-col" data-status="${col.status}">
@@ -808,6 +831,8 @@ function renderKanban(container) {
         </div>
       `).join('')}
     </div>`;
+  listEl.replaceChildren();
+  listEl.insertAdjacentHTML('beforeend', kanbanHtml);
 
   if (window.lucide) window.lucide.createIcons();
   wireKanbanDrag(container);
@@ -1039,7 +1064,8 @@ function renderTaskList(container) {
   }
   const listEl = container.querySelector('#task-list');
   if (!listEl) return;
-  listEl.innerHTML = renderTaskGroups(state.tasks, state.groupMode);
+  listEl.replaceChildren();
+  listEl.insertAdjacentHTML('beforeend', renderTaskGroups(state.tasks, state.groupMode));
   if (window.lucide) window.lucide.createIcons();
   stagger(listEl.querySelectorAll('.swipe-row, .kanban-card'));
   updateOverdueBadge();
@@ -1100,6 +1126,20 @@ function renderFilters(container) {
     chip.appendChild(rm);
     bar.appendChild(chip);
   }
+
+  // "Geplante anzeigen" Toggle-Chip
+  const futureChip = document.createElement('span');
+  futureChip.className = `filter-chip${state.showFuture ? ' filter-chip--active' : ''}`;
+  futureChip.id = 'filter-show-future';
+  futureChip.textContent = t('tasks.showFuture');
+  if (state.showFuture) {
+    const rm = document.createElement('span');
+    rm.className = 'filter-chip__remove';
+    rm.setAttribute('aria-hidden', 'true');
+    rm.textContent = '×';
+    futureChip.appendChild(rm);
+  }
+  bar.appendChild(futureChip);
 
   const toggleBtn = document.createElement('button');
   toggleBtn.id = 'filter-toggle-btn';
@@ -1267,6 +1307,7 @@ const SWIPE_HINT_KEY  = 'oikos:swipeHintSeen';
 const SWIPE_HINT_MAX  = 3;
 const RECENT_FILTERS_KEY = 'oikos:recentTaskFilters';
 const RECENT_FILTERS_MAX = 3;
+const SHOW_FUTURE_KEY = 'oikos:taskShowFuture';
 
 function getRecentFilters() {
   try { return JSON.parse(localStorage.getItem(RECENT_FILTERS_KEY) ?? '[]'); } catch { return []; }
@@ -1457,6 +1498,14 @@ function wireFilterChips(container) {
   // Alle Filter zurücksetzen
   container.querySelector('#filter-clear-all')?.addEventListener('click', async () => {
     state.filters = { status: '', priority: '', assigned_to: '' };
+    renderFilters(container);
+    await loadTasks(container);
+  });
+
+  // "Geplante anzeigen" Toggle
+  container.querySelector('#filter-show-future')?.addEventListener('click', async () => {
+    state.showFuture = !state.showFuture;
+    try { localStorage.setItem(SHOW_FUTURE_KEY, state.showFuture ? '1' : '0'); } catch {}
     renderFilters(container);
     await loadTasks(container);
   });
@@ -1709,10 +1758,14 @@ export async function render(container, { user }) {
     : (savedView === 'kanban' || savedView === 'list') ? savedView
     : 'list';
 
+  // showFuture aus localStorage wiederherstellen
+  try { state.showFuture = localStorage.getItem(SHOW_FUTURE_KEY) === '1'; } catch {}
+
   const isKanban = state.viewMode === 'kanban';
 
   // Initiales Skeleton (all values are from i18n keys or hardcoded constants, no user data)
-  container.innerHTML = `
+  container.replaceChildren();
+  container.insertAdjacentHTML('beforeend', `
     <div class="tasks-page">
       <div class="tasks-toolbar">
         <h1 class="tasks-toolbar__title">${t('tasks.title')}</h1>
@@ -1779,7 +1832,7 @@ export async function render(container, { user }) {
         </button>
       </div>
     </div>
-  `;
+  `);
 
   if (window.lucide) window.lucide.createIcons();
 
@@ -1789,6 +1842,7 @@ export async function render(container, { user }) {
     if (state.filters.status)      params.set('status',      state.filters.status);
     if (state.filters.priority)    params.set('priority',    state.filters.priority);
     if (state.filters.assigned_to) params.set('assigned_to', state.filters.assigned_to);
+    if (state.showFuture)          params.set('include_future', '1');
     const query = params.toString() ? `?${params}` : '';
 
     const [tasksData, metaData] = await Promise.all([

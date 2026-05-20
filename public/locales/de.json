@@ -224,7 +224,10 @@
     "bulkArchived": "Aufgaben archiviert.",
     "bulkDeleted": "Aufgaben gelöscht.",
     "kanbanArchived": "Archiviert",
-    "reminderNeedsDueDate": "Lege ein Fälligkeitsdatum fest, um Aufgabenerinnerungen zu aktivieren."
+    "reminderNeedsDueDate": "Lege ein Fälligkeitsdatum fest, um Aufgabenerinnerungen zu aktivieren.",
+    "startDateLabel": "Startdatum",
+    "startsOn": "Startet am {{date}}",
+    "showFuture": "Geplante anzeigen"
   },
   "shopping": {
     "title": "Einkauf",

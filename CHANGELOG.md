@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.52.11] - 2026-05-20
+
+### Added
+- Tasks can now have a **start date**: tasks with a future start date are hidden from the list by default, reducing cognitive load for children and family members who should focus on current assignments only
+- A "Show scheduled" toggle chip in the task filter bar lets parents and admins see all upcoming planned tasks
+- Future tasks display a "Starts on …" badge in the task card so the scheduled date is always visible at a glance
+- All 16 UI languages include translations for the new start date field and filter toggle
+
+### Changed
+- Replaced all remaining `innerHTML` assignments in `tasks.js` with `replaceChildren` / `insertAdjacentHTML` to comply with the project's XSS-safety constraint
+
 ## [0.52.10] - 2026-05-20
 
 ### Fixed
