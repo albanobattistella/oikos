@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.52.24] - 2026-05-23
+
+### Changed
+- Dashboard widget accent bar is now muted (`color-mix` at 40% saturation) so multiple module colours no longer clash on the widget grid
+- Base body font size increased from 15 px to 16 px (`--text-base: 1rem`) for better desktop readability
+- Recurring-event weekday buttons enlarged from 40 px to 44 px (Apple HIG minimum) on screens narrower than 1024 px; day-grid uses `space-between` layout to fit all 7 days
+
+### Fixed
+- Onboarding overlay no longer shows the "Skip" button on the first step or the last step, reducing premature dismissal before the navigation explanation is seen
+
 ## [0.52.23] - 2026-05-23
 
 ### Fixed

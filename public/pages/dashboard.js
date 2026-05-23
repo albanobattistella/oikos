@@ -87,7 +87,7 @@ function showOnboarding(appContainer) {
       nextBtn.focus();
     });
 
-    actions.appendChild(skipBtn);
+    if (current > 0 && !isLast) actions.appendChild(skipBtn);
     actions.appendChild(nextBtn);
     card.appendChild(icon);
     card.appendChild(title);

@@ -300,7 +300,7 @@
   --text-2xs:  0.625rem;   /* 10px - Sehr kleine Badges (z.B. Erinnerungs-Zähler) */
   --text-xs:   0.75rem;    /* 12px - Minimum, Captions, Badges, Nav-Labels */
   --text-sm:   0.8125rem;  /* 13px - Small/Secondary */
-  --text-base: 0.9375rem;  /* 15px - Body (Desktop) */
+  --text-base: 1rem;       /* 16px - Body (Desktop) */
   --text-md:   1rem;       /* 16px - Body (Mobile), Inputs */
   --text-lg:   1.125rem;   /* 18px - Section-Title */
   --text-xl:   1.25rem;    /* 20px - Subtitle */

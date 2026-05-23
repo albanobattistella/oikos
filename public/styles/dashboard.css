@@ -287,7 +287,7 @@
   }
 }
 
-/* Primäre Widgets: subtile Akzentlinie oben */
+/* Primäre Widgets: subtile Akzentlinie oben — auf Dashboard einheitlich gedämpft */
 .widget-size--1x2 > .widget,
 .widget-size--1x3 > .widget,
 .widget-size--1x4 > .widget,
@@ -300,7 +300,7 @@
 .widget-size--4x2 > .widget,
 .widget-size--4x3 > .widget,
 .widget-size--4x4 > .widget {
-  border-top: 2px solid var(--active-module-accent, var(--color-accent));
+  border-top: 2px solid color-mix(in srgb, var(--active-module-accent, var(--color-accent)) 40%, var(--color-border));
 }
 
 /* --------------------------------------------------------

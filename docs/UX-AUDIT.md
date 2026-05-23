@@ -202,7 +202,7 @@ Status-Spalte beim Abarbeiten: `[ ]` offen → `[x]` erledigt
     border-top-color: color-mix(in srgb, var(--active-module-accent) 40%, var(--color-border));
   }
   ```
-- **Status:** [ ]
+- **Status:** [x]
 
 ---
 
@@ -225,7 +225,7 @@ Status-Spalte beim Abarbeiten: `[ ]` offen → `[x]` erledigt
   --text-base: 1rem; /* 15px → 16px */
   ```
   Auf Folgewirkungen in `.input`, `.form-input` prüfen (die nutzen `--text-base` auf Desktop).
-- **Status:** [ ]
+- **Status:** [x]
 
 ---
 
@@ -245,7 +245,7 @@ Status-Spalte beim Abarbeiten: `[ ]` offen → `[x]` erledigt
     }
   }
   ```
-- **Status:** [ ]
+- **Status:** [x]
 
 ---
 
@@ -258,7 +258,7 @@ Status-Spalte beim Abarbeiten: `[ ]` offen → `[x]` erledigt
     background-color: color-mix(in srgb, var(--color-bg) 96%, transparent);
   }
   ```
-- **Status:** [ ]
+- **Status:** [x] (bereits durch `009a62f` behoben — `backdrop-filter` entfernt, `.sticky-header` ist jetzt vollständig opak mit `background-color: var(--color-bg)`)
 
 ---
 
@@ -271,7 +271,7 @@ Status-Spalte beim Abarbeiten: `[ ]` offen → `[x]` erledigt
   if (current > 0) actions.appendChild(skipBtn);
   ```
   Auf dem letzten Schritt Skip durch nichts ersetzen (nur "Los geht's"-Button).
-- **Status:** [ ]
+- **Status:** [x]
 
 ---
 
@@ -400,7 +400,8 @@ Diese Aspekte sind gut umgesetzt und sollten nicht verändert werden:
 - **Phase 6 abgeschlossen (v0.52.19):** H4 ✅
 - **Phase 7 abgeschlossen (v0.52.20):** H7 ✅
 - **Phase 8 abgeschlossen:** K2 + H6 ✅
-- **Nächste Phase:** Phase 9 — offen
+- **Phase 9 abgeschlossen:** M1, M3, M4, M5, M6 ✅
+- **Nächste Phase:** Phase 10 — H2, M7, N1–N6
 
 ---
 

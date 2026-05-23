@@ -1895,6 +1895,17 @@ html.fab-anim-done .page-fab {
   border-color: var(--color-accent-hover);
 }
 
+@media (max-width: 1023px) {
+  .rrule-day {
+    width: var(--target-base);
+    height: var(--target-base);
+  }
+  .rrule-day-grid {
+    gap: var(--space-0h);
+    justify-content: space-between;
+  }
+}
+
 /* ── Submit-Feedback Animationen ── */
 
 /* Checkbox-Pop: kanonische Definition - shopping.css + tasks.css verwenden diese */
