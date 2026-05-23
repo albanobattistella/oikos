@@ -577,20 +577,18 @@ html.navigating .app-content *::after {
  * Modul-Header/Toolbars als Glass-Elemente mit
  * Modul-Akzentfarbe als dezenter Tint.
  * ================================================================ */
-@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-  /* Eltern-Selektoren fuer Spezifitaet */
-  .tasks-page .tasks-toolbar,
-  .notes-page .notes-toolbar,
-  .contacts-page .contacts-toolbar,
-  .calendar-page .cal-toolbar {
-    background-color: var(--glass-bg-toolbar);
-    backdrop-filter: var(--blur-sm) saturate(160%);
-    -webkit-backdrop-filter: var(--blur-sm) saturate(160%);
-    border-top: 3px solid var(--module-accent);
-    border-bottom: 1px solid var(--glass-border-subtle);
-    padding-left: var(--space-4);
-    padding-right: var(--space-4);
-  }
+/* Eltern-Selektoren fuer Spezifitaet
+ * backdrop-filter deliberately omitted: position:sticky + backdrop-filter inside
+ * overflow:auto blanks the entire scroll container on iOS/WebKit (iOS 26+). */
+.tasks-page .tasks-toolbar,
+.notes-page .notes-toolbar,
+.contacts-page .contacts-toolbar,
+.calendar-page .cal-toolbar {
+  background-color: var(--color-bg);
+  border-top: 3px solid var(--module-accent);
+  border-bottom: 1px solid var(--glass-border-subtle);
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
 }
 
 /* ================================================================

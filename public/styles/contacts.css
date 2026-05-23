@@ -34,9 +34,7 @@
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--color-border);
-  background-color: color-mix(in srgb, var(--color-surface) 90%, transparent);
-  backdrop-filter: var(--blur-sm);
-  -webkit-backdrop-filter: var(--blur-sm);
+  background-color: var(--color-bg);
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
