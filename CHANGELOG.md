@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.52.47] - 2026-05-24
+
+### Changed
+- Page titles now scale fluidly from 20 px to 30 px across viewport widths via `clamp()` instead of a hard breakpoint override.
+- App-shell ambient background gradients now correctly shift hue to match the active module color; a second gradient blob adds bottom-right depth.
+- Form input focus rings adopt the active module accent color instead of always using the default violet.
+- "More" navigation sheet items now render a colored rounded-square icon well tinted with each module's accent color.
+
+### Fixed
+- App-shell background gradient was resolving to the fallback violet because it referenced `--module-accent` (scoped to child page elements) instead of `--active-module-accent` (set on `<html>` by the router).
+
 ## [0.52.46] - 2026-05-24
 
 ### Added
