@@ -81,7 +81,7 @@ function renderTabs(container) {
   bar.replaceChildren();
   bar.insertAdjacentHTML('beforeend', `
     ${tabsHtml}
-    <button class="list-tab__new" data-action="new-list" aria-label="Neue Liste erstellen">
+    <button class="list-tab__new" data-action="new-list" aria-label="${t('shopping.newListButton')}">
       <i data-lucide="plus" style="width:18px;height:18px" aria-hidden="true"></i>
     </button>
   `);
@@ -905,4 +905,3 @@ export async function render(container, { user }) {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 }
-

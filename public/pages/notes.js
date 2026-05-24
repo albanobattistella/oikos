@@ -58,7 +58,8 @@ export async function render(container, { user }) {
   _container = container;
   state.user = user;
 
-  container.innerHTML = `
+  container.replaceChildren();
+  container.insertAdjacentHTML('beforeend', `
     <div class="notes-page">
       <div class="notes-toolbar">
         <h1 class="notes-toolbar__title">${t('notes.title')}</h1>
@@ -78,7 +79,7 @@ export async function render(container, { user }) {
         <i data-lucide="plus" style="width:24px;height:24px" aria-hidden="true"></i>
       </button>
     </div>
-  `;
+  `);
 
   if (window.lucide) lucide.createIcons();
 
@@ -135,7 +136,8 @@ function renderGrid() {
 
   if (!visible.length) {
     const isFiltered = q.length > 0;
-    grid.innerHTML = `
+    grid.replaceChildren();
+    grid.insertAdjacentHTML('beforeend', `
       <div class="empty-state" style="column-span:all;">
         <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -152,7 +154,7 @@ function renderGrid() {
           ${t('notes.emptyAction')}
         </button>` : ''}
       </div>
-    `;
+    `);
     if (window.lucide) lucide.createIcons();
     grid.querySelector('#empty-cta-notes')?.addEventListener('click', () => {
       document.querySelector('.page-fab')?.click();
@@ -160,7 +162,8 @@ function renderGrid() {
     return;
   }
 
-  grid.innerHTML = visible.map((n) => renderNoteCard(n)).join('');
+  grid.replaceChildren();
+  grid.insertAdjacentHTML('beforeend', visible.map((n) => renderNoteCard(n)).join(''));
   if (window.lucide) lucide.createIcons();
   stagger(grid.querySelectorAll('.note-card'));
 }
@@ -561,4 +564,3 @@ function isLightColor(hex) {
   const b = parseInt(hex.slice(5, 7), 16);
   return (r * 299 + g * 587 + b * 114) / 1000 > 150;
 }
-

@@ -11,6 +11,7 @@ import { stagger, vibrate } from '/utils/ux.js';
 import { t, formatDate, getLocale } from '/i18n.js';
 import { esc } from '/utils/html.js';
 import { render as renderSplitExpenses } from '/pages/split-expenses.js';
+import { toLocalDateKey } from '/utils/date.js';
 
 // --------------------------------------------------------
 // Konstanten
@@ -847,7 +848,7 @@ function formatEntryDate(dateStr) {
 
 function openBudgetModal({ mode, entry = null, initialType = '' }) {
   const isEdit = mode === 'edit';
-  const today  = new Date().toISOString().slice(0, 10);
+  const today  = toLocalDateKey(new Date());
   const todayMonth = today.slice(0, 7);
 
   const isExpense  = isEdit ? entry.amount < 0 : true;
@@ -1256,7 +1257,7 @@ function openLoanModal(loan = null) {
 async function markLoanPayment(id) {
   const loan = state.loans.loans.find((item) => item.id === id);
   if (!loan?.next_installment_number) return;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = toLocalDateKey(new Date());
   try {
     await api.post(`/budget/loans/${id}/payments`, {
       installment_number: loan.next_installment_number,

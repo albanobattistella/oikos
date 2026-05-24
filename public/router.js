@@ -215,6 +215,18 @@ function updateBranding(path = currentPath) {
   });
 }
 
+function setOverlayInteractive(el, interactive) {
+  if (!el) return;
+  el.inert = !interactive;
+  el.setAttribute('aria-hidden', String(!interactive));
+}
+
+function returnFocus(target) {
+  if (target && typeof target.focus === 'function') {
+    setTimeout(() => target.focus(), 0);
+  }
+}
+
 /**
  * Navigiert zu einem Pfad und rendert die entsprechende Seite.
  * @param {string} path
@@ -551,6 +563,7 @@ function renderAppShell(container) {
     const moreBtn = document.createElement('button');
     moreBtn.className = 'nav-item nav-item--more';
     moreBtn.id = 'more-btn';
+    moreBtn.type = 'button';
     moreBtn.setAttribute('aria-label', t('nav.more'));
     moreBtn.setAttribute('aria-expanded', 'false');
     const moreBtnIcon = document.createElement('i');
@@ -573,8 +586,9 @@ function renderAppShell(container) {
     moreSheet.className = 'more-sheet';
     moreSheet.id = 'more-sheet';
     moreSheet.setAttribute('role', 'dialog');
+    moreSheet.setAttribute('aria-modal', 'true');
     moreSheet.setAttribute('aria-label', t('nav.more'));
-    moreSheet.setAttribute('aria-hidden', 'true');
+    setOverlayInteractive(moreSheet, false);
     const dragHandle = document.createElement('div');
     dragHandle.className = 'more-sheet__handle';
     dragHandle.setAttribute('aria-hidden', 'true');
@@ -610,7 +624,10 @@ function renderAppShell(container) {
   const searchOverlay = document.createElement('div');
   searchOverlay.className = 'search-overlay';
   searchOverlay.id = 'search-overlay';
-  searchOverlay.setAttribute('aria-hidden', 'true');
+  searchOverlay.setAttribute('role', 'dialog');
+  searchOverlay.setAttribute('aria-modal', 'true');
+  searchOverlay.setAttribute('aria-label', t('search.title'));
+  setOverlayInteractive(searchOverlay, false);
   const searchHeader = document.createElement('div');
   searchHeader.className = 'search-overlay__header';
   const searchInput = document.createElement('input');
@@ -622,6 +639,7 @@ function renderAppShell(container) {
   const searchClose = document.createElement('button');
   searchClose.className = 'search-overlay__close';
   searchClose.id = 'search-close';
+  searchClose.type = 'button';
   searchClose.setAttribute('aria-label', t('common.close'));
   const closeIcon = document.createElement('i');
   closeIcon.dataset.lucide = 'x';
@@ -882,18 +900,22 @@ function initMoreSheet(container, openSearch) {
   const backdrop = container.querySelector('#more-backdrop');
   const sheet    = container.querySelector('#more-sheet');
   if (!moreBtn || !backdrop || !sheet) return;
+  let lastFocusedBeforeSheet = null;
 
   function openSheet() {
-    sheet.setAttribute('aria-hidden', 'false');
+    lastFocusedBeforeSheet = document.activeElement;
+    setOverlayInteractive(sheet, true);
     backdrop.classList.add('more-backdrop--visible');
     moreBtn.setAttribute('aria-expanded', 'true');
+    setTimeout(() => sheet.querySelector('#more-sheet-search, [data-route]')?.focus(), 0);
     if (window.lucide) window.lucide.createIcons();
   }
 
-  function closeSheet() {
-    sheet.setAttribute('aria-hidden', 'true');
+  function closeSheet({ restoreFocus = true } = {}) {
+    setOverlayInteractive(sheet, false);
     backdrop.classList.remove('more-backdrop--visible');
     moreBtn.setAttribute('aria-expanded', 'false');
+    if (restoreFocus) returnFocus(lastFocusedBeforeSheet || moreBtn);
   }
 
   moreBtn.addEventListener('click', () => {
@@ -901,7 +923,12 @@ function initMoreSheet(container, openSearch) {
     isOpen ? closeSheet() : openSheet();
   });
 
-  backdrop.addEventListener('click', closeSheet);
+  backdrop.addEventListener('click', () => closeSheet());
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sheet.getAttribute('aria-hidden') === 'false') {
+      closeSheet();
+    }
+  });
 
   let _touchStartY = 0;
   sheet.addEventListener('touchstart', (e) => {
@@ -920,7 +947,7 @@ function initMoreSheet(container, openSearch) {
     const triggerSearch = () => {
       // Sheet sofort (ohne Slide-Animation) schließen, damit nur eine Animation abläuft
       sheet.style.transition = 'none';
-      closeSheet();
+      closeSheet({ restoreFocus: false });
       requestAnimationFrame(() => { sheet.style.transition = ''; });
       openSearch();
     };
@@ -947,10 +974,12 @@ function initSearch(container) {
   // Eigenständig (kein modal.js), da modul-globale Variablen in modal.js
   // bei gleichzeitig offenem Modal überschrieben würden.
   let _searchTrapHandler = null;
+  let lastFocusedBeforeSearch = null;
 
   function openSearch() {
-    if (window._closeMoreSheet) window._closeMoreSheet();
-    overlay.setAttribute('aria-hidden', 'false');
+    if (window._closeMoreSheet) window._closeMoreSheet({ restoreFocus: false });
+    lastFocusedBeforeSearch = document.activeElement;
+    setOverlayInteractive(overlay, true);
     overlay.classList.add('search-overlay--visible');
     setTimeout(() => input.focus(), 50);
     if (window.lucide) window.lucide.createIcons();
@@ -971,8 +1000,8 @@ function initSearch(container) {
     overlay.addEventListener('keydown', _searchTrapHandler);
   }
 
-  function closeSearch() {
-    overlay.setAttribute('aria-hidden', 'true');
+  function closeSearch({ restoreFocus = true } = {}) {
+    setOverlayInteractive(overlay, false);
     overlay.classList.remove('search-overlay--visible');
     if (_searchTrapHandler) {
       overlay.removeEventListener('keydown', _searchTrapHandler);
@@ -980,6 +1009,7 @@ function initSearch(container) {
     }
     input.value = '';
     results.replaceChildren();
+    if (restoreFocus) returnFocus(lastFocusedBeforeSearch);
   }
 
   if (searchClose) searchClose.addEventListener('click', closeSearch);

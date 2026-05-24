@@ -111,7 +111,7 @@ class OikosInstallPrompt extends HTMLElement {
   /** Banner rendern */
   _showBanner(isIOS) {
     this._currentIsIOS = isIOS;
-    this._shadow.innerHTML = '';
+    this._shadow.replaceChildren();
 
     const style = document.createElement('style');
     style.textContent = `
@@ -263,7 +263,7 @@ class OikosInstallPrompt extends HTMLElement {
 
     if (isIOS) {
       // iOS: Teilen-Icon als SVG inline
-      subtitle.innerHTML = '';
+      subtitle.replaceChildren();
       subtitle.append(
         document.createTextNode(t('install.iosTip1')),
         this._createShareIcon(),
@@ -290,7 +290,7 @@ class OikosInstallPrompt extends HTMLElement {
     const dismiss = document.createElement('button');
     dismiss.className = 'btn-dismiss';
     dismiss.setAttribute('aria-label', t('install.dismissLabel'));
-    dismiss.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+    dismiss.appendChild(this._createDismissIcon());
     dismiss.addEventListener('click', () => this._dismiss());
     banner.appendChild(dismiss);
 
@@ -329,6 +329,34 @@ class OikosInstallPrompt extends HTMLElement {
     svg.appendChild(path);
     svg.appendChild(polyline);
     svg.appendChild(line);
+    return svg;
+  }
+
+  /** Schließen-Icon */
+  _createDismissIcon() {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    svg.setAttribute('aria-hidden', 'true');
+
+    const first = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    first.setAttribute('x1', '18');
+    first.setAttribute('y1', '6');
+    first.setAttribute('x2', '6');
+    first.setAttribute('y2', '18');
+
+    const second = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    second.setAttribute('x1', '6');
+    second.setAttribute('y1', '6');
+    second.setAttribute('x2', '18');
+    second.setAttribute('y2', '18');
+
+    svg.appendChild(first);
+    svg.appendChild(second);
     return svg;
   }
 

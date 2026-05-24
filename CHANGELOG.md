@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.52.39] - 2026-05-24
+
+### Added
+- Frontend audit regression coverage now guards the accessibility and rendering fixes from this release: audited frontend files must not reintroduce `innerHTML` assignments, Meals and Budget must use local date keys, shared sub-tabs must wire tabs to panels, settings theme buttons must expose pressed state, and router overlays must stay hidden from keyboard focus when closed.
+- Shared local date helpers centralize YYYY-MM-DD generation for API payloads, week starts, and day arithmetic without relying on UTC ISO string slicing.
+
+### Changed
+- More navigation and global search overlays now behave like proper dialogs: closed overlays are inert, open overlays declare modal semantics, focus moves into the active surface, Escape closes them, and focus returns to the launching control.
+- Shared sub-tabs now generate stable tab ids, connect each tab to its matching panel with `aria-controls` and `aria-labelledby`, and keep hidden panel state synchronized with the active tab.
+- Settings theme buttons now expose `aria-pressed` and update that pressed state whenever the active theme changes.
+- Shopping list creation now uses the existing localized label for its icon-only button instead of a hardcoded German ARIA label.
+- Notes, Meals, and the install prompt now render through `replaceChildren()`, `insertAdjacentHTML()`, or DOM APIs instead of assigning `innerHTML`, aligning these frontend paths with the project XSS policy.
+
+### Fixed
+- Meals and Budget no longer derive today, week starts, or payment dates through UTC ISO slicing, preventing off-by-one calendar dates for users west of UTC and around local midnight.
+- The PWA install prompt now builds its dismiss icon with SVG DOM APIs and clears shadow content safely, avoiding blocked `innerHTML` assignments.
+- Hidden More and Search overlay controls are no longer reachable by keyboard or assistive technology while the overlays are closed.
+
 ## [0.52.38] - 2026-05-24
 
 ### Fixed

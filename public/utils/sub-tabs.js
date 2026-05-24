@@ -13,6 +13,8 @@
  * @param {InsertPosition} [opts.insertPosition='afterbegin']
  * @returns {HTMLElement} the rendered bar element
  */
+let subTabsCounter = 0;
+
 export function renderSubTabs(anchorEl, {
   tabs,
   activeId,
@@ -29,6 +31,7 @@ export function renderSubTabs(anchorEl, {
   }
 
   const bar = document.createElement('div');
+  const barId = `sub-tabs-${++subTabsCounter}`;
   bar.className = 'sub-tabs-bar' + (extraClass ? ' ' + extraClass : '');
   bar.setAttribute('role', 'tablist');
   if (ariaLabel) bar.setAttribute('aria-label', ariaLabel);
@@ -42,11 +45,17 @@ export function renderSubTabs(anchorEl, {
     }
 
     const btn = document.createElement('button');
+    const safeId = safeDomId(id);
+    const tabId = `${barId}-tab-${safeId}`;
+    const panelId = `${barId}-panel-${safeId}`;
     btn.type = 'button';
+    btn.id = tabId;
     btn.className = 'sub-tab' + (id === current ? ' sub-tab--active' : '');
     btn.dataset.tabId = id;
+    btn.dataset.panelId = panelId;
     btn.setAttribute('role', 'tab');
     btn.setAttribute('aria-selected', id === current ? 'true' : 'false');
+    btn.setAttribute('aria-controls', panelId);
 
     if (icon) {
       const i = document.createElement('i');
@@ -79,13 +88,39 @@ export function renderSubTabs(anchorEl, {
       b.classList.toggle('sub-tab--active', active);
       b.setAttribute('aria-selected', String(active));
     });
+    syncTabPanels(anchorEl, bar, current);
 
     onChange(current);
   });
 
   anchorEl.insertAdjacentElement(insertPosition, bar);
+  syncTabPanels(anchorEl, bar, current);
 
   if (window.lucide) window.lucide.createIcons({ el: bar });
 
   return bar;
+}
+
+function safeDomId(value) {
+  return String(value)
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'tab';
+}
+
+function syncTabPanels(anchorEl, bar, current) {
+  const root = anchorEl.closest('.page') ?? anchorEl.parentElement;
+  if (!root) return;
+
+  bar.querySelectorAll('[data-tab-id]').forEach((btn) => {
+    const panel = Array.from(root.querySelectorAll('[data-panel]'))
+      .find((candidate) => candidate.dataset.panel === btn.dataset.tabId);
+    if (!panel) return;
+
+    const active = btn.dataset.tabId === current;
+    panel.id = btn.dataset.panelId;
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', btn.id);
+    panel.hidden = !active;
+  });
 }

@@ -11,6 +11,7 @@ import { t, formatDate, dateInputPlaceholder, formatDateInput, parseDateInput, i
 import { esc } from '/utils/html.js';
 import { DEFAULT_CATEGORY_NAME, categoryLabel } from '/utils/shopping-categories.js';
 import { renderKitchenTabsBar } from '/utils/kitchen-tabs.js';
+import { addLocalDays, startOfLocalWeekKey, toLocalDateKey } from '/utils/date.js';
 
 // --------------------------------------------------------
 // Konstanten
@@ -52,17 +53,11 @@ let _container = null;
 // --------------------------------------------------------
 
 function getMondayOf(dateStr) {
-  const d   = new Date(dateStr + 'T00:00:00Z');
-  const day = d.getUTCDay();
-  const diff = (day === 0 ? -6 : 1 - day);
-  d.setUTCDate(d.getUTCDate() + diff);
-  return d.toISOString().slice(0, 10);
+  return startOfLocalWeekKey(dateStr, 1);
 }
 
 function addDays(dateStr, n) {
-  const d = new Date(dateStr + 'T00:00:00Z');
-  d.setUTCDate(d.getUTCDate() + n);
-  return d.toISOString().slice(0, 10);
+  return addLocalDays(dateStr, n);
 }
 
 function formatWeekLabel(monday) {
@@ -71,7 +66,7 @@ function formatWeekLabel(monday) {
 }
 
 function isToday(dateStr) {
-  return dateStr === new Date().toISOString().slice(0, 10);
+  return dateStr === toLocalDateKey(new Date());
 }
 
 function formatDayDate(dateStr) {
@@ -141,7 +136,8 @@ async function loadPreferences() {
 
 export async function render(container, { user }) {
   _container = container;
-  container.innerHTML = `
+  container.replaceChildren();
+  container.insertAdjacentHTML('beforeend', `
     <div class="meals-page">
       <h1 class="sr-only">${t('meals.title')}</h1>
       <div class="week-nav">
@@ -161,12 +157,12 @@ export async function render(container, { user }) {
         <i data-lucide="plus" style="width:24px;height:24px" aria-hidden="true"></i>
       </button>
     </div>
-  `;
+  `);
 
   if (window.lucide) lucide.createIcons();
   renderKitchenTabsBar(container, '/meals');
 
-  const today  = new Date().toISOString().slice(0, 10);
+  const today  = toLocalDateKey(new Date());
   const monday = getMondayOf(today);
 
   await Promise.all([loadWeek(monday), loadLists(), loadPreferences(), loadCategories(), loadRecipes()]);
@@ -202,7 +198,8 @@ function renderWeekGrid() {
   const days = Array.from({ length: 7 }, (_, i) => addDays(state.currentWeek, i));
   const dayNames = DAY_NAMES();
 
-  grid.innerHTML = days.map((date, idx) => {
+  grid.replaceChildren();
+  grid.insertAdjacentHTML('beforeend', days.map((date, idx) => {
     const mealsForDay = state.meals.filter((m) => m.date === date);
     const todayClass  = isToday(date) ? 'day-header--today' : '';
 
@@ -217,7 +214,7 @@ function renderWeekGrid() {
         </div>
       </div>
     `;
-  }).join('');
+  }).join(''));
 
   if (window.lucide) lucide.createIcons();
   stagger(grid.querySelectorAll('.meal-card'));
@@ -304,7 +301,7 @@ function wireNav() {
   });
 
   _container.querySelector('#week-today')?.addEventListener('click', async () => {
-    const monday = getMondayOf(new Date().toISOString().slice(0, 10));
+    const monday = getMondayOf(toLocalDateKey(new Date()));
     if (monday === state.currentWeek) return;
     await loadWeek(monday);
     renderWeekGrid();
@@ -519,9 +516,10 @@ function openMealModal(opts) {
             const res = await api.get(`/meals/suggestions?q=${encodeURIComponent(q)}`);
             if (!res.data.length) { acDropdown.hidden = true; return; }
             acIndex = -1;
-            acDropdown.innerHTML = res.data.map((s) => `
+            acDropdown.replaceChildren();
+            acDropdown.insertAdjacentHTML('beforeend', res.data.map((s) => `
               <div class="meal-modal__autocomplete-item" data-title="${esc(s.title)}">${esc(s.title)}</div>
-            `).join('');
+            `).join(''));
             acDropdown.hidden = false;
           } catch { acDropdown.hidden = true; }
         }, 200);
@@ -608,12 +606,13 @@ function openMealModal(opts) {
         panel.querySelector('#modal-notes').value = recipe.notes || '';
         panel.querySelector('#modal-recipe-url').value = recipe.recipe_url || '';
 
-        ingList.innerHTML = (recipe.ingredients || [])
+        ingList.replaceChildren();
+        ingList.insertAdjacentHTML('beforeend', (recipe.ingredients || [])
           .map((ing) => {
             const scaledQty = scaleQuantityText(ing.quantity ?? '', factor);
             return ingredientRowHTML(ing.name, scaledQty, null, ing.category ?? DEFAULT_CATEGORY_NAME);
           })
-          .join('');
+          .join(''));
 
         if (window.lucide) lucide.createIcons();
       };
@@ -630,14 +629,15 @@ function openMealModal(opts) {
         const factor = Number(recipeScaleInput.value || 1);
         if (!Number.isFinite(factor) || factor <= 0) return;
 
-        ingList.innerHTML = (currentAppliedRecipe.ingredients || [])
+        ingList.replaceChildren();
+        ingList.insertAdjacentHTML('beforeend', (currentAppliedRecipe.ingredients || [])
           .map((ing) => ingredientRowHTML(
             ing.name,
             scaleQuantityText(ing.quantity ?? '', Math.max(factor, 0.1)),
             null,
             ing.category ?? DEFAULT_CATEGORY_NAME
           ))
-          .join('');
+          .join(''));
 
         if (window.lucide) lucide.createIcons();
       });
@@ -691,7 +691,7 @@ function openMealModal(opts) {
 
       addIngBtn.addEventListener('click', () => {
         const tmp  = document.createElement('div');
-        tmp.innerHTML = ingredientRowHTML('', '', null);
+        tmp.insertAdjacentHTML('beforeend', ingredientRowHTML('', '', null));
         const row = tmp.firstElementChild;
         ingList.appendChild(row);
         if (window.lucide) lucide.createIcons();
