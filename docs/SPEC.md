@@ -674,6 +674,8 @@ Key-value table for OAuth tokens and CalDAV credentials.
 
 Responsive grid: 1 column on mobile, 2 on tablet, 3 on desktop.
 
+**Today Cockpit (v0.52.40):** a compact summary strip renders above the widget grid that highlights at a glance: the next urgent/high-priority task, the next upcoming calendar event, the open shopping item count, and the planned dinner for today. Tapping any cockpit item navigates directly to the relevant module.
+
 **Widgets:**
 - Greeting: "Good [morning/afternoon/evening], [Name]" + date; auto-refreshes on `visibilitychange` so the greeting stays current during long sessions
 - Weather: OpenWeatherMap proxy, 3-day preview, refresh every 30 min, hide widget on API error
@@ -685,7 +687,7 @@ Responsive grid: 1 column on mobile, 2 on tablet, 3 on desktop.
 
 **Widget sizes:** each widget has a configurable size using named presets (Tiny, Narrow, Standard, Large, Full) that map to `columns × rows` in the CSS grid. Sizes are persisted in user preferences and survive page reloads.
 
-Skeleton loading instead of spinners. Clicking any widget navigates to that module.
+Skeleton loading instead of spinners (skeleton renders all 9 widgets at their correct grid-spanning sizes to prevent layout shift). Clicking any widget navigates to that module.
 
 ### Tasks (`/tasks`)
 
@@ -719,7 +721,7 @@ Skeleton loading instead of spinners. Clicking any widget navigates to that modu
 
 ### Meal Plan (`/meals`)
 
-Weekly view (Mon–Sun), slots: breakfast / lunch / dinner / snack.
+**Desktop:** full weekly grid (Mon–Sun), slots: breakfast / lunch / dinner / snack. **Mobile:** a focused Today layout showing today's slots and the next few days — the full week grid is hidden on narrow viewports to reduce scroll.
 
 - Meal: title + notes + ingredient list
 - "→ Shopping list" button: transfer unchecked ingredients of the week to a selected list
@@ -740,7 +742,7 @@ Reusable recipe cards linked to meal slots.
 
 ### Calendar (`/calendar`)
 
-**Views:** Month (default, dot indicators), Week (hour grid), Day (timeline), Agenda (list).
+**Views:** Month (default on desktop, dot indicators), Week (hour grid), Day (timeline), Agenda (list). On mobile the first load defaults to Agenda view; after the user manually switches views the selected view is persisted for subsequent visits.
 
 - CRUD: title, description, start/end, all-day, location, color, assignment
 - **Multi-person assignment:** events can be assigned to multiple family members via the same `UserMultiSelect` component as tasks
@@ -1017,8 +1019,10 @@ Additive CSS file loaded globally after `layout.css`. Implements a Liquid Glass 
 **Phase 4 (Vibrancy + Tint):**
 - **Deeper glass penetration:** Dashboard widgets, task cards, note items, meal slots, form inputs, toolbars, group toggles, and FAB speed-dial actions all use semi-transparent glass backgrounds (`--glass-bg-card`, 52% opacity) with `backdrop-filter: blur() saturate()` so underlying content shines through.
 - **Module tint:** Each glass surface receives a subtle accent color gradient overlay via `::after` pseudo-element using `color-mix(in srgb, var(--module-accent) var(--glass-tint-strength), transparent)`. Strength is 6% in light mode, 8% in dark mode.
-- **App vibrancy background:** `app-content` uses a radial gradient with the active module accent at 3% opacity to provide an ambient color base that glass elements refract.
+- **App vibrancy background:** `.app-shell` (the viewport container, `height: 100dvh`, never scrolls) carries a radial gradient with the active module accent at 3% opacity to provide an ambient color base that glass elements refract. `.app-content` (the scroll container) has a transparent background so the gradient shows through. This split is intentional: placing a complex `color-mix()` gradient on a scrolling `overflow: auto` element causes blank-screen rasterization bugs in iOS WebKit and Android Blink (v0.52.32).
 - **Load-order safety:** All Phase 4 glass selectors use parent-scoped specificity (`.dashboard .widget`, `.tasks-page .task-card`, `.meals-page .meal-slot`) to prevent override by on-demand page CSS that loads after `glass.css`.
+
+**Mobile compositor safety (v0.52.26):** a single permanent CSS rule disables `backdrop-filter` for all children of the `.app-content` scroll container. Bottom navigation, modals, and toasts sit outside the scroll container and retain their blur. This prevents mobile WebKit/Blink from creating excessive GPU compositor layers during scroll that would trigger blank-screen rendering bugs on iOS Safari and Android Chrome.
 
 **Accessibility:** `prefers-reduced-transparency`, `prefers-reduced-motion`, and `prefers-contrast: more` blocks deactivate blur/animation and restore solid fallbacks across all phases.
 
