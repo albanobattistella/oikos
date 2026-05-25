@@ -93,6 +93,18 @@ test('More sheet closes route clicks through delegated handler after rebuilds', 
   assert.doesNotMatch(source, /sheet\.querySelectorAll\('\[data-route\]'\)\.forEach/);
 });
 
+test('More sheet search trigger is a native button with visible focus styling', () => {
+  const router = read('./public/router.js');
+  const layout = read('./public/styles/layout.css');
+  const focusRule = cssRuleBody(layout, '.more-sheet__search:focus-visible');
+
+  assert.match(router, /const moreSearchBar = document\.createElement\('button'\)/);
+  assert.match(router, /moreSearchBar\.type = 'button'/);
+  assert.doesNotMatch(router, /moreSearchBar\.setAttribute\('role',\s*'button'\)/);
+  assert.match(focusRule, /outline:/);
+  assert.match(focusRule, /box-shadow:/);
+});
+
 test('bottom navigation labels are constrained against localized overflow', () => {
   const layout = read('./public/styles/layout.css');
   const labelRule = cssRuleBody(layout, '.nav-item__label');

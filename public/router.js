@@ -643,11 +643,10 @@ function renderAppShell(container) {
     dragHandle.setAttribute('aria-hidden', 'true');
     moreSheet.insertAdjacentElement('afterbegin', dragHandle);
 
-    const moreSearchBar = document.createElement('div');
+    const moreSearchBar = document.createElement('button');
+    moreSearchBar.type = 'button';
     moreSearchBar.className = 'more-sheet__search';
     moreSearchBar.id = 'more-sheet-search';
-    moreSearchBar.setAttribute('role', 'button');
-    moreSearchBar.setAttribute('tabindex', '0');
     moreSearchBar.setAttribute('aria-label', t('search.placeholder'));
     const moreSearchIcon = document.createElement('i');
     moreSearchIcon.dataset.lucide = 'search';
@@ -1007,9 +1006,6 @@ function initMoreSheet(container, openSearch) {
       });
     };
     moreSearchBar.addEventListener('click', triggerSearch);
-    moreSearchBar.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); triggerSearch(); }
-    });
   }
 
   window._closeMoreSheet = closeSheet;
