@@ -33,7 +33,9 @@ const VALID_WIDGET_SIZES = ['1x1', '1x2', '1x3', '1x4', '2x1', '2x2', '2x3', '2x
 const TOGGLEABLE_MODULES = [
   'tasks', 'calendar', 'meals', 'recipes', 'shopping',
   'birthdays', 'notes', 'contacts', 'budget', 'documents',
+  'housekeeping',
 ];
+const MODULE_ORDER_RE = /^(dashboard|tasks|calendar|meals|recipes|shopping|birthdays|notes|contacts|budget|documents|housekeeping|third-party-[a-z0-9][a-z0-9-]{1,62}[a-z0-9])$/;
 
 function defaultWidgetSize(id) {
   if (['tasks', 'calendar'].includes(id)) return '2x2';
@@ -70,6 +72,20 @@ function cfgDelete(key) {
   db.get().prepare('DELETE FROM sync_config WHERE key = ?').run(key);
 }
 
+function userCfgKey(key, userId) {
+  return `${key}:user:${Number(userId)}`;
+}
+
+function cfgUserGet(key, userId) {
+  if (!userId) return null;
+  return cfgGet(userCfgKey(key, userId));
+}
+
+function cfgUserSet(key, userId, value) {
+  if (!userId) return;
+  cfgSet(userCfgKey(key, userId), value);
+}
+
 // --------------------------------------------------------
 // Widget-Hilfsfunktionen
 // --------------------------------------------------------
@@ -89,6 +105,17 @@ function parseDisabledModules(raw) {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     return parsed.filter((m) => typeof m === 'string' && TOGGLEABLE_MODULES.includes(m));
+  } catch {
+    return [];
+  }
+}
+
+function parseModuleOrder(raw) {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return [...new Set(parsed.filter((id) => typeof id === 'string' && MODULE_ORDER_RE.test(id)))];
   } catch {
     return [];
   }
@@ -134,6 +161,7 @@ router.get('/', (req, res) => {
     const appName = cfgGet('app_name') ?? DEFAULT_APP_NAME;
     const dashboardWidgets = parseWidgetConfig(cfgGet('dashboard_widgets'));
     const disabledModules = parseDisabledModules(cfgGet('disabled_modules'));
+    const moduleOrder = parseModuleOrder(cfgUserGet('module_order', req.authUserId) ?? cfgGet('module_order'));
 
     res.json({
       data: {
@@ -144,6 +172,7 @@ router.get('/', (req, res) => {
         app_name: appName,
         dashboard_widgets: dashboardWidgets,
         disabled_modules: disabledModules,
+        module_order: moduleOrder,
         housekeeping_payment_tasks: cfgGet('housekeeping_payment_tasks') === '1',
       },
     });
@@ -162,7 +191,7 @@ router.get('/', (req, res) => {
 
 router.put('/', (req, res) => {
   try {
-    const { visible_meal_types, currency, date_format, time_format, app_name, dashboard_widgets, disabled_modules, housekeeping_payment_tasks } = req.body;
+    const { visible_meal_types, currency, date_format, time_format, app_name, dashboard_widgets, disabled_modules, module_order, housekeeping_payment_tasks } = req.body;
 
     if (visible_meal_types !== undefined) {
       if (!Array.isArray(visible_meal_types)) {
@@ -221,6 +250,14 @@ router.put('/', (req, res) => {
       cfgSet('disabled_modules', JSON.stringify(unique));
     }
 
+    if (module_order !== undefined) {
+      if (!Array.isArray(module_order)) {
+        return res.status(400).json({ error: 'module_order muss ein Array sein', code: 400 });
+      }
+      const unique = [...new Set(module_order.filter((id) => typeof id === 'string' && MODULE_ORDER_RE.test(id)))];
+      cfgUserSet('module_order', req.authUserId, JSON.stringify(unique));
+    }
+
     if (housekeeping_payment_tasks !== undefined) {
       if (typeof housekeeping_payment_tasks !== 'boolean') {
         return res.status(400).json({ error: 'housekeeping_payment_tasks must be a boolean', code: 400 });
@@ -236,6 +273,7 @@ router.put('/', (req, res) => {
     const savedAppName = cfgGet('app_name') ?? DEFAULT_APP_NAME;
     const savedWidgets = parseWidgetConfig(cfgGet('dashboard_widgets'));
     const savedDisabledModules = parseDisabledModules(cfgGet('disabled_modules'));
+    const savedModuleOrder = parseModuleOrder(cfgUserGet('module_order', req.authUserId) ?? cfgGet('module_order'));
     const savedHousekeepingPaymentTasks = cfgGet('housekeeping_payment_tasks') === '1';
 
     res.json({
@@ -247,6 +285,7 @@ router.put('/', (req, res) => {
         app_name: savedAppName,
         dashboard_widgets: savedWidgets,
         disabled_modules: savedDisabledModules,
+        module_order: savedModuleOrder,
         housekeeping_payment_tasks: savedHousekeepingPaymentTasks,
       },
     });

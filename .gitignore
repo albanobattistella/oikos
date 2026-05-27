@@ -1,6 +1,11 @@
 # Dependencies
 node_modules/
 
+# External/customized modules
+modules/*
+!modules/
+!modules/.gitkeep
+
 # Environment variables (NEVER commit)
 .env
 

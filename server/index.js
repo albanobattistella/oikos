@@ -39,6 +39,7 @@ import searchRouter from './routes/search.js';
 import familyRouter from './routes/family.js';
 import backupRouter from './routes/backup.js';
 import housekeepingRouter from './routes/housekeeping.js';
+import modulesRouter from './routes/modules.js';
 
 const log     = createLogger('Server');
 const logSync = createLogger('Sync');
@@ -260,6 +261,7 @@ app.use('/api/v1/search', searchRouter);
 app.use('/api/v1/family', familyRouter);
 app.use('/api/v1/backup', backupRouter);
 app.use('/api/v1/housekeeping', housekeepingRouter);
+app.use('/api/v1/modules', modulesRouter);
 
 // --------------------------------------------------------
 // Health-Check (für Docker)

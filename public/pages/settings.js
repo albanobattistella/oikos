@@ -19,6 +19,20 @@ const APP_NAME_STORAGE_KEY = 'oikos-app-name';
 const DEFAULT_APP_NAME = 'Oikos';
 const FAMILY_ROLES = ['dad', 'mom', 'parent', 'child', 'grandparent', 'relative', 'other'];
 const MAX_AVATAR_DATA_LENGTH = 768 * 1024;
+const BUILT_IN_MODULES = [
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: 'layout-dashboard', locked: true },
+  { id: 'calendar', labelKey: 'nav.calendar', icon: 'calendar' },
+  { id: 'tasks', labelKey: 'nav.tasks', icon: 'check-square' },
+  { id: 'notes', labelKey: 'nav.notes', icon: 'sticky-note' },
+  { id: 'birthdays', labelKey: 'nav.birthdays', icon: 'cake' },
+  { id: 'contacts', labelKey: 'nav.contacts', icon: 'book-user' },
+  { id: 'budget', labelKey: 'nav.budget', icon: 'wallet' },
+  { id: 'documents', labelKey: 'nav.documents', icon: 'folder-lock' },
+  { id: 'housekeeping', labelKey: 'nav.housekeeping', icon: 'paintbrush' },
+  { id: 'meals', labelKey: 'nav.meals', icon: 'utensils' },
+  { id: 'recipes', labelKey: 'nav.recipes', icon: 'book-text' },
+  { id: 'shopping', labelKey: 'nav.shopping', icon: 'shopping-cart' },
+];
 
 const CATEGORY_I18N = {
   'Obst & Gemüse': 'shopping.catFruitVeg',
@@ -202,13 +216,14 @@ export async function render(container, { user }) {
   let users           = [];
   let googleStatus    = { configured: false, connected: false, lastSync: null };
   let appleStatus     = { configured: false, lastSync: null };
-  let prefs           = { visible_meal_types: ['breakfast', 'lunch', 'dinner', 'snack'], currency: 'EUR', date_format: 'mdy', time_format: '24h', app_name: DEFAULT_APP_NAME, disabled_modules: [], housekeeping_payment_tasks: false };
+  let prefs           = { visible_meal_types: ['breakfast', 'lunch', 'dinner', 'snack'], currency: 'EUR', date_format: 'mdy', time_format: '24h', app_name: DEFAULT_APP_NAME, disabled_modules: [], module_order: [], housekeeping_payment_tasks: false };
   let categories      = [];
   let icsSubscriptions = [];
   let apiTokens       = [];
+  let thirdPartyModules = [];
 
   try {
-    const [usersRes, gStatus, aStatus, prefsRes, catsRes, icsRes, apiTokensRes] = await Promise.allSettled([
+    const [usersRes, gStatus, aStatus, prefsRes, catsRes, icsRes, apiTokensRes, modulesRes] = await Promise.allSettled([
       user.role === 'admin' ? auth.getUsers() : Promise.resolve({ data: [] }),
       api.get('/calendar/google/status'),
       api.get('/calendar/apple/status'),
@@ -216,6 +231,7 @@ export async function render(container, { user }) {
       api.get('/shopping/categories'),
       api.get('/calendar/subscriptions'),
       user.role === 'admin' ? api.get('/auth/api-tokens') : Promise.resolve({ data: [] }),
+      user.role === 'admin' ? api.get('/modules?admin=1') : Promise.resolve({ data: [] }),
     ]);
     if (usersRes.status === 'fulfilled')  users            = usersRes.value.data  ?? [];
     if (gStatus.status  === 'fulfilled')  googleStatus     = gStatus.value;
@@ -224,6 +240,7 @@ export async function render(container, { user }) {
     if (catsRes.status  === 'fulfilled')  categories       = catsRes.value.data   ?? [];
     if (icsRes.status   === 'fulfilled')  icsSubscriptions = icsRes.value.data    ?? [];
     if (apiTokensRes.status === 'fulfilled') apiTokens     = apiTokensRes.value.data ?? [];
+    if (modulesRes.status === 'fulfilled') thirdPartyModules = modulesRes.value.data ?? [];
   } catch (_) { /* non-critical */ }
 
   if (prefs.date_format) {
@@ -371,35 +388,6 @@ export async function render(container, { user }) {
 
         ${user?.role === 'admin' ? `
         <section class="settings-section">
-          <h2 class="settings-section__title">${t('settings.sectionModules')}</h2>
-          <div class="settings-card">
-            <h3 class="settings-card__title">${t('settings.modulesTitle')}</h3>
-            <p class="form-hint" style="margin-bottom:var(--space-3)">${t('settings.modulesHint')}</p>
-            <div class="meal-type-toggles" id="module-toggles">
-              ${[
-                ['tasks',     'nav.tasks'],
-                ['calendar',  'nav.calendar'],
-                ['meals',     'nav.meals'],
-                ['recipes',   'nav.recipes'],
-                ['shopping',  'nav.shopping'],
-                ['birthdays', 'nav.birthdays'],
-                ['notes',     'nav.notes'],
-                ['contacts',  'nav.contacts'],
-                ['budget',    'nav.budget'],
-                ['documents', 'nav.documents'],
-              ].map(([slug, labelKey]) => `
-                <label class="toggle-row">
-                  <input type="checkbox" value="${slug}" ${prefs.disabled_modules?.includes(slug) ? '' : 'checked'}>
-                  <span>${t(labelKey)}</span>
-                </label>
-              `).join('')}
-            </div>
-          </div>
-        </section>
-        ` : ''}
-
-        ${user?.role === 'admin' ? `
-        <section class="settings-section">
           <h2 class="settings-section__title">${t('settings.sectionHousekeeping')}</h2>
           <div class="settings-card">
             <h3 class="settings-card__title">${t('settings.housekeepingPaymentsTitle')}</h3>
@@ -408,6 +396,20 @@ export async function render(container, { user }) {
               <input type="checkbox" id="housekeeping-payment-tasks" ${prefs.housekeeping_payment_tasks ? 'checked' : ''}>
               <span>${t('settings.housekeepingPaymentTasksLabel')}</span>
             </label>
+          </div>
+        </section>
+        ` : ''}
+
+        ${user?.role === 'admin' ? `
+        <section class="settings-section">
+          <h2 class="settings-section__title">${t('settings.sectionModules')}</h2>
+          <div class="settings-card">
+            <h3 class="settings-card__title">${t('settings.modulesTitle')}</h3>
+            <p class="form-hint" style="margin-bottom:var(--space-3)">${t('settings.modulesHint')}</p>
+            <p class="form-hint" style="margin-bottom:var(--space-3)">${t('settings.modulesDragHint')}</p>
+            <div class="settings-modules-list settings-modules-list--sortable" id="module-toggles">
+              ${activeModuleRowsHtml(prefs, thirdPartyModules)}
+            </div>
           </div>
         </section>
         ` : ''}
@@ -901,7 +903,7 @@ docker cp oikos:/data/oikos-backup.db ./oikos-backup.db</code></pre>
   }
 
   renderSettingsSubTabs(container, user, activeTab);
-  bindEvents(container, user, users, categories, icsSubscriptions, apiTokens);
+  bindEvents(container, user, users, categories, icsSubscriptions, apiTokens, thirdPartyModules);
   if (window.lucide) window.lucide.createIcons();
 }
 // CalDAV-Konten laden
@@ -1280,16 +1282,226 @@ function bindPwaInstallEvents(container) {
   });
 }
 
+function thirdPartyModuleStatusLabel(module) {
+  if (module.status === 'error') return t('settings.thirdPartyModulesStatusError');
+  return module.enabled ? t('settings.thirdPartyModulesStatusEnabled') : t('settings.thirdPartyModulesStatusDisabled');
+}
+
+function orderedActiveModules(prefs, thirdPartyModules) {
+  const rows = [
+    ...BUILT_IN_MODULES.map((module) => ({
+      type: 'built-in',
+      id: module.id,
+      orderId: module.id,
+      label: t(module.labelKey),
+      icon: module.icon,
+      enabled: module.locked || !prefs.disabled_modules?.includes(module.id),
+      locked: module.locked === true,
+      status: module.locked ? t('settings.modulesBuiltInBadge') : t('settings.modulesBuiltInBadge'),
+      draggable: true,
+    })),
+    ...thirdPartyModules.map((module) => ({
+      type: 'third-party',
+      id: module.id,
+      orderId: `third-party-${module.id}`,
+      label: module.menu?.label || module.name || module.id,
+      icon: module.menu?.icon || module.icon || 'box',
+      enabled: module.enabled && module.status === 'enabled',
+      locked: false,
+      status: module.menu?.show === false ? t('settings.modulesMenuDisabled') : thirdPartyModuleStatusLabel(module),
+      error: module.error,
+      disabled: module.status === 'error',
+      draggable: module.menu?.show !== false,
+      accent: module.accent,
+    })),
+  ];
+  const orderIndex = new Map((prefs.module_order || []).map((id, index) => [id, index]));
+  return rows.sort((a, b) => {
+    const ai = orderIndex.has(a.orderId) ? orderIndex.get(a.orderId) : Number.MAX_SAFE_INTEGER;
+    const bi = orderIndex.has(b.orderId) ? orderIndex.get(b.orderId) : Number.MAX_SAFE_INTEGER;
+    if (ai !== bi) return ai - bi;
+    return 0;
+  });
+}
+
+function activeModuleRowsHtml(prefs, thirdPartyModules) {
+  const rows = orderedActiveModules(prefs, thirdPartyModules);
+  if (!rows.length) {
+    return `
+      <div class="empty-state empty-state--compact">
+        <div class="empty-state__title">${t('settings.thirdPartyModulesEmptyTitle')}</div>
+        <div class="empty-state__description">${t('settings.thirdPartyModulesEmptyHint')}</div>
+      </div>
+    `;
+  }
+  return rows.map((module) => {
+    const isThirdParty = module.type === 'third-party';
+    const inputAttr = isThirdParty
+      ? `data-third-party-module-toggle="${esc(module.id)}"`
+      : `data-built-in-module-toggle="${esc(module.id)}"`;
+    const rowAttr = module.draggable
+      ? `draggable="true" data-module-order-id="${esc(module.orderId)}"`
+      : '';
+    return `
+      <div class="settings-module-row settings-module-row--sortable" ${rowAttr} data-module-row-id="${esc(module.orderId)}">
+        <button type="button" class="settings-module-drag" aria-label="${esc(t('settings.modulesDragHandle'))}" title="${esc(t('settings.modulesDragHandle'))}" ${module.draggable ? '' : 'disabled'}>
+          <i data-lucide="grip-vertical" aria-hidden="true"></i>
+        </button>
+        <div class="settings-module-move-buttons">
+          <button type="button" class="settings-module-move" data-module-move="up" aria-label="${esc(t('settings.modulesMoveUp'))}" title="${esc(t('settings.modulesMoveUp'))}" ${module.draggable ? '' : 'disabled'}>
+            <i data-lucide="chevron-up" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="settings-module-move" data-module-move="down" aria-label="${esc(t('settings.modulesMoveDown'))}" title="${esc(t('settings.modulesMoveDown'))}" ${module.draggable ? '' : 'disabled'}>
+            <i data-lucide="chevron-down" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="settings-module-row__icon" style="--module-row-accent:${esc(module.accent || '#6366F1')}">
+          <i data-lucide="${esc(module.icon)}" aria-hidden="true"></i>
+        </div>
+        <div class="settings-module-row__body">
+          <div class="settings-module-row__title">
+            <strong>${esc(module.label)}</strong>
+            ${isThirdParty ? `<span class="settings-module-origin">${esc(t('settings.modulesExternalBadge'))}</span>` : ''}
+            <span class="settings-module-status ${isThirdParty && module.disabled ? 'settings-module-status--error' : module.enabled ? 'settings-module-status--enabled' : 'settings-module-status--disabled'}">${esc(module.status)}</span>
+          </div>
+          ${module.error ? `<p class="form-error">${esc(module.error)}</p>` : ''}
+        </div>
+        <label class="toggle-row settings-module-row__toggle">
+          <input type="checkbox" ${inputAttr} ${module.enabled ? 'checked' : ''} ${module.locked || module.disabled ? 'disabled' : ''}>
+          <span>${t('settings.thirdPartyModulesEnableLabel')}</span>
+        </label>
+      </div>
+    `;
+  }).join('');
+}
+
+function collectModuleOrder(list) {
+  return [...list.querySelectorAll('[data-module-order-id]')]
+    .map((row) => row.dataset.moduleOrderId)
+    .filter(Boolean);
+}
+
+function collectDisabledBuiltInModules(list) {
+  return [...list.querySelectorAll('[data-built-in-module-toggle]')]
+    .filter((input) => !input.checked)
+    .map((input) => input.dataset.builtInModuleToggle);
+}
+
+async function saveModuleListState(list) {
+  const disabled = collectDisabledBuiltInModules(list);
+  const moduleOrder = collectModuleOrder(list);
+  const res = await api.put('/preferences', { disabled_modules: disabled, module_order: moduleOrder });
+  const savedDisabled = res?.data?.disabled_modules ?? disabled;
+  const savedOrder = res?.data?.module_order ?? moduleOrder;
+  window.oikos?.setDisabledModules?.(savedDisabled);
+  window.oikos?.setModuleOrder?.(savedOrder);
+}
+
+function bindModuleListEvents(container, user) {
+  if (user?.role !== 'admin') return;
+  const list = container.querySelector('#module-toggles');
+  if (!list) return;
+  let dragged = null;
+  let dragStartOrder = '';
+  let savingOrder = false;
+
+  const saveIfChanged = async (previousOrder) => {
+    const currentOrder = collectModuleOrder(list).join('|');
+    if (currentOrder === previousOrder || savingOrder) return;
+    savingOrder = true;
+    try {
+      await saveModuleListState(list);
+      window.oikos?.showToast(t('settings.modulesSaved'), 'success');
+    } catch (err) {
+      window.oikos?.showToast(err.message ?? t('common.errorGeneric'), 'danger');
+      render(container, { user });
+    } finally {
+      savingOrder = false;
+    }
+  };
+
+  list.addEventListener('dragstart', (event) => {
+    const row = event.target.closest('[data-module-order-id]');
+    if (!row) return;
+    dragged = row;
+    dragStartOrder = collectModuleOrder(list).join('|');
+    row.classList.add('settings-module-row--dragging');
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', row.dataset.moduleOrderId);
+  });
+
+  list.addEventListener('dragend', async () => {
+    const previousOrder = dragStartOrder;
+    dragged?.classList.remove('settings-module-row--dragging');
+    dragged = null;
+    dragStartOrder = '';
+    await saveIfChanged(previousOrder);
+  });
+
+  list.addEventListener('dragover', (event) => {
+    if (!dragged) return;
+    event.preventDefault();
+    const row = event.target.closest('[data-module-order-id]');
+    if (!row || row === dragged) return;
+    const rect = row.getBoundingClientRect();
+    const before = event.clientY < rect.top + rect.height / 2;
+    list.insertBefore(dragged, before ? row : row.nextSibling);
+  });
+
+  list.addEventListener('drop', (event) => {
+    if (!dragged) return;
+    event.preventDefault();
+  });
+
+  list.addEventListener('click', async (event) => {
+    const btn = event.target.closest('[data-module-move]');
+    if (!btn) return;
+    const row = btn.closest('[data-module-order-id]');
+    if (!row) return;
+    const previousOrder = collectModuleOrder(list).join('|');
+    if (btn.dataset.moduleMove === 'up') {
+      const prev = row.previousElementSibling;
+      if (prev?.matches('[data-module-order-id]')) list.insertBefore(row, prev);
+    } else {
+      const next = row.nextElementSibling;
+      if (next?.matches('[data-module-order-id]')) list.insertBefore(next, row);
+    }
+    await saveIfChanged(previousOrder);
+  });
+
+  list.addEventListener('change', async (event) => {
+    const input = event.target.closest('[data-built-in-module-toggle], [data-third-party-module-toggle]');
+    if (!input) return;
+    const enabled = input.checked;
+    input.disabled = true;
+    try {
+      if (input.dataset.thirdPartyModuleToggle) {
+        await api.patch(`/modules/${encodeURIComponent(input.dataset.thirdPartyModuleToggle)}`, { enabled });
+        await window.oikos?.refreshThirdPartyModules?.();
+      }
+      await saveModuleListState(list);
+      window.oikos?.showToast(t('settings.thirdPartyModulesSaved'), 'success');
+      render(container, { user });
+    } catch (err) {
+      input.checked = !enabled;
+      window.oikos?.showToast(err.message ?? t('common.errorGeneric'), 'danger');
+    } finally {
+      input.disabled = false;
+    }
+  });
+}
+
 // --------------------------------------------------------
 // Event-Binding
 // --------------------------------------------------------
 
-function bindEvents(container, user, users, categories, icsSubscriptions, apiTokens) {
+function bindEvents(container, user, users, categories, icsSubscriptions, apiTokens, thirdPartyModules = []) {
   bindSettingsDateInputs(container);
   bindPwaInstallEvents(container);
   bindCategoryEvents(container);
   bindIcsEvents(container, user, icsSubscriptions);
   bindApiTokenEvents(container, apiTokens);
+  bindModuleListEvents(container, user, thirdPartyModules);
   if (typeof bindBackupEvents === 'function') bindBackupEvents(container);
   // Theme-Toggle
   const themeToggle = container.querySelector('#theme-toggle');
@@ -1304,22 +1516,6 @@ function bindEvents(container, user, users, categories, icsSubscriptions, apiTok
         b.classList.toggle('theme-toggle__btn--active', active);
         b.setAttribute('aria-pressed', String(active));
       });
-    });
-  }
-
-  // Modul-Toggles (admin-only)
-  const moduleToggles = container.querySelector('#module-toggles');
-  if (moduleToggles) {
-    moduleToggles.addEventListener('change', async () => {
-      const disabled = [...moduleToggles.querySelectorAll('input:not(:checked)')].map((cb) => cb.value);
-      try {
-        const res = await api.put('/preferences', { disabled_modules: disabled });
-        const saved = res?.data?.disabled_modules ?? disabled;
-        window.oikos?.setDisabledModules?.(saved);
-        window.oikos?.showToast(t('settings.modulesSaved'), 'success');
-      } catch (err) {
-        window.oikos?.showToast(err.message ?? t('common.errorGeneric'), 'danger');
-      }
     });
   }
 

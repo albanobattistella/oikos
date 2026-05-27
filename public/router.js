@@ -61,6 +61,10 @@ function getCSSToken(name) {
 
 /** Setzt theme-color passend zum aktuellen Modul */
 function updateThemeColorForRoute(route) {
+  if (route?.thirdPartyModule?.accent) {
+    setThemeColor(route.thirdPartyModule.accent, route.thirdPartyModule.accent);
+    return;
+  }
   if (!route?.module) {
     setThemeColor('#007AFF', '#1C1C1E');
     return;
@@ -76,9 +80,9 @@ function updateThemeColorForRoute(route) {
 // --------------------------------------------------------
 let activePageStyle = null;
 
-function loadPageStyle(moduleName) {
-  if (!moduleName) return { ready: Promise.resolve(), cleanup: () => {} };
-  const href = `/styles/${moduleName}.css`;
+function loadPageStyle(moduleName, routeStyle = null) {
+  if (!moduleName && !routeStyle) return { ready: Promise.resolve(), cleanup: () => {} };
+  const href = routeStyle || `/styles/${moduleName}.css`;
   if (activePageStyle?.getAttribute('href') === href) {
     return { ready: Promise.resolve(), cleanup: () => {} };
   }
@@ -123,6 +127,9 @@ let currentPath = null;
 let isNavigating = false;
 let _preferencesLoaded = false;
 let _disabledModules = new Set();
+let _thirdPartyModules = [];
+let _moduleOrder = [];
+let _moduleRefreshTimer = null;
 // Gesetzt wenn auth:expired waehrend einer laufenden Navigation feuert.
 // Die Weiterleitung zu /login wird nach Abschluss der Navigation nachgeholt.
 let _pendingLoginRedirect = false;
@@ -189,7 +196,7 @@ function routeTitle(path) {
     '/housekeeping': t('nav.housekeeping'),
     '/settings': t('nav.settings'),
   };
-  return map[path] || getAppName();
+  return map[path] || _thirdPartyModules.find((module) => module.route?.path === path)?.menu?.label || getAppName();
 }
 
 function updateBranding(path = currentPath) {
@@ -287,6 +294,7 @@ async function navigate(path, userOrPushState = true, pushState = true) {
     if (typeof userOrPushState === 'object' && userOrPushState !== null) {
       currentUser = userOrPushState;
       await syncPreferencesOnce();
+      startThirdPartyModulePolling();
       if (currentUser.access_scope !== 'split_guest') {
         loadReminderStyles();
         initReminders();
@@ -300,7 +308,7 @@ async function navigate(path, userOrPushState = true, pushState = true) {
     const basePath = path.split('?')[0];
     currentPath = basePath;
 
-    let route = ROUTES.find((r) => r.path === basePath) ?? ROUTES.find((r) => r.path === '/');
+    let route = allRoutes().find((r) => r.path === basePath) ?? ROUTES.find((r) => r.path === '/');
 
     if (currentUser?.access_scope === 'split_guest' && route.path !== '/budget') {
       currentPath = null;
@@ -323,6 +331,7 @@ async function navigate(path, userOrPushState = true, pushState = true) {
         const result = await auth.me();
         currentUser = result.user;
         await syncPreferencesOnce();
+        startThirdPartyModulePolling();
         if (currentUser.access_scope !== 'split_guest') {
           loadReminderStyles();
           initReminders();
@@ -339,6 +348,15 @@ async function navigate(path, userOrPushState = true, pushState = true) {
       }
     }
 
+    route = allRoutes().find((r) => r.path === basePath) ?? route;
+
+    if (currentUser?.access_scope === 'split_guest' && route.path !== '/budget') {
+      currentPath = null;
+      isNavigating = false;
+      navigate('/budget');
+      return;
+    }
+
     if (!route.requiresAuth && currentUser && path === '/login') {
       currentPath = null;
       isNavigating = false;
@@ -350,7 +368,7 @@ async function navigate(path, userOrPushState = true, pushState = true) {
       history.pushState({ path }, '', path);
     }
 
-    const accent = route?.module ? getCSSToken(`--module-${route.module}`) : '';
+    const accent = route?.thirdPartyModule?.accent || (route?.module ? getCSSToken(`--module-${route.module}`) : '');
     document.documentElement.style.setProperty('--active-module-accent', accent);
 
     await renderPage(route, previousPath);
@@ -390,6 +408,9 @@ async function syncPreferencesOnce() {
     if (Array.isArray(res?.data?.disabled_modules)) {
       _disabledModules = new Set(res.data.disabled_modules);
     }
+    if (Array.isArray(res?.data?.module_order)) {
+      _moduleOrder = res.data.module_order;
+    }
   } catch {
     // Non-critical. The settings page can refresh this later.
   }
@@ -401,6 +422,55 @@ async function syncPreferencesOnce() {
   } catch {
     // Non-critical. The login page and settings page can refresh branding later.
   }
+  await syncThirdPartyModules();
+}
+
+async function syncThirdPartyModules() {
+  try {
+    const res = await api.get('/modules');
+    _thirdPartyModules = Array.isArray(res?.data) ? res.data : [];
+  } catch {
+    _thirdPartyModules = [];
+  }
+}
+
+function moduleSnapshot() {
+  return JSON.stringify(_thirdPartyModules.map((module) => ({
+    id: module.id,
+    enabled: module.enabled,
+    status: module.status,
+    path: module.route?.path,
+    label: module.menu?.label,
+  })));
+}
+
+function startThirdPartyModulePolling() {
+  if (_moduleRefreshTimer || currentUser?.access_scope === 'split_guest') return;
+  _moduleRefreshTimer = setInterval(async () => {
+    const before = moduleSnapshot();
+    await syncThirdPartyModules();
+    if (before !== moduleSnapshot()) rebuildNavigation();
+  }, 30_000);
+}
+
+function stopThirdPartyModulePolling() {
+  if (!_moduleRefreshTimer) return;
+  clearInterval(_moduleRefreshTimer);
+  _moduleRefreshTimer = null;
+}
+
+function allRoutes() {
+  const moduleRoutes = _thirdPartyModules
+    .filter((module) => module.enabled && module.status === 'enabled' && module.route?.path && module.route?.entry)
+    .map((module) => ({
+      path: module.route.path,
+      page: module.route.entry,
+      style: module.route.style,
+      requiresAuth: true,
+      module: `third-party-${module.id}`,
+      thirdPartyModule: module,
+    }));
+  return [...ROUTES, ...moduleRoutes];
 }
 
 /**
@@ -416,7 +486,7 @@ async function renderPage(route, previousPath = null) {
   if (loading) loading.hidden = true;
 
   try {
-    const style = loadPageStyle(route.module);
+    const style = loadPageStyle(route.thirdPartyModule ? null : route.module, route.style);
     const [module] = await Promise.all([
       importPage(route.page),
       style.ready,
@@ -488,6 +558,9 @@ async function renderPage(route, previousPath = null) {
   } catch (err) {
     document.documentElement.classList.remove('navigating');
     console.error('[Router] Seiten-Render-Fehler:', err);
+    if (route.thirdPartyModule?.id) {
+      await disableFailedThirdPartyModule(route.thirdPartyModule.id);
+    }
     renderError(app, err);
   }
 }
@@ -563,12 +636,9 @@ function renderAppShell(container) {
   const sidebarItems = document.createElement('div');
   sidebarItems.className = 'nav-sidebar__items';
   sidebarItems.setAttribute('role', 'list');
-  navItems()
-    .filter((item) => !item.kitchenGroup)
-    .forEach((item) => {
-      sidebarItems.appendChild(navItemEl(item));
-      if (item.path === '/calendar') sidebarItems.appendChild(sidebarKitchenEl());
-    });
+  navItems().forEach((item) => {
+    sidebarItems.appendChild(navItemEl(item));
+  });
   if (window.lucide) window.lucide.createIcons({ el: sidebarItems });
   sidebar.appendChild(sidebarLogo);
   sidebar.appendChild(sidebarItems);
@@ -583,7 +653,7 @@ function renderAppShell(container) {
   bottomNav.setAttribute('aria-label', t('nav.navigation'));
   const bottomItems = document.createElement('div');
   bottomItems.className = 'nav-bottom__items';
-  navItems().slice(0, PRIMARY_NAV).forEach((item) => bottomItems.appendChild(navItemEl(item)));
+  navItems().filter((item) => !item.kitchenGroup).slice(0, PRIMARY_NAV).forEach((item) => bottomItems.appendChild(navItemEl(item)));
 
   let backdrop, moreSheet;
 
@@ -1146,7 +1216,7 @@ function navItems() {
       { path: '/budget', label: t('splitExpenses.tabLabel'), icon: 'receipt-text', module: 'budget' },
     ];
   }
-  const all = [
+  const baseItems = [
     { path: '/',          label: t('nav.dashboard'), icon: 'layout-dashboard', module: 'dashboard' },
     { path: '/calendar',  label: t('nav.calendar'),  icon: 'calendar',         module: 'calendar'  },
     { path: '/tasks',     label: t('nav.tasks'),     icon: 'check-square',     module: 'tasks'     },
@@ -1163,7 +1233,30 @@ function navItems() {
     { path: '/recipes',   label: t('nav.recipes'),   icon: 'book-text',     module: 'recipes',  kitchenGroup: true },
     { path: '/shopping',  label: t('nav.shopping'),  icon: 'shopping-cart', module: 'shopping', kitchenGroup: true },
   ];
-  return all.filter((item) => !_disabledModules.has(item.module));
+  const thirdPartyItems = _thirdPartyModules
+    .filter((module) => module.enabled && module.status === 'enabled' && module.menu?.show && module.route?.path)
+    .map((module) => ({
+      path: module.route.path,
+      label: module.menu.label || module.name,
+      icon: module.menu.icon || module.icon || 'box',
+      module: `third-party-${module.id}`,
+      accent: module.accent,
+      order: module.menu.order ?? 1000,
+    }))
+    .sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
+  const settings = baseItems.find((item) => item.module === 'settings');
+  const sortable = [
+    ...baseItems.filter((item) => item.module !== 'settings' && !_disabledModules.has(item.module)),
+    ...thirdPartyItems,
+  ];
+  const orderIndex = new Map(_moduleOrder.map((id, index) => [id, index]));
+  sortable.sort((a, b) => {
+    const ai = orderIndex.has(a.module) ? orderIndex.get(a.module) : Number.MAX_SAFE_INTEGER;
+    const bi = orderIndex.has(b.module) ? orderIndex.get(b.module) : Number.MAX_SAFE_INTEGER;
+    if (ai !== bi) return ai - bi;
+    return 0;
+  });
+  return settings ? [...sortable, settings] : sortable;
 }
 
 function isModuleDisabled(moduleName) {
@@ -1175,14 +1268,36 @@ function setDisabledModules(modules) {
   rebuildNavigation();
 }
 
-function navItemEl({ path, label, icon, module: mod }) {
+function setModuleOrder(order) {
+  _moduleOrder = Array.isArray(order) ? order : [];
+  rebuildNavigation();
+}
+
+async function refreshThirdPartyModules() {
+  await syncThirdPartyModules();
+  rebuildNavigation();
+}
+
+async function disableFailedThirdPartyModule(moduleId) {
+  if (!moduleId) return;
+  _thirdPartyModules = _thirdPartyModules.filter((module) => module.id !== moduleId);
+  rebuildNavigation();
+  try {
+    await api.patch(`/modules/${encodeURIComponent(moduleId)}`, { enabled: false });
+  } catch {
+    // Members cannot persist module state. The failed module is still removed locally.
+  }
+}
+
+function navItemEl({ path, label, icon, module: mod, accent }) {
   const a = document.createElement('a');
   a.href = path;
   a.dataset.route = path;
   a.className = 'nav-item';
   a.setAttribute('aria-label', label);
   a.setAttribute('title', label);
-  if (mod) a.style.setProperty('--item-module-accent', `var(--module-${mod})`);
+  if (accent) a.style.setProperty('--item-module-accent', accent);
+  else if (mod) a.style.setProperty('--item-module-accent', `var(--module-${mod})`);
   const iconWrap = document.createElement('div');
   iconWrap.className = 'nav-item__icon-wrap';
   const well = document.createElement('div');
@@ -1215,42 +1330,13 @@ function replaceLucideIcon(container, selector, iconName) {
   if (window.lucide) window.lucide.createIcons({ el: container });
 }
 
-function sidebarKitchenEl() {
-  const a = document.createElement('a');
-  a.href = '/meals';
-  a.id = 'sidebar-kitchen-nav';
-  a.className = 'nav-item';
-  a.style.setProperty('--item-module-accent', 'var(--module-meals)');
-  a.setAttribute('aria-label', t('nav.kitchen'));
-  a.setAttribute('title', t('nav.kitchen'));
-  const iconWrap = document.createElement('div');
-  iconWrap.className = 'nav-item__icon-wrap';
-  const well = document.createElement('div');
-  well.className = 'nav-item__icon-well';
-  const icon = document.createElement('i');
-  icon.dataset.lucide = 'utensils';
-  icon.className = 'nav-item__icon';
-  icon.setAttribute('aria-hidden', 'true');
-  well.appendChild(icon);
-  iconWrap.appendChild(well);
-  const label = document.createElement('span');
-  label.className = 'nav-item__label';
-  label.textContent = t('nav.kitchen');
-  a.appendChild(iconWrap);
-  a.appendChild(label);
-  a.addEventListener('click', (e) => {
-    e.preventDefault();
-    navigate(getLastKitchenRoute());
-  });
-  return a;
-}
-
-function moreItemEl({ path, label, icon, module: mod }) {
+function moreItemEl({ path, label, icon, module: mod, accent }) {
   const a = document.createElement('a');
   a.href = path;
   a.dataset.route = path;
   a.className = 'more-item';
-  if (mod) a.style.setProperty('--item-module-accent', `var(--module-${mod})`);
+  if (accent) a.style.setProperty('--item-module-accent', accent);
+  else if (mod) a.style.setProperty('--item-module-accent', `var(--module-${mod})`);
   const well = document.createElement('div');
   well.className = 'more-item__icon-well';
   const i = document.createElement('i');
@@ -1333,23 +1419,6 @@ function updateNav(path) {
     if (kitchenBtnIcon) kitchenBtnIcon.dataset.lucide = 'utensils';
     kitchenNavBtn.setAttribute('aria-label', kitchenNavAriaLabel(path));
     kitchenNavBtn.setAttribute('title', t('nav.kitchen'));
-  }
-
-  const sidebarKitchenNav = document.querySelector('#sidebar-kitchen-nav');
-  if (sidebarKitchenNav) {
-    const isKitchen = isKitchenRoute(path);
-    if (isKitchen) {
-      sidebarKitchenNav.setAttribute('aria-current', 'page');
-    } else {
-      sidebarKitchenNav.removeAttribute('aria-current');
-    }
-
-    const sidebarLabel = sidebarKitchenNav.querySelector('.nav-item__label');
-    const sidebarIcon  = sidebarKitchenNav.querySelector('.nav-item__icon');
-    if (sidebarLabel) sidebarLabel.textContent = t('nav.kitchen');
-    if (sidebarIcon) sidebarIcon.dataset.lucide = 'utensils';
-    sidebarKitchenNav.setAttribute('aria-label', kitchenNavAriaLabel(path));
-    sidebarKitchenNav.setAttribute('title', t('nav.kitchen'));
   }
 
   const moreBtn = document.querySelector('#more-btn');
@@ -1551,6 +1620,7 @@ window.addEventListener('popstate', (e) => {
 // Session abgelaufen
 window.addEventListener('auth:expired', () => {
   currentUser = null;
+  stopThirdPartyModulePolling();
   stopReminders();
   if (isNavigating) {
     // navigate('/login') kann nicht sofort aufgerufen werden - wird im finally-Block
@@ -1579,27 +1649,20 @@ function rebuildNavigation({ updateLabels = true } = {}) {
     if (moreBtnLabel) moreBtnLabel.textContent = t('nav.more');
   }
 
-  const kitchenVisible = ['meals', 'recipes', 'shopping'].some((m) => !_disabledModules.has(m));
-
   if (navSidebarItems) {
-    const sidebarEls = [];
-    navItems()
-      .filter((item) => !item.kitchenGroup)
-      .forEach((item) => {
-        sidebarEls.push(navItemEl(item));
-        if (item.path === '/calendar' && kitchenVisible) sidebarEls.push(sidebarKitchenEl());
-      });
+    const sidebarEls = navItems().map(navItemEl);
     navSidebarItems.replaceChildren(...sidebarEls);
     if (window.lucide) window.lucide.createIcons({ el: navSidebarItems });
   }
   if (bottomItems) {
     const kitchenBtnEl = bottomItems.querySelector('#kitchen-btn');
     const moreBtn      = bottomItems.querySelector('#more-btn');
+    const kitchenVisible = ['meals', 'recipes', 'shopping'].some((m) => !_disabledModules.has(m));
     if (kitchenBtnEl) {
       kitchenBtnEl.querySelector('.nav-item__label').textContent = t('nav.kitchen');
       kitchenBtnEl.hidden = !kitchenVisible;
     }
-    const newItems = navItems().slice(0, PRIMARY_NAV).map(navItemEl);
+    const newItems = navItems().filter((item) => !item.kitchenGroup).slice(0, PRIMARY_NAV).map(navItemEl);
     const tail = [kitchenBtnEl, moreBtn].filter(Boolean);
     bottomItems.replaceChildren(...newItems, ...tail);
   }
@@ -1720,6 +1783,8 @@ window.oikos = {
   friendlyError,
   setThemeColor,
   setDisabledModules,
+  setModuleOrder,
+  refreshThirdPartyModules,
   isModuleDisabled,
   applyTheme: (value) => {
     localStorage.setItem('oikos-theme', value);
@@ -1732,7 +1797,7 @@ window.oikos = {
     }
   },
   restoreThemeColor: () => {
-    const route = ROUTES.find((r) => r.path === currentPath);
+    const route = allRoutes().find((r) => r.path === currentPath);
     updateThemeColorForRoute(route);
   },
 };
