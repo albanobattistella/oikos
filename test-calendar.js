@@ -290,6 +290,47 @@ test('nextOccurrence: WEEKLY BYDAY=MO INTERVAL=2 — klassisch alle 2 Wochen', (
 });
 
 // --------------------------------------------------------
+// Task-Chip-Helfer
+// --------------------------------------------------------
+
+console.log('\n[Calendar-Test] Task-Chip-Helfer\n');
+
+const { filterTasksForCalendar: ftc } = calendarHelpers;
+
+test('filterTasksForCalendar: Tasks ohne due_date werden gefiltert', () => {
+  const tasks = [
+    { id: 1, title: 'A', due_date: null,         status: 'open' },
+    { id: 2, title: 'B', due_date: '2026-06-15', status: 'open' },
+  ];
+  const result = ftc(tasks);
+  assert(result.length === 1, 'Nur 1 Task erwartet');
+  assert(result[0].id === 2, 'Task B muss enthalten sein');
+});
+
+test('filterTasksForCalendar: done-Tasks werden gefiltert', () => {
+  const tasks = [
+    { id: 1, title: 'A', due_date: '2026-06-15', status: 'done'     },
+    { id: 2, title: 'B', due_date: '2026-06-16', status: 'open'     },
+    { id: 3, title: 'C', due_date: '2026-06-17', status: 'archived' },
+  ];
+  const result = ftc(tasks);
+  assert(result.length === 1, 'Nur 1 Task erwartet');
+  assert(result[0].id === 2, 'Nur offener Task erwartet');
+});
+
+test('filterTasksForCalendar: in_progress-Tasks werden behalten', () => {
+  const tasks = [
+    { id: 1, title: 'A', due_date: '2026-06-15', status: 'in_progress' },
+  ];
+  const result = ftc(tasks);
+  assert(result.length === 1, 'in_progress-Task muss enthalten sein');
+});
+
+test('filterTasksForCalendar: leeres Array gibt leeres Array zurück', () => {
+  assert(ftc([]).length === 0, 'Leeres Array erwartet');
+});
+
+// --------------------------------------------------------
 // Ergebnis
 // --------------------------------------------------------
 console.log(`\n[Calendar-Test] Ergebnis: ${passed} bestanden, ${failed} fehlgeschlagen\n`);

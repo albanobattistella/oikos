@@ -329,6 +329,7 @@ let state = {
   today:       '',
   cursor:      null,     // aktuell angezeigte Referenz-Datum (YYYY-MM-DD)
   events:      [],
+  tasks:       [],       // Aufgaben mit due_date für Kalender-Anzeige
   users:       [],
   rangeFrom:   '',
   rangeTo:     '',
@@ -575,17 +576,53 @@ function eventsOnDay(dateStr) {
   });
 }
 
+/** Filtert Tasks: nur open/in_progress mit due_date werden angezeigt. */
+function filterTasksForCalendar(tasks) {
+  return tasks.filter(
+    (t) => t.due_date && t.status !== 'done' && t.status !== 'archived'
+  );
+}
+
+/** Tasks, die an einem bestimmten Tag fällig sind. */
+function tasksOnDay(dateStr) {
+  return state.tasks.filter((t) => t.due_date === dateStr);
+}
+
+/** Rendert einen read-only Task-Chip für Kalenderansichten. */
+function renderTaskChip(task) {
+  const priority = task.priority || 'none';
+  const label    = esc(task.title);
+  const ariaLbl  = t('calendar.taskChipAriaLabel', { title: task.title });
+  const timeStr  = task.due_time ? ` · ${task.due_time.slice(0, 5)}` : '';
+  return `<div class="cal-task-chip cal-task-chip--${priority}"
+               data-task-id="${task.id}"
+               role="button" tabindex="0"
+               aria-label="${esc(ariaLbl)}"
+               title="${label}${esc(timeStr)}">
+    <i data-lucide="check-square" class="icon-xs" aria-hidden="true"></i>
+    <span>${label}${esc(timeStr)}</span>
+  </div>`;
+}
+
 // --------------------------------------------------------
 // API
 // --------------------------------------------------------
 
 async function loadRange(from, to) {
   try {
-    const res      = await api.get(`/calendar?from=${from}&to=${to}`);
-    state.events   = res.data;
+    const [evRes, taskRes] = await Promise.all([
+      api.get(`/calendar?from=${from}&to=${to}`),
+      api.get('/tasks?include_future=1').catch((err) => {
+        console.warn('[Calendar] Tasks-Fetch fehlgeschlagen:', err);
+        return { data: [] };
+      }),
+    ]);
+    state.events = evRes.data;
+    state.tasks  = filterTasksForCalendar(taskRes.data ?? []);
   } catch (err) {
     console.error('[Calendar] loadRange Fehler:', err);
     state.events = [];
+    state.tasks  = [];
     window.oikos?.showToast(t('calendar.loadError'), 'danger');
   }
   state.rangeFrom = from;
@@ -1153,7 +1190,7 @@ function renderAgendaView(container) {
   });
 }
 
-export const __test = { normalizeCalendarView, defaultCalendarViewFromState };
+export const __test = { normalizeCalendarView, defaultCalendarViewFromState, filterTasksForCalendar, tasksOnDay };
 
 function renderAgendaEvent(ev) {
   const timeStr = ev.all_day
