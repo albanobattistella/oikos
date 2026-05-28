@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.54.2] - 2026-05-28
+
+### Changed
+- **Liquid Glass – Settings module:** Migrated `settings.css` and `settings-nav.css` to Glass design tokens. Settings cards (`.settings-card`), CalDAV account items, module rows, and the settings sidebar now use `--glass-bg-card`, `--glass-bg-elevated`, `--radius-glass-card`/`--radius-glass-inner`, `--glass-border-subtle`, and `--glass-shadow-*` tokens. Interactive rows (`.toggle-row`, `.cat-row`, `.caldav-calendar-item`) use `--glass-bg-card-hover` on hover. Tooltips use `--glass-shadow-lg`. Sidebar navigation items use `--radius-glass-inner` with glass hover states.
+
 ## [0.54.1] - 2026-05-28
 
 ### Changed
