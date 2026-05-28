@@ -16,11 +16,10 @@ function isStandaloneMode() {
 }
 
 function isIOSInstallFlow() {
-  return (
-    navigator.standalone === undefined &&
-    /iPhone|iPad/.test(navigator.userAgent) &&
-    !window.MSStream
-  );
+  const platform = navigator.platform || '';
+  const userAgent = navigator.userAgent || '';
+  const isiPadOSDesktopMode = platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+  return /iPhone|iPad|iPod/.test(userAgent) || isiPadOSDesktopMode;
 }
 
 function emitInstallStateChanged() {
@@ -76,4 +75,3 @@ export async function promptPwaInstall() {
     throw err;
   }
 }
-
