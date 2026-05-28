@@ -73,9 +73,10 @@
    -------------------------------------------------------- */
 
 .settings-card {
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  background-color: var(--glass-bg-card);
+  border: 1px solid var(--glass-border-subtle);
+  border-radius: var(--radius-glass-card);
+  box-shadow: var(--glass-shadow-sm);
   padding: var(--space-4);
   margin-bottom: var(--space-3);
 }
@@ -203,7 +204,7 @@
 .settings-avatar-button:hover,
 .settings-avatar-button:focus-visible {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--glass-shadow-md);
   outline: none;
 }
 
@@ -498,7 +499,7 @@
   min-height: 148px;
   padding: var(--space-5);
   border: 1.5px dashed var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-glass-card);
   background: var(--color-surface-2);
   color: var(--color-text-secondary);
   text-align: center;
@@ -616,7 +617,7 @@
   opacity: 0;
   transition: opacity var(--transition-fast);
   z-index: var(--z-tooltip);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--glass-shadow-lg);
 }
 
 .settings-help-icon:hover .settings-help-tooltip {
@@ -688,7 +689,7 @@
   justify-content: center;
   padding: var(--space-8) var(--space-6);
   text-align: center;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-glass-card);
   background: var(--color-surface-2);
   border: 2px dashed var(--color-border);
   margin: var(--space-4) 0;
@@ -775,14 +776,14 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-glass-inner);
   cursor: pointer;
   transition: background-color var(--transition-fast);
   min-height: var(--target-lg);
 }
 
 .toggle-row:hover {
-  background-color: var(--color-surface-2);
+  background-color: var(--glass-bg-card-hover);
 }
 
 .toggle-row input[type="checkbox"] {
@@ -825,12 +826,12 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-1);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-glass-inner);
   transition: background var(--transition-fast);
 }
 
 .cat-row:hover {
-  background: var(--color-surface-2);
+  background: var(--glass-bg-card-hover);
 }
 
 .cat-row__icon {
@@ -942,9 +943,9 @@
 
 .caldav-account-item {
   padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-2);
+  border: 1px solid var(--glass-border-subtle);
+  border-radius: var(--radius-glass-inner);
+  background-color: var(--glass-bg-card);
   margin-bottom: var(--space-3);
 }
 
@@ -1003,7 +1004,7 @@
 }
 
 .caldav-calendar-item:hover {
-  background-color: var(--color-surface);
+  background-color: var(--glass-bg-card-hover);
 }
 
 .caldav-calendar-checkbox {
@@ -1057,9 +1058,9 @@
   gap: var(--space-3);
   align-items: center;
   padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-2);
+  border: 1px solid var(--glass-border-subtle);
+  border-radius: var(--radius-glass-inner);
+  background-color: var(--glass-bg-card);
 }
 
 .settings-module-row--dragging {

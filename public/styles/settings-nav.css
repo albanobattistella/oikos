@@ -41,8 +41,8 @@
   height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
-  background: var(--color-surface);
-  border-right: 1px solid var(--color-border);
+  background: var(--glass-bg-elevated);
+  border-right: 1px solid var(--glass-border-subtle);
   padding: var(--space-4) 0;
   scrollbar-width: thin;
   scrollbar-color: var(--color-border) transparent;
@@ -128,7 +128,7 @@
   padding: var(--space-2) var(--space-4);
   margin: 0 var(--space-2);
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-glass-inner);
   background: transparent;
   color: var(--color-text-secondary);
   font-family: inherit;
@@ -142,7 +142,7 @@
 }
 
 .settings-sidebar-page:hover {
-  background: var(--color-surface-2);
+  background: var(--glass-bg-card-hover);
   color: var(--color-text-primary);
 }
 
@@ -345,7 +345,7 @@
   opacity: 0;
   transition: opacity var(--transition-fast);
   z-index: var(--z-tooltip);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--glass-shadow-lg);
 }
 
 .settings-help-icon:hover .settings-help-tooltip {
@@ -419,7 +419,7 @@
   justify-content: center;
   padding: var(--space-8) var(--space-6);
   text-align: center;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-glass-card);
   background: var(--color-surface-2);
   border: 2px dashed var(--color-border);
 }
