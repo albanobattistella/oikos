@@ -58,7 +58,9 @@
     "housekeeping": "Pulizie",
     "splitExpenses": "Dividi",
     "kitchenActiveLabel": "Cucina, {{section}} attiva",
-    "section.household": "Casa"
+    "section": {
+      "household": "Casa"
+    }
   },
   "dashboard": {
     "title": "Panoramica",

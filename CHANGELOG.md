@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.54.11] - 2026-05-29
+
+### Fixed
+- **Calendar – unreadable time-axis labels:** The week and day view time-axis labels used the disabled-text token (`--color-text-disabled`), which fell far below the WCAG AA 4.5:1 contrast ratio against the grid background (~1.2:1 in light mode, ~1.5:1 in dark mode). Switched to `--color-text-tertiary` for legible, AA-compliant times in both themes.
+- **Navigation – "Household" section label showed a raw key:** The desktop sidebar section heading rendered as `NAV.SECTION.HOUSEHOLD` instead of the translated label. The locale key was stored as a flat `"section.household"` string inside `nav`, but `t()` resolves dot-paths as nested objects, so it never matched and fell back to the (uppercased) key. Restructured the key to a nested `nav.section.household` object across all 16 locales.
+- **Meal plan & list headers scrolled under glass cards:** Sticky section headers in the meal plan (`.day-header`), calendar agenda (`.agenda-day__header`), and contacts list (`.contact-group__header`) sat on the base z-layer (`--z-base`), so translucent Liquid Glass cards rendered above them while scrolling. Raised them to `--z-sticky` so they stay on top.
+
 ## [0.54.10] - 2026-05-29
 
 ### Added

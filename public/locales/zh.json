@@ -58,7 +58,9 @@
     "housekeeping": "Housekeeping",
     "splitExpenses": "分摊",
     "kitchenActiveLabel": "厨房，{{section}} 已激活",
-    "section.household": "家庭"
+    "section": {
+      "household": "家庭"
+    }
   },
   "dashboard": {
     "title": "概览",

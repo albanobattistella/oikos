@@ -365,7 +365,7 @@
 
 .week-view__time-label {
   font-size: var(--text-xs);
-  color: var(--color-text-disabled);
+  color: var(--color-text-tertiary);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -597,7 +597,7 @@
   position: sticky;
   top: 0;
   background-color: var(--color-bg);
-  z-index: var(--z-base);
+  z-index: var(--z-sticky);
 }
 
 .agenda-day__date {

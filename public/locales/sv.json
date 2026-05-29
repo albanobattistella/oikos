@@ -58,7 +58,9 @@
     "housekeeping": "Städning",
     "splitExpenses": "Dela",
     "kitchenActiveLabel": "Kök, {{section}} aktivt",
-    "section.household": "Hushåll"
+    "section": {
+      "household": "Hushåll"
+    }
   },
   "dashboard": {
     "title": "Översikt",

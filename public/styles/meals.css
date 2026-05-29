@@ -95,7 +95,7 @@
   position: sticky;
   top: 0;
   background-color: var(--color-bg);
-  z-index: var(--z-base);
+  z-index: var(--z-sticky);
 }
 
 .day-header__name {

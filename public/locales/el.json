@@ -58,7 +58,9 @@
     "housekeeping": "Housekeeping",
     "splitExpenses": "Μοίρασμα",
     "kitchenActiveLabel": "Κουζίνα, {{section}} ενεργό",
-    "section.household": "Νοικοκυριό"
+    "section": {
+      "household": "Νοικοκυριό"
+    }
   },
   "dashboard": {
     "title": "Επισκόπηση",

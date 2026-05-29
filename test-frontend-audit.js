@@ -4,7 +4,7 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 
@@ -209,4 +209,70 @@ test('phase 4 opens search from More sheet in a single handoff', () => {
 
   assert.match(routerSource, /closeSheet\(\{\s*restoreFocus:\s*false\s*\}\)/);
   assert.match(routerSource, /requestAnimationFrame\(\(\) => \{\s*openSearch\(\);/);
+});
+
+// --------------------------------------------------------
+// Liquid-Glass-Migration: Regressions-Guards (UX-Audit)
+// --------------------------------------------------------
+
+test('calendar week-view time labels use a readable text token, not the disabled token', () => {
+  const calendar = read('./public/styles/calendar.css');
+  const body = cssRuleBody(calendar, '.week-view__time-label');
+
+  assert.match(body, /color:\s*var\(--color-text-tertiary\)/, 'time labels must use --color-text-tertiary for WCAG AA contrast');
+  assert.doesNotMatch(body, /color:\s*var\(--color-text-disabled\)/, 'time labels must not reuse the disabled token (insufficient contrast)');
+});
+
+test('sticky section headers stack above glass cards via --z-sticky', () => {
+  const stickyHeaders = [
+    ['./public/styles/meals.css', '.day-header'],
+    ['./public/styles/calendar.css', '.agenda-day__header'],
+    ['./public/styles/contacts.css', '.contact-group__header'],
+  ];
+
+  for (const [file, selector] of stickyHeaders) {
+    const body = cssRuleBody(read(file), selector);
+    assert.match(body, /position:\s*sticky/, `${file} ${selector} should be sticky`);
+    assert.match(body, /z-index:\s*var\(--z-sticky\)/, `${file} ${selector} must use --z-sticky so glass cards do not scroll over it`);
+    assert.doesNotMatch(body, /z-index:\s*var\(--z-base\)/, `${file} ${selector} must not sit on the base layer`);
+  }
+});
+
+test('every locale resolves nav.section.household as a nested key', () => {
+  const localesDir = new URL('./public/locales/', import.meta.url);
+  const files = readdirSync(localesDir).filter((f) => f.endsWith('.json'));
+
+  assert.ok(files.length >= 16, 'expected at least 16 locale files');
+  for (const file of files) {
+    const data = JSON.parse(readFileSync(new URL(file, localesDir), 'utf8'));
+    assert.equal(typeof data.nav?.section?.household, 'string', `${file}: nav.section.household must be a nested string`);
+    assert.ok(data.nav.section.household.length > 0, `${file}: nav.section.household must not be empty`);
+    assert.ok(!('section.household' in data.nav), `${file}: nav must not keep the flat "section.household" key (t() cannot resolve it)`);
+  }
+});
+
+test('dark-mode token blocks stay in sync between @media and [data-theme="dark"]', () => {
+  const tokens = read('./public/styles/tokens.css');
+
+  const mediaBlock = tokens.match(/@media \(prefers-color-scheme: dark\)\s*\{\s*:root:not\(\[data-theme="light"\]\)\s*\{([\s\S]*?)\n {2}\}\n\}/);
+  const attrBlock = tokens.match(/\n\[data-theme="dark"\]\s*\{([\s\S]*?)\n\}/);
+
+  assert.ok(mediaBlock, 'expected a prefers-color-scheme dark block');
+  assert.ok(attrBlock, 'expected a [data-theme="dark"] block');
+
+  const parseVars = (block) => {
+    const map = new Map();
+    for (const [, name, value] of block.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)) {
+      map.set(name, value.trim());
+    }
+    return map;
+  };
+
+  const media = parseVars(mediaBlock[1]);
+  const attr = parseVars(attrBlock[1]);
+
+  assert.ok(media.size > 0 && attr.size > 0, 'both dark blocks must declare variables');
+  const allKeys = new Set([...media.keys(), ...attr.keys()]);
+  const divergent = [...allKeys].filter((k) => media.get(k) !== attr.get(k));
+  assert.deepEqual(divergent, [], `dark token blocks diverge for: ${divergent.join(', ')}`);
 });
