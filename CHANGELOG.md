@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.55.3] - 2026-05-30
+
+### Changed
+- **SPEC updated to v0.55.2:** Documents the Phase 7 Living Drifting Backdrop (`.lg-backdrop`, `--lg-*` tokens), Enter-submits-modal convention, modal state machine, and budget chart screen-reader summary. Version reference updated to v0.55.2.
+- **awesome-selfhosted description updated:** Now reflects CalDAV/CardDAV multi-account sync, split expenses, and housekeeping module.
+
 ## [0.55.2] - 2026-05-30
 
 ### Fixed
