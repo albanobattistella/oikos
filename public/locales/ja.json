@@ -1146,7 +1146,10 @@
     "invalidCredentials": "ユーザー名またはパスワードが正しくありません。",
     "showPassword": "パスワードを表示",
     "hidePassword": "パスワードを非表示",
-    "version": "v{{version}}"
+    "version": "v{{version}}",
+    "loginWithSso": "SSOでサインイン",
+    "orDivider": "または",
+    "ssoError": "SSOサインインに失敗しました。もう一度お試しください。"
   },
   "install": {
     "title": "Oikos をインストール",

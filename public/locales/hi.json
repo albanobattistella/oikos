@@ -1146,7 +1146,10 @@
     "invalidCredentials": "अमान्य क्रेडेंशियल।",
     "showPassword": "पासवर्ड दिखाएं",
     "hidePassword": "पासवर्ड छिपाएं",
-    "version": "v{{version}}"
+    "version": "v{{version}}",
+    "loginWithSso": "SSO से साइन इन करें",
+    "orDivider": "या",
+    "ssoError": "SSO साइन-इन विफल रहा। कृपया पुनः प्रयास करें।"
   },
   "install": {
     "title": "Oikos इंस्टॉल करें",

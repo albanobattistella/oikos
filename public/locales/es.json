@@ -1146,7 +1146,10 @@
     "invalidCredentials": "Credenciales incorrectas.",
     "showPassword": "Mostrar contraseña",
     "hidePassword": "Ocultar contraseña",
-    "version": "v{{version}}"
+    "version": "v{{version}}",
+    "loginWithSso": "Iniciar sesión con SSO",
+    "orDivider": "o",
+    "ssoError": "Error al iniciar sesión con SSO. Inténtalo de nuevo."
   },
   "install": {
     "title": "Instalar Oikos",

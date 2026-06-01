@@ -1146,7 +1146,10 @@
     "invalidCredentials": "بيانات اعتماد غير صالحة.",
     "showPassword": "إظهار كلمة المرور",
     "hidePassword": "إخفاء كلمة المرور",
-    "version": "v{{version}}"
+    "version": "v{{version}}",
+    "loginWithSso": "تسجيل الدخول بـ SSO",
+    "orDivider": "أو",
+    "ssoError": "فشل تسجيل الدخول بـ SSO. يرجى المحاولة مرة أخرى."
   },
   "install": {
     "title": "تثبيت Oikos",

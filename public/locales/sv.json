@@ -1146,7 +1146,10 @@
     "invalidCredentials": "Ogiltiga användaruppgifter.",
     "showPassword": "Visa lösenord",
     "hidePassword": "Dölj lösenord",
-    "version": "v{{version}}"
+    "version": "v{{version}}",
+    "loginWithSso": "Logga in med SSO",
+    "orDivider": "eller",
+    "ssoError": "SSO-inloggning misslyckades. Försök igen."
   },
   "install": {
     "title": "Installera Oikos",

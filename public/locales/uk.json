@@ -1146,7 +1146,10 @@
     "invalidCredentials": "Невірні облікові дані.",
     "showPassword": "Показати пароль",
     "hidePassword": "Приховати пароль",
-    "version": "v{{version}}"
+    "version": "v{{version}}",
+    "loginWithSso": "Увійти через SSO",
+    "orDivider": "або",
+    "ssoError": "Вхід через SSO не вдався. Спробуйте ще раз."
   },
   "install": {
     "title": "Встановити Oikos",

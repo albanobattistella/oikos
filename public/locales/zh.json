@@ -1146,7 +1146,10 @@
     "invalidCredentials": "用户名或密码错误。",
     "showPassword": "显示密码",
     "hidePassword": "隐藏密码",
-    "version": "v{{version}}"
+    "version": "v{{version}}",
+    "loginWithSso": "通过SSO登录",
+    "orDivider": "或",
+    "ssoError": "SSO登录失败，请重试。"
   },
   "install": {
     "title": "安装 Oikos",

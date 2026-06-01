@@ -1146,7 +1146,10 @@
     "invalidCredentials": "Identifiants invalides.",
     "showPassword": "Afficher le mot de passe",
     "hidePassword": "Masquer le mot de passe",
-    "version": "v{{version}}"
+    "version": "v{{version}}",
+    "loginWithSso": "Se connecter avec SSO",
+    "orDivider": "ou",
+    "ssoError": "La connexion SSO a échoué. Veuillez réessayer."
   },
   "install": {
     "title": "Installer Oikos",

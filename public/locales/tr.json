@@ -1146,7 +1146,10 @@
     "invalidCredentials": "Geçersiz kimlik bilgileri.",
     "showPassword": "Şifreyi göster",
     "hidePassword": "Şifreyi gizle",
-    "version": "v{{version}}"
+    "version": "v{{version}}",
+    "loginWithSso": "SSO ile giriş yap",
+    "orDivider": "veya",
+    "ssoError": "SSO girişi başarısız oldu. Lütfen tekrar deneyin."
   },
   "install": {
     "title": "Oikos'u Yükle",

@@ -1146,7 +1146,10 @@
     "invalidCredentials": "Λανθασμένα στοιχεία σύνδεσης.",
     "showPassword": "Εμφάνιση κωδικού",
     "hidePassword": "Απόκρυψη κωδικού",
-    "version": "v{{version}}"
+    "version": "v{{version}}",
+    "loginWithSso": "Σύνδεση με SSO",
+    "orDivider": "ή",
+    "ssoError": "Η σύνδεση SSO απέτυχε. Παρακαλώ δοκιμάστε ξανά."
   },
   "install": {
     "title": "Εγκατάσταση Oikos",
