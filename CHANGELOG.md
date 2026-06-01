@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.55.15] - 2026-06-01
+
+### Fixed
+- Failed login attempts are now logged as warnings with IP address, username, and failure reason (`user_not_found` or `invalid_password`), enabling fail2ban/CrowdSec integration.
+
 ## [0.55.14] - 2026-06-01
 
 ### Added

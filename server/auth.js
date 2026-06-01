@@ -474,11 +474,13 @@ router.post('/login', loginLimiter, async (req, res) => {
     if (!user) {
       // Timing-Attack-Schutz: trotzdem bcrypt ausführen
       await bcrypt.compare(password, '$2b$12$invalidhashfortimingprotection000000000000000000000');
+      log.warn('Login failed', { ip: req.ip, username, reason: 'user_not_found' });
       return res.status(401).json({ error: 'Invalid credentials.', code: 401 });
     }
 
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
+      log.warn('Login failed', { ip: req.ip, username, reason: 'invalid_password' });
       return res.status(401).json({ error: 'Invalid credentials.', code: 401 });
     }
 
