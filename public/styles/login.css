@@ -4,6 +4,15 @@
  * Abhängigkeiten: tokens.css, reset.css, layout.css
  */
 
+/* Die Login-Seite wird direkt in #app.app-shell gerendert (keine Sidebar/App-Shell
+ * vor dem Login). Ab >=1024px schaltet .app-shell auf flex-direction: row für die
+ * Sidebar um – ohne Sidebar schrumpft der Seiten-Wrapper dann auf Inhaltsbreite und
+ * wird linksbündig (sieht aus wie das Mobil-Layout). Solange die Login-Seite präsent
+ * ist, bleibt die Shell daher im Spaltenfluss, damit das Formular voll zentriert. */
+.app-shell:has(.login-page) {
+  flex-direction: column;
+}
+
 .login-page {
   display: flex;
   flex-direction: column;
