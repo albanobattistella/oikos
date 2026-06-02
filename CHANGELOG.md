@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.55.17] - 2026-06-02
+
+### Changed
+- **Documentation synced with changelog v0.45.0–v0.55.16:** `SPEC.md` adds `oidc_sub`/`oidc_provider` columns to the Users table and documents the SSO login flow (Authorization Code + PKCE, nonce) and failed-login warning logging; `docs/installation.md` adds `TRUST_PROXY` to the Server section, `DATA_DIR`/`BACKUP_DIR` to the Database section, a new SSO/OIDC env-var section, a new Automated Backups env-var section, and a legacy note on the Apple CalDAV single-account variables; `README.md` adds SSO/OpenID Connect to the Design & Technology section; `docs/index.html` updates the version badge and footer to v0.55.16 and corrects the birthday feature description to mention customizable reminders; `docs/install.html` updates the Calendar Sync optional card to reflect multi-account CalDAV/CardDAV, adds an SSO/OIDC optional card, updates the Automated Backups card to describe the built-in scheduler, and keeps EN and DE i18n strings in sync.
+
 ## [0.55.16] - 2026-06-02
 
 ### Fixed
