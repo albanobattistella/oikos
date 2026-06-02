@@ -31,7 +31,7 @@
 
 <br>
 
-Oikos is a self-hosted web app that keeps your household organized — tasks, groceries, meals, calendar, budget, and more — in one private place, without cloud accounts or subscriptions. Runs as a Docker container on any home server or NAS. Accessible on every device with a polished mobile-first PWA interface.
+Oikos is a self-hosted web app that keeps your household organized — tasks, groceries, meals, calendar, budget, and more — in one private place, without cloud accounts or subscriptions. Runs as a Docker or Podman container on any home server or NAS — including rootless Podman on SELinux-enabled RHEL/Fedora/CentOS Stream. Accessible on every device with a polished mobile-first PWA interface.
 
 Each module is independent. Use what fits, skip what doesn't.
 
@@ -78,7 +78,7 @@ git clone https://github.com/ulsklyc/oikos.git && cd oikos
 node tools/installer/install-server.js
 ```
 
-Open **http://localhost:8090** in your browser. The localized wizard (16 languages) checks your Docker setup, configures your `.env` — including optional reverse proxy/HTTPS, SSO (OIDC), and automatic backups — starts Docker, and creates your admin account. Requires Node.js 18+ on the host.
+Open **http://localhost:8090** in your browser. The localized wizard (16 languages) detects your container engine (Docker or Podman), configures your `.env` — including optional reverse proxy/HTTPS, SSO (OIDC), and automatic backups — starts the container, and creates your admin account. Requires Node.js 18+ on the host.
 
 **Option B — Pre-built image (no clone required)**
 
@@ -101,7 +101,13 @@ docker compose exec oikos node setup.js
 
 Open `http://localhost:3000` and sign in with the admin credentials you created above.
 
-> **New to Docker?** The **[Installation Guide](docs/installation.md)** covers Docker setup, HTTPS, backups, and troubleshooting step by step.
+> **Using Podman (RHEL / Fedora / CentOS Stream)?** Both installers above auto-detect
+> Podman and use `podman-compose.yml` (SELinux `:Z` labels, configurable host bind).
+> For a manual start, replace `docker compose` with `podman compose -f podman-compose.yml`
+> (or `podman-compose -f podman-compose.yml`). For rootless systemd autostart, see the
+> Quadlet unit at `tools/quadlet/oikos.container`.
+
+> **New to Docker or Podman?** The **[Installation Guide](docs/installation.md)** covers engine setup, HTTPS, backups, and troubleshooting step by step.
 
 ---
 

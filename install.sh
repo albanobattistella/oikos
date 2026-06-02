@@ -27,16 +27,39 @@ generate_secret() {
 
 trap 'printf "\n%sInterrupted. Exiting.%s\n" "$YELLOW" "$RESET"; exit 1' INT TERM
 
+# ── Container engine detection (Docker preferred, Podman fallback) ──────────────
+# Sets the COMPOSE array used everywhere a compose command is run. Podman uses
+# the dedicated podman-compose.yml (SELinux :Z labels). Also sets ENGINE_BIN for
+# direct engine calls (e.g. inspect) and ENGINE_NAME for messages.
+COMPOSE=(); ENGINE_BIN=""; ENGINE_NAME=""
+detect_engine() {
+  if command -v docker &>/dev/null && docker compose version &>/dev/null 2>&1; then
+    COMPOSE=(docker compose); ENGINE_BIN=docker; ENGINE_NAME="Docker"; return 0
+  fi
+  if command -v podman &>/dev/null; then
+    if podman compose version &>/dev/null 2>&1; then
+      COMPOSE=(podman compose -f podman-compose.yml)
+    elif command -v podman-compose &>/dev/null; then
+      COMPOSE=(podman-compose -f podman-compose.yml)
+    else
+      return 1
+    fi
+    ENGINE_BIN=podman; ENGINE_NAME="Podman"; return 0
+  fi
+  return 1
+}
+
 # ── Prerequisites ──────────────────────────────────────────────────────────────
 check_prereqs() {
   step "Checking prerequisites"
   local ok=1
-  for cmd in docker curl; do
-    if command -v "$cmd" &>/dev/null; then success "$cmd found"
-    else warn "$cmd not found"; ok=0; fi
-  done
-  if docker compose version &>/dev/null 2>&1; then success "docker compose (v2) found"
-  else warn "docker compose v2 not found"; ok=0; fi
+  if ! command -v curl &>/dev/null; then warn "curl not found"; ok=0; else success "curl found"; fi
+  if detect_engine; then
+    success "$ENGINE_NAME with Compose found (${COMPOSE[*]})"
+  else
+    warn "No container engine found — need Docker (Compose v2) or Podman (podman compose / podman-compose)"
+    ok=0
+  fi
   [ $ok -eq 0 ] && err "Install missing prerequisites and re-run."
 }
 
@@ -143,9 +166,9 @@ review_and_confirm() {
   [ "${confirm,,}" = "n" ] && { info "Aborted."; exit 0; }
 }
 
-# ── Step 6: Docker ─────────────────────────────────────────────────────────────
+# ── Step 6: Container ───────────────────────────────────────────────────────────
 write_env_and_start() {
-  step "Step 6/7: Starting Docker Container"
+  step "Step 6/7: Starting Container ($ENGINE_NAME)"
 
   if [ -f .env ]; then
     backup=".env.bak-$(date +%Y-%m-%dT%H-%M-%S)"
@@ -176,9 +199,9 @@ ENVEOF
 
   success ".env written"
 
-  if ! docker compose up -d; then
-    warn "Docker failed to start. Recent logs:"
-    docker compose logs --tail 50
+  if ! "${COMPOSE[@]}" up -d; then
+    warn "$ENGINE_NAME failed to start. Recent logs:"
+    "${COMPOSE[@]}" logs --tail 50
     exit 1
   fi
 
@@ -196,7 +219,7 @@ ENVEOF
 
   printf "\n"
   warn "Timeout waiting for container. Logs:"
-  docker compose logs --tail 50
+  "${COMPOSE[@]}" logs --tail 50
   exit 1
 }
 
@@ -256,11 +279,14 @@ run_noninteractive() {
   info "Non-interactive mode: using $env_file"
   cp "$env_file" .env
 
+  detect_engine || err "No container engine found — need Docker (Compose v2) or Podman (podman compose / podman-compose)."
+  info "Using $ENGINE_NAME (${COMPOSE[*]})"
+
   OIKOS_PORT=$(grep -E '^PORT=' .env 2>/dev/null | cut -d= -f2- | head -n1)
   OIKOS_PORT="${OIKOS_PORT:-3000}"
   OIKOS_HOST="localhost"
 
-  if ! docker compose up -d; then docker compose logs --tail 50; exit 1; fi
+  if ! "${COMPOSE[@]}" up -d; then "${COMPOSE[@]}" logs --tail 50; exit 1; fi
 
   printf "  Waiting for container"
   local elapsed=0

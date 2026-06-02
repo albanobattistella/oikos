@@ -437,6 +437,7 @@
       <div class="hero-tags">
         <span class="tag">MIT License</span>
         <span class="tag">Docker</span>
+        <span class="tag">Podman</span>
         <span class="tag">PWA</span>
         <span class="tag">16 languages</span>
         <span class="tag" data-t="tag_nocloud">No Cloud Required</span>
@@ -511,7 +512,7 @@
         <div class="phil-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg></div>
         <div>
           <h3 data-t="p_self_t">Fully Self-Hosted</h3>
-          <p data-t="p_self_d">Runs on a Raspberry Pi, a NAS, or any server. Docker makes setup a one-liner.</p>
+          <p data-t="p_self_d">Runs on a Raspberry Pi, a NAS, or any server. Docker or Podman makes setup a one-liner.</p>
         </div>
       </div>
       <div class="phil-card reveal reveal-d2">
@@ -691,7 +692,11 @@ curl -O https://raw.githubusercontent.com/ulsklyc/oikos/main/.env.example
 cp .env.example .env
 <span class="c"># Set SESSION_SECRET and DB_ENCRYPTION_KEY in .env</span>
 <span class="h">docker compose up -d</span>
-<span class="h">docker compose exec oikos node setup.js</span></div>
+<span class="h">docker compose exec oikos node setup.js</span>
+
+<span class="c"># Podman (RHEL/Fedora/CentOS Stream): use podman-compose.yml instead</span>
+<span class="c"># curl -O .../main/podman-compose.yml</span>
+<span class="c"># podman compose -f podman-compose.yml up -d</span></div>
         <p class="setup-note" data-t="setup_note">Then open <code>http://localhost:3000</code> and log in. Need a step-by-step guide, HTTPS setup, or troubleshooting? See the <a href="https://github.com/ulsklyc/oikos/blob/main/docs/installation.md" target="_blank" rel="noopener">Installation Guide</a>.</p>
       </div>
       <a href="install.html" class="setup-guide-link" data-t="setup_guide_link">→ Step-by-step installation guide</a>
@@ -777,7 +782,7 @@ cp .env.example .env
       phil_label:'Philosophy', phil_title:'Built different, on purpose',
       phil_desc:'No subscriptions, no vendor lock-in, no data leaving your home.',
       p_priv_t:'Privacy First', p_priv_d:'AES-256 encrypted database with SQLCipher. Zero telemetry. Your data never leaves your server.',
-      p_self_t:'Fully Self-Hosted', p_self_d:'Runs on a Raspberry Pi, a NAS, or any server. Docker makes setup a one-liner.',
+      p_self_t:'Fully Self-Hosted', p_self_d:'Runs on a Raspberry Pi, a NAS, or any server. Docker or Podman makes setup a one-liner.',
       p_build_t:'Zero Build Step', p_build_d:'Pure ES modules, vanilla JS, plain CSS. No bundler, no transpiler, no framework. Ships what you write.',
       p_open_t:'Open Source', p_open_d:'MIT licensed. Inspect, modify, extend, contribute. Built in the open for families who care about transparency.',
       setup_label:'Setup', setup_title:'Up and running in minutes',
@@ -827,7 +832,7 @@ cp .env.example .env
       phil_label:'Philosophie', phil_title:'Bewusst anders gebaut',
       phil_desc:'Keine Abos, kein Vendor-Lock-in, keine Daten, die euer Zuhause verlassen.',
       p_priv_t:'Datenschutz zuerst', p_priv_d:'AES-256-verschlüsselte Datenbank mit SQLCipher. Keine Telemetrie. Eure Daten verlassen nie euren Server.',
-      p_self_t:'Vollständig selbstgehostet', p_self_d:'Läuft auf einem Raspberry Pi, NAS oder jedem Server. Docker macht das Setup zum Einzeiler.',
+      p_self_t:'Vollständig selbstgehostet', p_self_d:'Läuft auf einem Raspberry Pi, NAS oder jedem Server. Docker oder Podman macht das Setup zum Einzeiler.',
       p_build_t:'Kein Build-Schritt', p_build_d:'Pure ES-Module, Vanilla JS, reines CSS. Kein Bundler, kein Transpiler, kein Framework.',
       p_open_t:'Open Source', p_open_d:'MIT-lizenziert. Einsehen, anpassen, erweitern, beitragen. Offen gebaut für Familien, die Transparenz schätzen.',
       setup_label:'Setup', setup_title:'In Minuten einsatzbereit',

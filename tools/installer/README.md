@@ -1,7 +1,8 @@
 # Oikos Web Installer
 
 A browser-based setup wizard for Oikos. Run it once to configure your `.env`,
-start Docker, and create your admin account — no hand-editing of config files.
+start your container engine, and create your admin account — no hand-editing of
+config files. Works with both Docker and Podman (auto-detected).
 
 ## Usage
 
@@ -18,16 +19,19 @@ The server shuts down automatically after setup completes (or after 30 minutes o
 ## Requirements
 
 - Node.js 18+ (the installer itself has zero npm dependencies — Node built-ins only)
-- Docker with Compose v2
+- A container engine — either **Docker** with Compose v2, or **Podman** with the
+  `podman compose` subcommand (4.1+) or the `podman-compose` package
 - The repository cloned locally
 
-The wizard verifies that `docker` and `docker compose` v2 are available before it
-starts, and surfaces container start/spawn errors in the UI instead of failing silently.
+The wizard auto-detects the engine (Docker preferred, Podman fallback) and verifies
+that it plus its compose command are available before it starts, surfacing container
+start/spawn errors in the UI instead of failing silently. With Podman it uses the
+dedicated `podman-compose.yml` (SELinux `:Z` labels).
 
 ## What it does
 
-1. Checks Docker prerequisites and reports any existing `.env` file or running
-   `oikos` container before you start
+1. Detects the container engine (Docker or Podman), checks its prerequisites, and
+   reports any existing `.env` file or running `oikos` container before you start
 2. Guides you through all configuration options, grouped into steps:
    - **Basics** — timezone (`TZ`) and HTTP host port (`OIKOS_HTTP_PORT`)
    - **Security keys** — generates `SESSION_SECRET` and `DB_ENCRYPTION_KEY`
@@ -37,7 +41,8 @@ starts, and surfaces container start/spawn errors in the UI instead of failing s
 3. Backs up any existing `.env` to `.env.bak-<ISO>` before writing
 4. Writes `.env` to the project root (keys are allowlisted against the shared
    env schema; values containing line breaks are rejected)
-5. Starts the Docker container (`docker compose up -d`)
+5. Starts the container (`docker compose up -d`, or `podman compose -f
+   podman-compose.yml up -d` / `podman-compose -f podman-compose.yml up -d`)
 6. Polls the health endpoint until the container is ready
 7. Creates your first admin account via `POST /api/v1/auth/setup`
 

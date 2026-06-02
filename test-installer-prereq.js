@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   commandAvailable, checkPrereqs, spawnStart, createInstallerServer,
+  detectEngine, composeCommand, inspectCommand,
 } from './tools/installer/install-server.js';
 
 const REPO_ROOT = fileURLToPath(new URL('.', import.meta.url));
@@ -45,6 +46,109 @@ test('spawnStart meldet ok:false bei Spawn-Fehler (unbekanntes Kommando)', async
 test('spawnStart meldet ok:true, wenn der Prozess erfolgreich startet', async () => {
   const r = await spawnStart('node', ['-e', '']);
   assert.equal(r.ok, true);
+});
+
+// ── detectEngine (Docker bevorzugt, Podman-Fallback) ───────────────────────────
+
+// Baut einen injizierbaren check(cmd, args), der nur für die in `present`
+// gelisteten "cmd args"-Kombinationen true liefert.
+function checkFor(present) {
+  const set = new Set(present);
+  return async (cmd, args = []) => set.has([cmd, ...args].join(' '));
+}
+
+test('detectEngine wählt docker, wenn docker + compose v2 vorhanden sind', async () => {
+  const e = await detectEngine(checkFor(['docker --version', 'docker compose version']));
+  assert.equal(e.engine, 'docker');
+  assert.equal(e.composeBin, 'docker');
+  assert.deepEqual(e.compose, ['compose']);
+  assert.deepEqual(e.missing, []);
+});
+
+test('detectEngine fällt auf "podman compose" zurück, wenn docker fehlt', async () => {
+  const e = await detectEngine(checkFor(['podman --version', 'podman compose version']));
+  assert.equal(e.engine, 'podman');
+  assert.equal(e.composeBin, 'podman');
+  assert.deepEqual(e.compose, ['compose', '-f', 'podman-compose.yml']);
+  assert.deepEqual(e.missing, []);
+});
+
+test('detectEngine nutzt podman-compose, wenn "podman compose" fehlt', async () => {
+  const e = await detectEngine(checkFor(['podman --version', 'podman-compose --version']));
+  assert.equal(e.engine, 'podman');
+  assert.equal(e.composeBin, 'podman-compose');
+  assert.deepEqual(e.compose, ['-f', 'podman-compose.yml']);
+  assert.deepEqual(e.missing, []);
+});
+
+test('detectEngine meldet engine:null, wenn weder docker noch podman da sind', async () => {
+  const e = await detectEngine(async () => false);
+  assert.equal(e.engine, null);
+  assert.ok(e.missing.includes('docker'));
+  assert.ok(e.missing.includes('podman'));
+});
+
+test('detectEngine meldet fehlendes compose, wenn nur podman (ohne compose) da ist', async () => {
+  const e = await detectEngine(checkFor(['podman --version']));
+  assert.equal(e.engine, null);
+  assert.ok(e.missing.some(m => /compose/.test(m)), 'missing nennt kein fehlendes compose');
+});
+
+// ── composeCommand / inspectCommand (Engine-aware Spawn-Argumente) ──────────────
+
+test('composeCommand baut den richtigen Befehl je Engine', async () => {
+  const docker = await detectEngine(checkFor(['docker --version', 'docker compose version']));
+  assert.deepEqual(composeCommand(docker, ['up', '-d']),
+    { cmd: 'docker', args: ['compose', 'up', '-d'] });
+
+  const podman = await detectEngine(checkFor(['podman --version', 'podman compose version']));
+  assert.deepEqual(composeCommand(podman, ['up', '-d']),
+    { cmd: 'podman', args: ['compose', '-f', 'podman-compose.yml', 'up', '-d'] });
+
+  const pc = await detectEngine(checkFor(['podman --version', 'podman-compose --version']));
+  assert.deepEqual(composeCommand(pc, ['logs', '--tail', '30']),
+    { cmd: 'podman-compose', args: ['-f', 'podman-compose.yml', 'logs', '--tail', '30'] });
+});
+
+test('inspectCommand nutzt das passende Binary (podman auch bei podman-compose)', async () => {
+  const pc = await detectEngine(checkFor(['podman --version', 'podman-compose --version']));
+  assert.deepEqual(inspectCommand(pc, ['inspect', 'oikos']),
+    { cmd: 'podman', args: ['inspect', 'oikos'] });
+
+  const docker = await detectEngine(checkFor(['docker --version', 'docker compose version']));
+  assert.deepEqual(inspectCommand(docker, ['inspect', 'oikos']),
+    { cmd: 'docker', args: ['inspect', 'oikos'] });
+});
+
+// ── checkPrereqs liefert den Engine-Deskriptor mit ─────────────────────────────
+
+test('checkPrereqs gibt engine-Deskriptor zurück (podman-Fallback)', async () => {
+  const r = await checkPrereqs(checkFor(['podman --version', 'podman compose version']));
+  assert.equal(r.ok, true);
+  assert.equal(r.engine.engine, 'podman');
+});
+
+// ── Statische Artefakte: podman-compose.yml, Quadlet, install.sh ────────────────
+
+test('podman-compose.yml trägt :Z-Labels, OIKOS_HTTP_BIND und SESSION_SECURE-Default', () => {
+  const src = readFileSync(new URL('./podman-compose.yml', import.meta.url), 'utf8');
+  assert.match(src, /\/data:Z/, 'kein :Z-Label auf dem /data-Mount');
+  assert.match(src, /\$\{OIKOS_HTTP_BIND:-0\.0\.0\.0\}/, 'kein konfigurierbares Host-Binding');
+  assert.match(src, /SESSION_SECURE=\$\{SESSION_SECURE:-false\}/, 'kein SESSION_SECURE-Default');
+});
+
+test('Quadlet-Unit existiert mit :Z-Volume und EnvironmentFile', () => {
+  const src = readFileSync(new URL('./tools/quadlet/oikos.container', import.meta.url), 'utf8');
+  assert.match(src, /\[Container\]/, 'keine [Container]-Sektion');
+  assert.match(src, /EnvironmentFile=/, 'kein EnvironmentFile');
+  assert.match(src, /:Z\b/, 'kein :Z-SELinux-Label');
+  assert.match(src, /WantedBy=default\.target/, 'kein [Install]-Autostart-Target');
+});
+
+test('install.sh enthält den Podman-Fallback', () => {
+  const src = readFileSync(new URL('./install.sh', import.meta.url), 'utf8');
+  assert.match(src, /podman compose/, 'install.sh kennt "podman compose" nicht');
+  assert.match(src, /podman-compose/, 'install.sh kennt "podman-compose" nicht');
 });
 
 // ── HTTP-Route /api/prereqs ────────────────────────────────────────────────────

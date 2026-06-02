@@ -83,6 +83,8 @@ Oikos scans `modules/` and validates each `module.json`. Invalid modules are sho
 
 Admins can enable, disable, and order modules in Settings -> General -> Active modules. Copying a new folder into `modules/` makes it appear there automatically.
 
-## Docker
+## Docker / Podman
 
 The default `docker-compose.yml` mounts `${MODULES_DIR:-./modules}` to `/app/modules`. To keep modules outside the Oikos checkout, set `MODULES_DIR=/absolute/path/to/oikos-modules` in `.env` and restart the compose service. New or changed module folders are scanned at runtime; rebuilding the image is not required.
+
+On Podman (RHEL/Fedora/CentOS Stream) use `podman-compose.yml` instead — it mounts the same `/app/modules` path with the SELinux `:Z` relabel so the rootless container can read your modules.

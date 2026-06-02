@@ -10,7 +10,7 @@ node tools/installer/install-server.js
 # Open http://localhost:8090
 ```
 
-Requires Node.js 18+ on the host. The browser-based wizard is fully localized (16 languages, auto-detected from your browser), checks Docker prerequisites first, then configures your `.env` — including optional reverse-proxy/HTTPS, Single Sign-On (OIDC), and automatic backups — starts Docker, and creates your admin account. Docker still runs the app itself.
+Requires Node.js 18+ on the host. The browser-based wizard is fully localized (16 languages, auto-detected from your browser), detects your container engine (Docker or Podman) first, then configures your `.env` — including optional reverse-proxy/HTTPS, Single Sign-On (OIDC), and automatic backups — starts the container, and creates your admin account. The engine still runs the app itself.
 
 ### Option B — CLI Installer (Linux / macOS)
 
@@ -19,7 +19,7 @@ git clone https://github.com/ulsklyc/oikos.git && cd oikos
 bash install.sh
 ```
 
-The script checks prerequisites, generates security keys, configures optional integrations, starts Docker, and creates your admin account.
+The script checks prerequisites, generates security keys, configures optional integrations, starts the container (Docker or Podman — auto-detected), and creates your admin account.
 
 Non-interactive mode (CI/provisioning — provide your own `.env`):
 
@@ -27,7 +27,7 @@ Non-interactive mode (CI/provisioning — provide your own `.env`):
 bash install.sh --env-file /path/to/.env
 ```
 
-### Option C — Manual (Docker only, no clone required)
+### Option C — Manual (Docker or Podman, no clone required)
 
 ```bash
 curl -O https://raw.githubusercontent.com/ulsklyc/oikos/main/docker-compose.yml
@@ -35,6 +35,17 @@ curl -O https://raw.githubusercontent.com/ulsklyc/oikos/main/.env.example
 cp .env.example .env  # set SESSION_SECRET and DB_ENCRYPTION_KEY
 docker compose up -d
 docker compose exec oikos node setup.js
+```
+
+**Podman (RHEL / Fedora / CentOS Stream):** grab `podman-compose.yml` instead — it
+adds the SELinux `:Z` relabel so the rootless container can write to its volumes:
+
+```bash
+curl -O https://raw.githubusercontent.com/ulsklyc/oikos/main/podman-compose.yml
+curl -O https://raw.githubusercontent.com/ulsklyc/oikos/main/.env.example
+cp .env.example .env  # set SESSION_SECRET and DB_ENCRYPTION_KEY
+podman compose -f podman-compose.yml up -d   # or: podman-compose -f podman-compose.yml up -d
+podman compose -f podman-compose.yml exec oikos node setup.js
 ```
 
 ---
@@ -91,6 +102,22 @@ docker --version           # Docker version 27.x.x or later
 docker compose version     # Docker Compose version v2.x.x
 ```
 
+### Podman (alternative to Docker, RHEL / Fedora / CentOS Stream)
+
+RHEL-based distributions ship **Podman** (often rootless) and **SELinux** instead of
+Docker. Oikos supports Podman out of the box: both installers auto-detect it, and a
+dedicated `podman-compose.yml` adds the SELinux `:Z` volume relabel. Install Podman and
+either the `podman compose` subcommand (Podman 4.1+) or the `podman-compose` package:
+
+```bash
+sudo dnf install -y podman podman-compose   # Fedora / RHEL 9+ / CentOS Stream
+podman --version              # podman version 4.x / 5.x
+podman compose version        # or: podman-compose --version
+```
+
+No extra SELinux configuration is required — the `:Z` labels in `podman-compose.yml`
+(and the Quadlet unit) relabel the bind mounts for the container automatically.
+
 ### Git
 
 You need Git to clone the repository and pull updates later.
@@ -133,14 +160,14 @@ node tools/installer/install-server.js
 
 #### 3. Open the Wizard
 
-Open your browser and navigate to **http://localhost:8090**. The wizard detects your browser language (16 languages supported), verifies that Docker and Docker Compose v2 are available, and reports any existing `.env` file or running container before you start. It then guides you through:
+Open your browser and navigate to **http://localhost:8090**. The wizard detects your browser language (16 languages supported), verifies that a container engine is available (Docker with Compose v2, or Podman with `podman compose` / `podman-compose`), and reports any existing `.env` file or running container before you start. It then guides you through:
 
 - Basics — timezone (`TZ`) and HTTP host port (`OIKOS_HTTP_PORT`)
 - Security key generation (`SESSION_SECRET`, `DB_ENCRYPTION_KEY`)
 - Optional integrations (weather, Google Calendar, Apple CalDAV)
 - Advanced settings — reverse-proxy/HTTPS (`SESSION_SECURE`, `TRUST_PROXY`), Single Sign-On (OIDC), and automatic backups
 - Writing your `.env` file (an existing `.env` is backed up to `.env.bak-<timestamp>` first)
-- Starting the Docker container
+- Starting the container (via Docker or Podman, whichever was detected)
 - Creating your admin account
 
 The installer server shuts down automatically after setup completes (or after 30 minutes of inactivity).
@@ -271,7 +298,8 @@ All configuration happens in the `.env` file. The container reads these values o
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | `PORT` | Port the Express server listens on **inside the container** (rarely changed) | `3000` | No |
-| `OIKOS_HTTP_PORT` | Host port that `docker-compose.yml` maps to the container's port 3000. Change this to expose Oikos on a different host port; the app inside the container always listens on 3000. | `3000` | No |
+| `OIKOS_HTTP_PORT` | Host port that the compose file maps to the container's port 3000. Change this to expose Oikos on a different host port; the app inside the container always listens on 3000. | `3000` | No |
+| `OIKOS_HTTP_BIND` | Host bind address for the published port (`podman-compose.yml` only). Set to `127.0.0.1` for rootless Podman behind a reverse proxy on the same host. | `0.0.0.0` | No |
 | `TZ` | Container timezone (e.g. `Europe/Berlin`). Affects timestamps and the automated-backup schedule. | `UTC` | No |
 | `NODE_ENV` | Runtime environment | `production` | No |
 | `TRUST_PROXY` | Number of reverse-proxy hops to trust, or a subnet string (e.g. `1`, `172.16.0.0/12`, `loopback`). Set to `1` when running behind a single Traefik/Nginx hop so `req.ip` returns the real client IP. Numeric values are treated as a hop count; subnet strings and named values (`loopback`, `linklocal`, `uniquelocal`) work as expected. | `false` | No |
@@ -440,6 +468,36 @@ docker compose up -d
 
 ---
 
+## Podman & systemd Autostart (rootless)
+
+On RHEL-based systems you can run Oikos as a rootless systemd service via Podman
+[Quadlet](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html). Oikos
+ships a ready-made unit at `tools/quadlet/oikos.container`.
+
+```bash
+# 1. Create the data folders and drop your generated .env in place
+mkdir -p ~/.local/share/oikos/{data,backups,modules} ~/.config/oikos
+cp /path/to/oikos/.env ~/.config/oikos/.env
+
+# 2. Install the Quadlet unit
+mkdir -p ~/.config/containers/systemd
+cp tools/quadlet/oikos.container ~/.config/containers/systemd/
+
+# 3. Generate and start the service
+systemctl --user daemon-reload
+systemctl --user start oikos
+
+# 4. Keep it running across reboots (even without an active login session)
+loginctl enable-linger "$USER"
+```
+
+The unit publishes port 3000, applies the SELinux `:Z` relabel to its volumes, runs the
+same healthcheck as Compose, and restarts automatically. Edit the `PublishPort` /
+`Volume` paths in the file to taste; for a system-wide (rootful) service, place the unit
+in `/etc/containers/systemd/` and use `systemctl` without `--user`.
+
+---
+
 ## Updates
 
 ### Option B — Pre-built Image
@@ -578,6 +636,25 @@ sudo usermod -aG docker $USER
 ```
 
 Log out and back in (or reboot) for the group change to take effect.
+
+</details>
+
+<details>
+<summary>Permission denied on volumes (Podman / SELinux)</summary>
+
+If the container logs show `EACCES` / permission errors writing to `/data` or `/backups`
+on an SELinux system, you started it without the `:Z` relabel. Use `podman-compose.yml`
+(which carries `:Z` on every bind mount) instead of `docker-compose.yml`:
+
+```bash
+podman compose -f podman-compose.yml up -d
+```
+
+To relabel existing host folders manually:
+
+```bash
+chcon -Rt container_file_t ./data ./backups ./modules
+```
 
 </details>
 

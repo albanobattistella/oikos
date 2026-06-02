@@ -496,7 +496,7 @@
         <span data-t="hero_eyebrow">Installation</span>
       </p>
       <h1 class="reveal" data-t="hero_title">Install Oikos</h1>
-      <p class="hero-desc reveal" data-t="hero_desc">Get your self-hosted family planner running in a few minutes. No programming experience required — just Docker.</p>
+      <p class="hero-desc reveal" data-t="hero_desc">Get your self-hosted family planner running in a few minutes. No programming experience required — just Docker or Podman.</p>
       <div class="reveal">
         <span class="time-badge">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -511,16 +511,17 @@
     <div class="container">
       <p class="section-label reveal" data-t="prereq_label">Before you start</p>
       <h2 class="section-title reveal" data-t="prereq_title">What you need</h2>
-      <p class="section-desc reveal" data-t="prereq_desc">Oikos runs as a Docker container — you don't need to install Node.js or any other runtime. Just Docker, and you're good to go.</p>
+      <p class="section-desc reveal" data-t="prereq_desc">Oikos runs as a Docker or Podman container — you don't need to install Node.js or any other runtime. Just a container engine, and you're good to go.</p>
       <div class="prereq-grid">
         <div class="prereq-card reveal">
           <div class="prereq-icon" aria-hidden="true">🐳</div>
-          <h3>Docker</h3>
-          <p data-t="prereq_docker_desc">Packages the app so you don't need to install anything else. Free for personal use.</p>
+          <h3>Docker or Podman</h3>
+          <p data-t="prereq_docker_desc">Packages the app so you don't need to install anything else. Free for personal use. Podman (RHEL/Fedora/CentOS Stream) works too — rootless and SELinux-ready.</p>
           <div class="prereq-links">
             <a href="https://docs.docker.com/desktop/install/mac-install/" target="_blank" rel="noopener" class="prereq-link">macOS</a>
             <a href="https://docs.docker.com/desktop/install/windows-install/" target="_blank" rel="noopener" class="prereq-link">Windows</a>
             <a href="https://docs.docker.com/engine/install/" target="_blank" rel="noopener" class="prereq-link">Linux</a>
+            <a href="https://podman.io/docs/installation" target="_blank" rel="noopener" class="prereq-link">Podman</a>
           </div>
         </div>
         <div class="prereq-card reveal reveal-delay-1">
@@ -565,7 +566,7 @@
       <div class="tab-panel active" id="panel-installer" role="tabpanel" aria-labelledby="tab-installer">
         <div class="callout callout-success reveal">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-          <span data-t="option_installer_info">Recommended for most users. A localized browser wizard (16 languages) checks your Docker setup, then configures your .env — including optional reverse proxy/HTTPS, Single Sign-On (OIDC), and automatic backups — starts Docker, and creates your admin account. No manual steps. Requires Node.js 18+ on the host.</span>
+          <span data-t="option_installer_info">Recommended for most users. A localized browser wizard (16 languages) detects your container engine (Docker or Podman), then configures your .env — including optional reverse proxy/HTTPS, Single Sign-On (OIDC), and automatic backups — starts the container, and creates your admin account. No manual steps. Requires Node.js 18+ on the host.</span>
         </div>
 
         <div class="step reveal">
@@ -603,7 +604,7 @@ cd oikos</div>
           <div class="step-num" aria-hidden="true">3</div>
           <div class="step-content">
             <h3 class="step-title" data-t="step_inst3_title">Open the wizard in your browser</h3>
-            <p class="step-desc" data-t="step_inst3_desc">Navigate to the following address. The wizard will guide you through configuration, Docker startup, and admin account creation.</p>
+            <p class="step-desc" data-t="step_inst3_desc">Navigate to the following address. The wizard will guide you through configuration, container startup, and admin account creation.</p>
             <div class="code-wrap">
               <div class="code-block" role="region" aria-label="Installer URL"><span class="val">http://localhost:8090</span></div>
               <button class="copy-btn" data-copy="http://localhost:8090" aria-label="Copy URL">
@@ -613,7 +614,7 @@ cd oikos</div>
             </div>
             <div class="callout callout-info">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <span data-t="step_inst3_info">The installer shuts down automatically after setup completes. Your Oikos instance keeps running via Docker.</span>
+              <span data-t="step_inst3_info">The installer shuts down automatically after setup completes. Your Oikos instance keeps running via Docker or Podman.</span>
             </div>
           </div>
         </div>
@@ -623,7 +624,7 @@ cd oikos</div>
       <div class="tab-panel" id="panel-a" role="tabpanel" aria-labelledby="tab-a">
         <div class="callout callout-info reveal">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span data-t="option_a_info">No Git, no build step — just two files and a single command. Requires only Docker.</span>
+          <span data-t="option_a_info">No Git, no build step — just two files and a single command. Requires only Docker or Podman (Podman: use podman-compose.yml).</span>
         </div>
 
         <div class="step reveal">
@@ -953,12 +954,12 @@ docker compose logs | grep "Server läuft"</div>
         en: {
           hero_eyebrow: 'Installation',
           hero_title: 'Install Oikos',
-          hero_desc: 'Get your self-hosted family planner running in a few minutes. No programming experience required \u2014 just Docker.',
+          hero_desc: 'Get your self-hosted family planner running in a few minutes. No programming experience required \u2014 just Docker or Podman.',
           hero_time: '~10 minutes',
           prereq_label: 'Before you start',
           prereq_title: 'What you need',
-          prereq_desc: 'Oikos runs as a Docker container \u2014 you don\u2019t need to install Node.js or any other runtime. Just Docker, and you\u2019re good to go.',
-          prereq_docker_desc: 'Packages the app so you don\u2019t need to install anything else. Free for personal use.',
+          prereq_desc: 'Oikos runs as a Docker or Podman container \u2014 you don\u2019t need to install Node.js or any other runtime. Just a container engine, and you\u2019re good to go.',
+          prereq_docker_desc: 'Packages the app so you don\u2019t need to install anything else. Free for personal use. Podman (RHEL/Fedora/CentOS Stream) works too \u2014 rootless and SELinux-ready.',
           prereq_terminal_title: 'Terminal',
           prereq_terminal_desc: 'A command-line interface to type a few commands. Built into every OS \u2014 no extra install needed.',
           prereq_terminal_hint: 'macOS: Terminal \u00b7 Windows: PowerShell \u00b7 Linux: bash',
@@ -970,16 +971,16 @@ docker compose logs | grep "Server läuft"</div>
           tab_installer: 'Option A \u2014 Web Installer',
           tab_a: 'Option B \u2014 Pre-built Image',
           tab_b: 'Option C \u2014 Build from Source',
-          option_installer_info: 'Recommended for most users. A localized browser wizard (16 languages) checks your Docker setup, then configures your .env \u2014 including optional reverse proxy/HTTPS, Single Sign-On (OIDC), and automatic backups \u2014 starts Docker, and creates your admin account. No manual steps. Requires Node.js 18+ on the host.',
-          option_a_info: 'No Git, no build step \u2014 just two files and a single command. Requires only Docker.',
+          option_installer_info: 'Recommended for most users. A localized browser wizard (16 languages) detects your container engine (Docker or Podman), then configures your .env \u2014 including optional reverse proxy/HTTPS, Single Sign-On (OIDC), and automatic backups \u2014 starts the container, and creates your admin account. No manual steps. Requires Node.js 18+ on the host.',
+          option_a_info: 'No Git, no build step \u2014 just two files and a single command. Requires only Docker or Podman (Podman: use podman-compose.yml).',
           option_b_info: 'For contributors or those who want to run a custom version. Requires Git. The first build takes a few minutes.',
           step_inst1_title: 'Clone the repository',
           step_inst1_desc: 'Open your terminal and clone Oikos to a folder of your choice.',
           step_inst2_title: 'Start the installer',
           step_inst2_desc: 'Run this command from the repository root. The installer server starts on port 8090.',
           step_inst3_title: 'Open the wizard in your browser',
-          step_inst3_desc: 'Navigate to the following address. The wizard will guide you through configuration, Docker startup, and admin account creation.',
-          step_inst3_info: 'The installer shuts down automatically after setup completes. Your Oikos instance keeps running via Docker.',
+          step_inst3_desc: 'Navigate to the following address. The wizard will guide you through configuration, container startup, and admin account creation.',
+          step_inst3_info: 'The installer shuts down automatically after setup completes. Your Oikos instance keeps running via Docker or Podman.',
           step_a1_title: 'Download the configuration files',
           step_a1_desc: 'Open your terminal and run these two commands. They download the Docker configuration and the template for your settings.',
           step_a2_title: 'Create your configuration',
@@ -1049,12 +1050,12 @@ docker compose logs | grep "Server läuft"</div>
         de: {
           hero_eyebrow: 'Installation',
           hero_title: 'Oikos installieren',
-          hero_desc: 'Euren selbstgehosteten Familienplaner in wenigen Minuten zum Laufen bringen. Keine Programmierkenntnisse n\u00f6tig \u2014 nur Docker.',
+          hero_desc: 'Euren selbstgehosteten Familienplaner in wenigen Minuten zum Laufen bringen. Keine Programmierkenntnisse n\u00f6tig \u2014 nur Docker oder Podman.',
           hero_time: '~10 Minuten',
           prereq_label: 'Voraussetzungen',
           prereq_title: 'Was ihr braucht',
-          prereq_desc: 'Oikos l\u00e4uft als Docker-Container \u2014 Node.js oder andere Laufzeitumgebungen m\u00fcsst ihr nicht installieren. Nur Docker, und ihr seid startklar.',
-          prereq_docker_desc: 'Verpackt die App, sodass ihr nichts weiter installieren m\u00fcsst. F\u00fcr den privaten Gebrauch kostenlos.',
+          prereq_desc: 'Oikos l\u00e4uft als Docker- oder Podman-Container \u2014 Node.js oder andere Laufzeitumgebungen m\u00fcsst ihr nicht installieren. Nur eine Container-Engine, und ihr seid startklar.',
+          prereq_docker_desc: 'Verpackt die App, sodass ihr nichts weiter installieren m\u00fcsst. F\u00fcr den privaten Gebrauch kostenlos. Podman (RHEL/Fedora/CentOS Stream) funktioniert ebenfalls \u2014 rootless und SELinux-f\u00e4hig.',
           prereq_terminal_title: 'Terminal',
           prereq_terminal_desc: 'Eine Befehlszeile, um ein paar Befehle einzugeben. In jedem Betriebssystem eingebaut \u2014 kein Extra-Install n\u00f6tig.',
           prereq_terminal_hint: 'macOS: Terminal \u00b7 Windows: PowerShell \u00b7 Linux: bash',
@@ -1066,16 +1067,16 @@ docker compose logs | grep "Server läuft"</div>
           tab_installer: 'Option A \u2014 Web-Installer',
           tab_a: 'Option B \u2014 Fertiges Image',
           tab_b: 'Option C \u2014 Aus Quellcode bauen',
-          option_installer_info: 'Empfohlen f\u00fcr die meisten Nutzer. Ein lokalisierter Browser-Assistent (16 Sprachen) pr\u00fcft eure Docker-Installation und konfiguriert dann eure .env \u2014 inklusive optionalem Reverse-Proxy/HTTPS, Single Sign-On (OIDC) und automatischen Backups \u2014 startet Docker und erstellt euer Admin-Konto. Ganz ohne manuelle Schritte. Erfordert Node.js 18+ auf dem Host.',
-          option_a_info: 'Kein Git, kein Build-Schritt \u2014 nur zwei Dateien und ein einziger Befehl. Nur Docker erforderlich.',
+          option_installer_info: 'Empfohlen f\u00fcr die meisten Nutzer. Ein lokalisierter Browser-Assistent (16 Sprachen) erkennt eure Container-Engine (Docker oder Podman) und konfiguriert dann eure .env \u2014 inklusive optionalem Reverse-Proxy/HTTPS, Single Sign-On (OIDC) und automatischen Backups \u2014 startet den Container und erstellt euer Admin-Konto. Ganz ohne manuelle Schritte. Erfordert Node.js 18+ auf dem Host.',
+          option_a_info: 'Kein Git, kein Build-Schritt \u2014 nur zwei Dateien und ein einziger Befehl. Nur Docker oder Podman erforderlich (Podman: podman-compose.yml verwenden).',
           option_b_info: 'F\u00fcr Mitwirkende oder wer eine eigene Version ausf\u00fchren m\u00f6chte. Erfordert Git. Der erste Build dauert einige Minuten.',
           step_inst1_title: 'Repository klonen',
           step_inst1_desc: '\u00d6ffnet euer Terminal und klont Oikos in einen Ordner eurer Wahl.',
           step_inst2_title: 'Installer starten',
           step_inst2_desc: 'F\u00fchrt diesen Befehl vom Projektordner aus. Der Installer-Server startet auf Port 8090.',
           step_inst3_title: 'Assistenten im Browser \u00f6ffnen',
-          step_inst3_desc: 'Navigiert zur folgenden Adresse. Der Assistent f\u00fchrt euch durch Konfiguration, Docker-Start und Admin-Konto-Erstellung.',
-          step_inst3_info: 'Der Installer beendet sich automatisch nach Abschluss der Einrichtung. Eure Oikos-Instanz l\u00e4uft weiter \u00fcber Docker.',
+          step_inst3_desc: 'Navigiert zur folgenden Adresse. Der Assistent f\u00fchrt euch durch Konfiguration, Container-Start und Admin-Konto-Erstellung.',
+          step_inst3_info: 'Der Installer beendet sich automatisch nach Abschluss der Einrichtung. Eure Oikos-Instanz l\u00e4uft weiter \u00fcber Docker oder Podman.',
           step_a1_title: 'Konfigurationsdateien herunterladen',
           step_a1_desc: '\u00d6ffnet euer Terminal und f\u00fchrt diese zwei Befehle aus. Sie laden die Docker-Konfiguration und die Vorlage f\u00fcr eure Einstellungen herunter.',
           step_a2_title: 'Konfiguration erstellen',

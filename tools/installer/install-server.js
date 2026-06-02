@@ -83,17 +83,68 @@ export function commandAvailable(cmd, args = ['--version']) {
 }
 
 /**
- * Verify the installer's prerequisites (docker + docker compose v2).
+ * Detect the available container engine, preferring Docker and falling back to
+ * Podman (RHEL/Fedora/CentOS Stream). `check` is injectable for deterministic
+ * tests. Returns a descriptor:
+ *   { engine: 'docker'|'podman'|null,
+ *     composeBin: 'docker'|'podman'|'podman-compose'|null,
+ *     compose: string[]|null,   // leading args before the compose subcommand
+ *     missing: string[] }       // human-readable list of absent prerequisites
+ *
+ * Podman uses the dedicated `podman-compose.yml` (SELinux `:Z` labels), so its
+ * compose args carry `-f podman-compose.yml`. Docker keeps the default file.
+ */
+export async function detectEngine(check = commandAvailable) {
+  if (await check('docker', ['--version']) && await check('docker', ['compose', 'version'])) {
+    return { engine: 'docker', composeBin: 'docker', compose: ['compose'], missing: [] };
+  }
+  if (await check('podman', ['--version'])) {
+    if (await check('podman', ['compose', 'version'])) {
+      return { engine: 'podman', composeBin: 'podman', compose: ['compose', '-f', 'podman-compose.yml'], missing: [] };
+    }
+    if (await check('podman-compose', ['--version'])) {
+      return { engine: 'podman', composeBin: 'podman-compose', compose: ['-f', 'podman-compose.yml'], missing: [] };
+    }
+    return { engine: null, composeBin: null, compose: null, missing: ['podman compose (oder podman-compose)'] };
+  }
+  return { engine: null, composeBin: null, compose: null, missing: ['docker', 'podman'] };
+}
+
+/**
+ * Build a compose invocation for the detected engine.
+ * docker: `docker compose <sub>`; podman: `podman compose -f podman-compose.yml
+ * <sub>`; podman-compose: `podman-compose -f podman-compose.yml <sub>`.
+ */
+export function composeCommand(engine, subArgs = []) {
+  return { cmd: engine.composeBin, args: [...(engine.compose || []), ...subArgs] };
+}
+
+/**
+ * Build an inspect invocation. Uses the engine binary directly (`podman` even
+ * when compose runs via `podman-compose`), since `docker`/`podman inspect`
+ * share the same flags and Go templates.
+ */
+export function inspectCommand(engine, args = []) {
+  return { cmd: engine.engine === 'docker' ? 'docker' : 'podman', args };
+}
+
+/**
+ * Verify the installer's prerequisites (a usable container engine + compose).
  * `check` is injectable so the result is deterministically testable.
- * Returns { ok, missing } where missing lists the absent prerequisites.
+ * Returns { ok, missing, engine } where engine is the detectEngine descriptor.
  */
 export async function checkPrereqs(check = commandAvailable) {
-  const docker = await check('docker', ['--version']);
-  const compose = docker ? await check('docker', ['compose', 'version']) : false;
-  const missing = [];
-  if (!docker) missing.push('docker');
-  if (!compose) missing.push('docker compose');
-  return { ok: missing.length === 0, missing };
+  const engine = await detectEngine(check);
+  return { ok: engine.engine !== null, missing: engine.missing, engine };
+}
+
+// Memoized real-engine detection for the HTTP handlers (probes the host once).
+// Tests call detectEngine/checkPrereqs directly with an injected check and never
+// touch this cache.
+let enginePromise = null;
+function getEngine() {
+  if (!enginePromise) enginePromise = detectEngine();
+  return enginePromise;
 }
 
 /**
@@ -225,8 +276,10 @@ async function route(req, res, server) {
   if (req.method === 'GET' && url.pathname === '/api/preflight') {
     try {
       const envExists = existsSync(resolve(projectRoot(), '.env'));
+      const engine = await getEngine();
+      const { cmd, args } = inspectCommand(engine, ['inspect', '--format', '{{.State.Status}}', 'oikos']);
       return await new Promise(resolvePromise => {
-        const inspect = spawn('docker', ['inspect', '--format', '{{.State.Status}}', 'oikos'], { stdio: 'pipe' });
+        const inspect = spawn(cmd, args, { stdio: 'pipe' });
         let out = '';
         let settled = false;
         const reply = containerRunning => {
@@ -267,8 +320,10 @@ async function route(req, res, server) {
 
   if (req.method === 'POST' && url.pathname === '/api/start') {
     try {
-      const result = await spawnStart('docker', ['compose', 'up', '-d'], { cwd: projectRoot() });
-      if (!result.ok) console.error('docker compose error:', result.error);
+      const engine = await getEngine();
+      const { cmd, args } = composeCommand(engine, ['up', '-d']);
+      const result = await spawnStart(cmd, args, { cwd: projectRoot() });
+      if (!result.ok) console.error(`${cmd} compose error:`, result.error);
       return json(res, result.ok ? 200 : 500, result);
     } catch (err) {
       return json(res, 500, { ok: false, error: err.message });
@@ -276,19 +331,23 @@ async function route(req, res, server) {
   }
 
   if (req.method === 'GET' && url.pathname === '/api/status') {
+    const engine = await getEngine();
+    const health = inspectCommand(engine, ['inspect', '--format', '{{.State.Health.Status}}', 'oikos']);
+    const stateCmd = inspectCommand(engine, ['inspect', '--format', '{{.State.Status}}', 'oikos']);
+    const logsCmd = composeCommand(engine, ['logs', '--tail', '30']);
     return new Promise(resolvePromise => {
-      const inspect = spawn('docker', ['inspect', '--format', '{{.State.Health.Status}}', 'oikos'], { stdio: 'pipe' });
+      const inspect = spawn(health.cmd, health.args, { stdio: 'pipe' });
       let out = '';
       inspect.stdout.on('data', d => { out += d.toString().trim(); });
       inspect.on('close', code => {
         if (code === 0 && out === 'healthy') return resolvePromise(json(res, 200, { status: 'running' }));
         if (code === 0 && (out === 'starting' || out === 'unhealthy')) return resolvePromise(json(res, 200, { status: 'starting' }));
-        const state = spawn('docker', ['inspect', '--format', '{{.State.Status}}', 'oikos'], { stdio: 'pipe' });
+        const state = spawn(stateCmd.cmd, stateCmd.args, { stdio: 'pipe' });
         let stateOut = '';
         state.stdout.on('data', d => { stateOut += d.toString().trim(); });
         state.on('close', () => {
           if (stateOut === 'running') return resolvePromise(json(res, 200, { status: 'starting' }));
-          const logs = spawn('docker', ['compose', 'logs', '--tail', '30'], { cwd: projectRoot(), stdio: 'pipe' });
+          const logs = spawn(logsCmd.cmd, logsCmd.args, { cwd: projectRoot(), stdio: 'pipe' });
           let logsOut = '';
           logs.stdout.on('data', d => { logsOut += d.toString(); });
           logs.stderr.on('data', d => { logsOut += d.toString(); });

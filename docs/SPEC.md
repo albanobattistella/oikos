@@ -1,6 +1,6 @@
 # Oikos - Product Specification
 
-Self-hosted family planner web app for a single household (2–6 people). No app store, no public access. Deployment via Docker on a private Linux server behind an Nginx reverse proxy with SSL.
+Self-hosted family planner web app for a single household (2–6 people). No app store, no public access. Deployment via Docker or Podman (rootless, SELinux-ready) on a private Linux server behind an Nginx reverse proxy with SSL.
 
 ---
 
@@ -928,7 +928,7 @@ modules/
 - Disabled modules are not served to the browser and do not appear in navigation.
 - Enabled module pages are registered automatically in the SPA router at startup.
 
-**Docker:** The default `docker-compose.yml` mounts `${MODULES_DIR:-./modules}` to `/app/modules`. To keep modules outside the Oikos checkout set `MODULES_DIR=/absolute/path` in `.env` and restart. No image rebuild is required.
+**Docker / Podman:** The default `docker-compose.yml` mounts `${MODULES_DIR:-./modules}` to `/app/modules`. To keep modules outside the Oikos checkout set `MODULES_DIR=/absolute/path` in `.env` and restart. No image rebuild is required. On Podman use `podman-compose.yml`, which adds the SELinux `:Z` relabel to the same mount.
 
 **Security rules for module authors:**
 - Use `replaceChildren()` and `insertAdjacentHTML()`. Never use `innerHTML`.
