@@ -2,7 +2,7 @@
 <Container version="2">
   <Name>Oikos</Name>
   <Repository>ghcr.io/ulsklyc/oikos:latest</Repository>
-  <Registry>https://ghcr.io/ulsklyc/oikos</Registry>
+  <Registry>https://github.com/ulsklyc/oikos/pkgs/container/oikos</Registry>
   <Network>bridge</Network>
   <MyIP/>
   <Shell>sh</Shell>
@@ -24,6 +24,7 @@ After first start, open the WebUI and create your admin account.</Overview>
 
   <Category>Productivity: HomeAutomation: Tools:</Category>
   <License>MIT</License>
+  <ExtraSearchTerms>family planner household organizer tasks groceries shopping meals recipes calendar budget chores notes contacts birthdays caldav carddav pwa selfhosted</ExtraSearchTerms>
 
   <Screenshot>https://raw.githubusercontent.com/ulsklyc/oikos/main/docs/screenshots/dashboard-light-desktop.png</Screenshot>
   <Screenshot>https://raw.githubusercontent.com/ulsklyc/oikos/main/docs/screenshots/calendar-light-desktop.png</Screenshot>

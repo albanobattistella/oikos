@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.57.4] - 2026-06-02
+
+### Changed
+- Refined the Unraid Community Apps template: the `Registry` link now points to the browsable GitHub Container Registry package page, and added `ExtraSearchTerms` so Oikos is easier to find in the Community Apps store.
+
 ## [0.57.3] - 2026-06-02
 
 ### Fixed
