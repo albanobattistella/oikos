@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.60.3] - 2026-06-03
+
+### Security
+- Restrict the OpenAPI specification (`/openapi.json`, `/api/v1/openapi.json`) and the `/docs` documentation page to signed-in admins, based on a penetration-test scan (#228). `/docs` is now hidden entirely in production and returns `404` unless the new optional `ENABLE_API_DOCS=true` is set, in which case it is exposed to admins only.
+- `GET /api/v1/version` now returns the exact application version only to authenticated callers (session or API token). Unauthenticated login and setup pages still receive `app_name` and `setup_required`, so version fingerprinting no longer works anonymously.
+- `POST /api/v1/auth/setup` responds with `404` instead of `403` in production once initial setup is complete, so the first-run admin-creation flow is no longer confirmed to anonymous visitors.
+- Remove the deployment host URL and SQLite implementation details (backup endpoint descriptions, version schema) from the generated OpenAPI spec.
+
 ## [0.60.2] - 2026-06-03
 
 ### Fixed
