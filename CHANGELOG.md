@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.60.4] - 2026-06-03
+
+### Security
+- Fix a regular-expression denial-of-service (ReDoS) in the ICS calendar parser (CodeQL #10). The parameter-list patterns matching `DUE`/`DTSTART` lines allowed catastrophic backtracking on a crafted line containing many `;` separators without a closing colon, which could freeze the server while parsing a malicious subscribed or imported calendar. The inner character class is now restricted so the separator and parameter content no longer overlap.
+- Apply the API rate limiter to the admin-only `/docs` and `/openapi.json` endpoints (CodeQL #11, #12). Both routes live outside the rate-limited `/api/` path and were previously unthrottled.
+
+### Fixed
+- Keep the time of day for tasks whose `DUE` value uses `VALUE=DATE-TIME`. A word boundary in the date-only detection also matched `VALUE=DATE-TIME`, so timed reminders imported via CalDAV/ICS were truncated to their date and lost their time.
+
 ## [0.60.3] - 2026-06-03
 
 ### Security
