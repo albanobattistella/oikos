@@ -65,7 +65,7 @@ Each module is independent. Use what fits, skip what doesn't.
 - **Privacy First** — fully self-hosted, SQLCipher AES-256 encrypted database, zero telemetry
 - **SSO / OpenID Connect** — optional single sign-on via any OIDC provider (Authentik, Keycloak, Google, Microsoft Entra). Configure with four env vars; Authorization Code + PKCE flow.
 - **Zero Build Step** — pure ES modules, no bundler, no transpiler, no framework
-- **Multilingual** — 16 languages with automatic locale detection (de, en, es, fr, it, sv, el, ru, tr, zh, ja, ar, hi, pt, uk, pl)
+- **Multilingual** — 17 languages with automatic locale detection (de, en, es, fr, it, sv, el, ru, tr, zh, ja, ar, hi, pt, uk, pl, nl)
 
 ---
 
@@ -78,7 +78,7 @@ git clone https://github.com/ulsklyc/oikos.git && cd oikos
 node tools/installer/install-server.js
 ```
 
-Open **http://localhost:8090** in your browser. The localized wizard (16 languages) detects your container engine (Docker or Podman), configures your `.env` — including optional reverse proxy/HTTPS, SSO (OIDC), and automatic backups — starts the container, and creates your admin account. Requires Node.js 18+ on the host.
+Open **http://localhost:8090** in your browser. The localized wizard (17 languages) detects your container engine (Docker or Podman), configures your `.env` — including optional reverse proxy/HTTPS, SSO (OIDC), and automatic backups — starts the container, and creates your admin account. Requires Node.js 18+ on the host.
 
 **Option B — Pre-built image (no clone required)**
 
