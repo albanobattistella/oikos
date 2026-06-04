@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.60.8] - 2026-06-04
+
+### Fixed
+- Create and fix ownership of the `/backups` and `/app/modules` volumes inside the container. The Docker image only prepared `/data`, so when `/backups` and `/app/modules` were mounted as named volumes they stayed owned by root and the app's `node` user could not write backups or read installed modules. The container's permission fix now also skips itself gracefully when the container is started as a non-root user, which keeps it compatible with orchestrators that manage volume ownership themselves.
+
 ## [0.60.7] - 2026-06-04
 
 ### Added
