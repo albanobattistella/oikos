@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.60.9] - 2026-06-04
+
+### Fixed
+- Start Oikos directly as the assigned user when the container is launched as a non-root user. The entrypoint switched to the `node` user with `gosu`, which only works when the container starts as root, so platforms that run the container under a fixed non-root user (and chown the volumes with a separate init step) could not start Oikos. The entrypoint now only fixes ownership and drops privileges when running as root, and otherwise runs directly as the assigned user. Normal Docker and Docker Compose deployments are unaffected.
+
 ## [0.60.8] - 2026-06-04
 
 ### Fixed
