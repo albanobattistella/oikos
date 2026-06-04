@@ -1,7 +1,18 @@
 // Generator für die TrueNAS-Catalog-Dateien von Oikos.
 // Pure Funktionen (unten) sind testbar; runGenerate() macht die fs-Arbeit.
 
+import { readFileSync, writeFileSync, copyFileSync, existsSync, mkdirSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+
 const SEMVER_RE = /^\d+\.\d+\.\d+$/;
+
+const STATIC_FILES = [
+  'questions.yaml',
+  'item.yaml',
+  'README.md',
+  'templates/docker-compose.yaml',
+  'templates/test_values/basic-values.yaml',
+];
 
 export function assertValidSemver(version) {
   if (typeof version !== 'string' || !SEMVER_RE.test(version)) {
@@ -30,4 +41,42 @@ export function substitute(template, vars) {
     throw new Error(`Platzhalter nicht ersetzt: ${leftover[1]}`);
   }
   return out;
+}
+
+export function runGenerate({ sourceDir, outDir, pkgVersion, bump }) {
+  assertValidSemver(pkgVersion);
+
+  if (!existsSync(join(outDir, 'templates', 'library'))) {
+    throw new Error(
+      `outDir sieht nicht nach einem TrueNAS-App-Verzeichnis aus (kein templates/library): ${outDir}`,
+    );
+  }
+
+  const cvPath = join(sourceDir, 'catalog-version.json');
+  const current = JSON.parse(readFileSync(cvPath, 'utf8')).version;
+  const catalogVersion = bumpVersion(current, bump);
+
+  const written = [];
+
+  const appTmpl = readFileSync(join(sourceDir, 'app.yaml.tmpl'), 'utf8');
+  writeFileSync(
+    join(outDir, 'app.yaml'),
+    substitute(appTmpl, { APP_VERSION: pkgVersion, CATALOG_VERSION: catalogVersion }),
+  );
+  written.push('app.yaml');
+
+  const ixTmpl = readFileSync(join(sourceDir, 'ix_values.yaml.tmpl'), 'utf8');
+  writeFileSync(join(outDir, 'ix_values.yaml'), substitute(ixTmpl, { IMAGE_TAG: pkgVersion }));
+  written.push('ix_values.yaml');
+
+  for (const rel of STATIC_FILES) {
+    const dest = join(outDir, rel);
+    mkdirSync(dirname(dest), { recursive: true });
+    copyFileSync(join(sourceDir, rel), dest);
+    written.push(rel);
+  }
+
+  writeFileSync(cvPath, JSON.stringify({ version: catalogVersion }, null, 2) + '\n');
+
+  return { appVersion: pkgVersion, catalogVersion, imageTag: pkgVersion, written };
 }
