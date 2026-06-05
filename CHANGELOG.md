@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.62.2] - 2026-06-05
+
+### Fixed
+- The Google sync-target picker now lists only writable calendars (accessRole `owner` or `writer`). Read-only calendars (`reader`, `freeBusyReader`) no longer appear as outbound destinations, preventing 403 errors when saving events. If an existing event already targets a calendar that has since become read-only, the picker re-inserts that option non-destructively so saving the event does not silently reset its target to "Local". The server-side outbound sync also guards against writing to a calendar that lost write permission after the event was created.
+
 ## [0.62.1] - 2026-06-05
 
 ### Fixed
