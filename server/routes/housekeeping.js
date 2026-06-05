@@ -11,6 +11,7 @@ import { createLogger } from '../logger.js';
 import * as db from '../db.js';
 import { normalizeAvatarData, syncFamilyMemberArtifacts } from '../auth.js';
 import { collectErrors, color, date, datetime, month, num, oneOf, str, id as validateId, MAX_SHORT, MAX_TEXT, MAX_TITLE } from '../middleware/validate.js';
+import { minutesBetween, computeHourlyAmount } from '../services/housekeeping-billing.js';
 
 const log = createLogger('Housekeeping');
 const router = express.Router();
@@ -108,6 +109,8 @@ function publicWorker(row, context = localDayContext()) {
     email: row.email ?? null,
     birth_date: row.birth_date ?? null,
     daily_rate: Number(row.daily_rate || 0),
+    rate_type: row.rate_type || 'daily',
+    hourly_rate: Number(row.hourly_rate || 0),
     payment_schedule: row.payment_schedule,
     calendar_color: row.calendar_color || DEFAULT_CALENDAR_COLOR,
     current_session: publicSession(todaySession),
@@ -509,13 +512,18 @@ router.post('/worker', async (req, res) => {
     const vSchedule = oneOf(req.body.payment_schedule || 'monthly', PAYMENT_SCHEDULES, 'payment_schedule');
     const vCalendarColor = color(req.body.calendar_color || DEFAULT_CALENDAR_COLOR, 'calendar_color');
     const vNotes = str(req.body.notes, 'notes', { max: MAX_TEXT, required: false });
-    const errors = collectErrors([vDisplayName, vUsername, vPhone, vEmail, vBirthDate, vDailyRate, vSchedule, vCalendarColor, vNotes]);
+    const vRateType = oneOf(req.body.rate_type || 'daily', ['daily', 'hourly'], 'rate_type');
+    const vHourlyRate = num(req.body.hourly_rate, 'hourly_rate');
+    const errors = collectErrors([vDisplayName, vUsername, vPhone, vEmail, vBirthDate, vDailyRate, vSchedule, vCalendarColor, vNotes, vRateType, vHourlyRate]);
     if (errors.length) return res.status(400).json({ error: errors.join(' '), code: 400 });
     if (vUsername.value && !/^[a-zA-Z0-9._-]{3,64}$/.test(vUsername.value)) {
       return res.status(400).json({ error: 'Username must be 3-64 characters long and may only contain letters, numbers, dots, hyphens, and underscores.', code: 400 });
     }
     if (vDailyRate.value < 0) {
       return res.status(400).json({ error: 'daily_rate must be greater than or equal to zero.', code: 400 });
+    }
+    if ((vHourlyRate.value ?? 0) < 0) {
+      return res.status(400).json({ error: 'hourly_rate must be greater than or equal to zero.', code: 400 });
     }
     const avatarColor = String(req.body.avatar_color || '#7C3AED').trim();
     const avatarData = req.body.avatar_data !== undefined
@@ -547,14 +555,16 @@ router.post('/worker', async (req, res) => {
         targetUserId,
       );
       db.get().prepare(`
-        INSERT INTO housekeeping_workers (user_id, daily_rate, payment_schedule, calendar_color, notes)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO housekeeping_workers (user_id, daily_rate, payment_schedule, calendar_color, notes, rate_type, hourly_rate)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(user_id) DO UPDATE SET
           daily_rate = excluded.daily_rate,
           payment_schedule = excluded.payment_schedule,
           calendar_color = excluded.calendar_color,
-          notes = excluded.notes
-      `).run(targetUserId, vDailyRate.value, vSchedule.value, vCalendarColor.value, vNotes.value);
+          notes = excluded.notes,
+          rate_type = excluded.rate_type,
+          hourly_rate = excluded.hourly_rate
+      `).run(targetUserId, vDailyRate.value, vSchedule.value, vCalendarColor.value, vNotes.value, vRateType.value, vHourlyRate.value ?? 0);
       syncFamilyMemberArtifacts(db.get(), targetUserId, {
         displayName: vDisplayName.value,
         phone: vPhone.value,

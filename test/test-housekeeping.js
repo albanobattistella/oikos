@@ -8,6 +8,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import Database from 'better-sqlite3';
 import { MIGRATIONS, _setTestDatabase, _resetTestDatabase } from '../server/db.js';
+import { roundMinutesTo15, computeHourlyAmount } from '../server/services/housekeeping-billing.js';
 
 // In-Memory-DB mit allen Migrationen aufbauen
 function buildTestDb() {
@@ -148,4 +149,18 @@ test('hourly rate: schema has rate_type/hourly_rate columns', () => {
   assert.ok(sCols.includes('rate_type'), 'housekeeping_work_sessions should have rate_type');
   assert.ok(sCols.includes('hourly_rate'), 'housekeeping_work_sessions should have hourly_rate');
   assert.ok(sCols.includes('minutes_worked'), 'housekeeping_work_sessions should have minutes_worked');
+});
+
+test('billing: rounds minutes to nearest 15', () => {
+  assert.equal(roundMinutesTo15(0), 0);
+  assert.equal(roundMinutesTo15(7), 0);
+  assert.equal(roundMinutesTo15(8), 15);
+  assert.equal(roundMinutesTo15(52), 45);
+  assert.equal(roundMinutesTo15(53), 60);
+});
+
+test('billing: amount = roundedHours * rate', () => {
+  assert.equal(computeHourlyAmount(210, 10), 35);   // 210 min -> 3.5h * 10
+  assert.equal(computeHourlyAmount(53, 12), 12);    // 53 -> 60 min -> 1h * 12
+  assert.equal(computeHourlyAmount(0, 10), 0);      // 0 min -> 0
 });
