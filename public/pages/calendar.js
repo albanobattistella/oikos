@@ -1650,7 +1650,7 @@ async function loadSyncTargets(selectElement, currentEvent = null) {
     // Zeigt das Event auf ein (jetzt) nur-lesbares Ziel, das nicht mehr in der
     // gefilterten Liste steht: Option nachtragen, damit Speichern das Ziel nicht
     // still auf "Lokal" zurücksetzt. Der Server-Guard fängt den Outbound-Fall ab.
-    if (!selectElement.querySelector(`option[value="${value}"]`)) {
+    if (!Array.from(selectElement.options).some((o) => o.value === value)) {
       let group = selectElement.querySelector('optgroup.js-google-targets');
       if (!group) {
         group = document.createElement('optgroup');
