@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.65.12] - 2026-06-07
+
+### Fixed
+- Sidebar navigation items no longer get an unintended pill shape (`border-radius: full`) on desktop hover. The glass hover rule in `glass.css` was global and applied `--radius-glass-chip` to all nav items; narrowed to `.nav-bottom .nav-item` so sidebar items keep their intended `--radius-sm` (8px) from `layout.css`.
+
 ## [0.65.11] - 2026-06-07
 
 ### Fixed
