@@ -31,7 +31,7 @@
     <tr>
       <td align="center"><b>14</b><br><sub>modules</sub></td>
       <td align="center"><sub>·</sub></td>
-      <td align="center"><b>18</b><br><sub>languages</sub></td>
+      <td align="center"><b>19</b><br><sub>languages</sub></td>
       <td align="center"><sub>·</sub></td>
       <td align="center"><b>0</b><br><sub>trackers</sub></td>
       <td align="center"><sub>·</sub></td>
@@ -168,7 +168,7 @@ Each module is independent. Use what fits, skip what doesn't.
 - **Privacy first** — fully self-hosted, SQLCipher AES-256 encrypted database, zero telemetry
 - **SSO / OpenID Connect** — optional single sign-on via any OIDC provider (Authentik, Keycloak, Google, Microsoft Entra) configured with four env vars; Authorization Code + PKCE flow
 - **Zero build step** — pure ES modules, no bundler, no transpiler, no framework
-- **Multilingual** — 18 languages with automatic locale detection (de, en, es, fr, it, sv, el, ru, tr, zh, ja, ar, hi, pt, uk, pl, nl, cs)
+- **Multilingual** — 19 languages with automatic locale detection (de, en, es, fr, it, sv, el, ru, tr, zh, ja, ar, hi, pt, uk, pl, nl, cs, vi)
 
 ---
 
