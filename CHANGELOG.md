@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.66.0] - 2026-06-09
+
+### Changed
+- Renamed the project from **Oikos** to **Yuvomi** to avoid a trademark conflict with an unrelated product of the same name. The app name, documentation, GitHub Pages and deploy descriptors now read Yuvomi — your existing data and settings are fully preserved on upgrade.
+- The Docker image moved to `ghcr.io/ulsklyc/yuvomi`. The previous `ghcr.io/ulsklyc/oikos` image keeps publishing for a couple more releases so existing deployments keep working — please update your image reference at your convenience.
+- The repository moved to `https://github.com/ulsklyc/yuvomi`; existing `ulsklyc/oikos` links (clone URLs, raw assets, releases) redirect automatically.
+
 ## [0.65.34] - 2026-06-08
 
 ### Added
