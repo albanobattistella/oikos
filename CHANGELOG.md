@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.65.33] - 2026-06-08
+
+### Fixed
+- The avatar color picker now resets to a fresh random color after each member is added or the form is cancelled, preventing all subsequent members from receiving the same color as the first.
+
 ## [0.65.32] - 2026-06-08
 
 ### Fixed
