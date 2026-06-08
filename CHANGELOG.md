@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.65.31] - 2026-06-08
+
+### Fixed
+- New family members created via the admin panel, from a contact in split expenses, or as a split guest now receive a random color from the avatar palette instead of always defaulting to blue. The new-member form in Settings also pre-populates the color picker with a random palette color.
+
 ## [0.65.30] - 2026-06-08
 
 ### Fixed

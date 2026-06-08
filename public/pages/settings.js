@@ -18,6 +18,8 @@ const SETTINGS_TAB_KEY = 'oikos:settings:tab';
 const APP_NAME_STORAGE_KEY = 'oikos-app-name';
 const DEFAULT_APP_NAME = 'Oikos';
 const FAMILY_ROLES = ['dad', 'mom', 'parent', 'child', 'grandparent', 'relative', 'other'];
+const AVATAR_COLORS = ['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE', '#FF2D55'];
+const randomAvatarColor = () => AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)];
 const MAX_AVATAR_DATA_LENGTH = 768 * 1024;
 const BUILT_IN_MODULES = [
   { id: 'dashboard', labelKey: 'nav.dashboard', icon: 'layout-dashboard', locked: true },
@@ -725,7 +727,7 @@ export async function render(container, { user }) {
                 </div>
                 <div class="form-group settings-color-field">
                   <label class="form-label" for="new-avatar-color">${t('settings.colorLabel')}</label>
-                  <input class="settings-color-button" type="color" id="new-avatar-color" value="#007AFF" />
+                  <input class="settings-color-button" type="color" id="new-avatar-color" value="${randomAvatarColor()}" />
                 </div>
               </div>
               <div class="form-group">
