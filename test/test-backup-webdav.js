@@ -11,6 +11,10 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const xmlEsc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
 // ─── Mock WebDAV server ───────────────────────────────────────────────────────
 
 const MOCK_PORT = 39871;
@@ -47,7 +51,7 @@ function createMockServer({ failAuth = false, failPropfind = false } = {}) {
       const fileEntries = [...files.entries()].filter(([k]) => k.startsWith(url));
       const fileXml = fileEntries.map(([filePath, info]) => `
         <D:response>
-          <D:href>${filePath}</D:href>
+          <D:href>${xmlEsc(filePath)}</D:href>
           <D:propstat>
             <D:prop>
               <D:resourcetype/>
@@ -61,7 +65,7 @@ function createMockServer({ failAuth = false, failPropfind = false } = {}) {
       const xml = `<?xml version="1.0" encoding="utf-8"?>
         <D:multistatus xmlns:D="DAV:">
           <D:response>
-            <D:href>${url}</D:href>
+            <D:href>${xmlEsc(url)}</D:href>
             <D:propstat>
               <D:prop>
                 <D:resourcetype><D:collection/></D:resourcetype>
