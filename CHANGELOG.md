@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.65.22] - 2026-06-08
+
+### Changed
+- README Modules table now uses SVG icons instead of emojis, matching the visual style of the GitHub Pages landing page.
+
 ## [0.65.21] - 2026-06-08
 
 ### Added
