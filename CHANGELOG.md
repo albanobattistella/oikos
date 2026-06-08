@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.65.23] - 2026-06-08
+
+### Fixed
+- README Modules table icons are now visible on GitHub — switched from SVG to PNG to work around GitHub's CSP restriction on raw.githubusercontent.com SVG files.
+
 ## [0.65.22] - 2026-06-08
 
 ### Changed
