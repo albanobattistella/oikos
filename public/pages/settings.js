@@ -953,51 +953,50 @@ export async function render(container, { user }) {
           <!-- WebDAV Backup Target -->
           <div class="settings-card settings-card--backup" id="backup-webdav-card">
             <h3 class="settings-card__title">
-              <i data-lucide="cloud-upload" aria-hidden="true" class="settings-card__title-icon"></i>
+              <i data-lucide="cloud-upload" aria-hidden="true" style="display:inline-block;width:18px;height:18px;vertical-align:-3px;margin-right:var(--space-2);"></i>
               ${t('settings.backupWebdavTitle')}
             </h3>
             <p class="form-hint">${t('settings.backupWebdavHint')}</p>
-            <form class="settings-form" id="backup-webdav-form" novalidate>
-              <div class="settings-form-row settings-form-row--toggle">
-                <label class="settings-toggle-label" for="webdav-enabled">
-                  ${t('settings.backupWebdavEnabled')}
-                </label>
-                <label class="toggle-switch">
+            <form class="settings-form" id="backup-webdav-form" novalidate style="margin-top:var(--space-4);">
+              <!-- Enable toggle -->
+              <div class="settings-webdav-toggle-row">
+                <span class="form-label" style="margin:0;">${t('settings.backupWebdavEnabled')}</span>
+                <label class="toggle">
                   <input type="checkbox" id="webdav-enabled" name="enabled" />
-                  <span class="toggle-switch__track" aria-hidden="true"></span>
+                  <span class="toggle__track" aria-hidden="true"></span>
                 </label>
               </div>
-              <div class="settings-form-row">
-                <label class="settings-label" for="webdav-url">${t('settings.backupWebdavUrl')}</label>
-                <input class="settings-input" type="url" id="webdav-url" name="url"
+              <div class="form-group">
+                <label class="form-label" for="webdav-url">${t('settings.backupWebdavUrl')}</label>
+                <input class="form-input" type="url" id="webdav-url" name="url"
                   placeholder="${t('settings.backupWebdavUrlPlaceholder')}" autocomplete="off" />
               </div>
-              <div class="settings-form-row">
-                <label class="settings-label" for="webdav-username">${t('settings.backupWebdavUsername')}</label>
-                <input class="settings-input" type="text" id="webdav-username" name="username"
+              <div class="form-group">
+                <label class="form-label" for="webdav-username">${t('settings.backupWebdavUsername')}</label>
+                <input class="form-input" type="text" id="webdav-username" name="username"
                   autocomplete="username" />
               </div>
-              <div class="settings-form-row">
-                <label class="settings-label" for="webdav-password">${t('settings.backupWebdavPassword')}</label>
-                <div class="settings-input-wrap settings-input-wrap--reveal">
-                  <input class="settings-input" type="password" id="webdav-password" name="password"
+              <div class="form-group">
+                <label class="form-label" for="webdav-password">${t('settings.backupWebdavPassword')}</label>
+                <div class="settings-webdav-pw-wrap">
+                  <input class="form-input" type="password" id="webdav-password" name="password"
                     autocomplete="current-password"
                     placeholder="${t('settings.backupWebdavPasswordPlaceholder')}" />
-                  <button type="button" class="btn btn--icon btn--ghost settings-reveal-btn"
+                  <button type="button" class="btn btn--icon btn--ghost settings-webdav-reveal-btn"
                     data-reveal-target="webdav-password" aria-label="${t('common.togglePasswordVisibility')}">
                     <i data-lucide="eye" aria-hidden="true"></i>
                   </button>
                 </div>
               </div>
-              <div class="settings-form-row">
-                <label class="settings-label" for="webdav-path">${t('settings.backupWebdavPath')}</label>
-                <input class="settings-input" type="text" id="webdav-path" name="remotePath"
+              <div class="form-group">
+                <label class="form-label" for="webdav-path">${t('settings.backupWebdavPath')}</label>
+                <input class="form-input" type="text" id="webdav-path" name="remotePath"
                   placeholder="${t('settings.backupWebdavPathPlaceholder')}" />
               </div>
-              <div class="settings-form-row">
-                <label class="settings-label" for="webdav-keep">${t('settings.backupWebdavKeep')}</label>
-                <input class="settings-input settings-input--narrow" type="number"
-                  id="webdav-keep" name="keep" min="1" max="99" />
+              <div class="form-group">
+                <label class="form-label" for="webdav-keep">${t('settings.backupWebdavKeep')}</label>
+                <input class="form-input" type="number" id="webdav-keep" name="keep" min="1" max="99"
+                  style="max-width:100px;" />
               </div>
               <div id="webdav-test-result" class="form-hint" hidden></div>
               <div class="settings-form-actions">
@@ -1011,7 +1010,7 @@ export async function render(container, { user }) {
               </div>
             </form>
 
-            <div class="settings-info-grid settings-info-grid--top-gap" id="backup-webdav-status">
+            <div class="settings-info-grid" id="backup-webdav-status" style="margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px solid var(--color-border);">
               <!-- Populated by JavaScript -->
             </div>
           </div>
@@ -2854,7 +2853,8 @@ async function loadWebdavConfig(container) {
         const el = form.querySelector(`#${id}`);
         if (el) {
           el.readOnly = true;
-          el.classList.add('settings-input--readonly');
+          el.disabled = true;
+          el.style.opacity = '0.6';
         }
       });
       const hint = form.querySelector('#webdav-test-result');
@@ -2883,9 +2883,9 @@ function renderWebdavStatus(grid, d) {
     : t('settings.backupWebdavNeverUploaded');
 
   const errorRow = d.lastError
-    ? `<div class="settings-info-row settings-info-row--danger">
+    ? `<div class="settings-info-row">
          <span class="settings-info-label">${t('settings.backupWebdavLastError')}</span>
-         <span class="settings-info-value settings-info-value--danger">${esc(d.lastError)}</span>
+         <span class="settings-info-value" style="color:var(--color-danger);">${esc(d.lastError)}</span>
        </div>`
     : '';
 
@@ -2935,8 +2935,7 @@ function bindWebdavBackupEvents(container) {
   loadWebdavConfig(container);
 
   // Password reveal toggle
-  form.querySelectorAll('[data-reveal-target]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+  form.querySelectorAll('[data-reveal-target]').forEach((btn) => {    btn.addEventListener('click', () => {
       const input = form.querySelector(`#${btn.dataset.revealTarget}`);
       if (!input) return;
       const isText = input.type === 'text';
@@ -2969,12 +2968,14 @@ function bindWebdavBackupEvents(container) {
       const res = await api.post('/backup/webdav/test', overrides);
       if (resultEl) {
         resultEl.textContent = t('settings.backupWebdavTestSuccess', { files: res.data?.files ?? 0 });
-        resultEl.className   = 'form-hint form-hint--success';
+        resultEl.className   = 'form-hint';
+        resultEl.style.color = 'var(--color-success)';
       }
     } catch (err) {
       if (resultEl) {
         resultEl.textContent = t('settings.backupWebdavTestFailed', { error: err.message });
-        resultEl.className   = 'form-hint form-hint--error';
+        resultEl.className   = 'form-hint';
+        resultEl.style.color = 'var(--color-danger)';
       }
     } finally {
       testBtn.disabled = false;
