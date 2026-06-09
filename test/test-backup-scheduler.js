@@ -88,6 +88,27 @@ describe('Backup Scheduler', () => {
     assert.ok(status.lastBackup.file, 'Last backup should have filename');
   });
 
+  it('createLocalBackup() should create a fresh, uniquely named file each call', async () => {
+    // Regression: the manual WebDAV "upload now" flow relies on this producing a
+    // new, distinct snapshot every time so remote uploads never overwrite each other.
+    assert.ok(backupScheduler.createLocalBackup, 'createLocalBackup function should exist');
+
+    const first = await backupScheduler.createLocalBackup();
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    const second = await backupScheduler.createLocalBackup();
+
+    assert.ok(first.endsWith('.db'), 'first call returns a .db path');
+    assert.ok(second.endsWith('.db'), 'second call returns a .db path');
+    assert.notStrictEqual(
+      path.basename(first),
+      path.basename(second),
+      'consecutive backups must have distinct filenames'
+    );
+
+    const existsSecond = await fs.access(second).then(() => true).catch(() => false);
+    assert.ok(existsSecond, 'newest backup file should exist on disk');
+  });
+
   it('should cleanup test directory', async () => {
     await fs.rm(TEST_BACKUP_DIR, { recursive: true, force: true });
   });

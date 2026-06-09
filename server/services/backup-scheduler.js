@@ -96,23 +96,35 @@ async function rotateBackups() {
 }
 
 /**
+ * Create a fresh timestamped local backup and rotate old local files.
+ * Shared by the scheduler and the manual "upload now" flow so that every
+ * trigger produces a new, uniquely named snapshot of the current DB state.
+ * @returns {Promise<string>} Absolute path to the newly created backup file
+ */
+export async function createLocalBackup() {
+  await ensureBackupDir();
+
+  const fileName = backupFileName();
+  const filePath = path.join(BACKUP_DIR, fileName);
+
+  await backupToFile(filePath);
+  log.info(`Backup created: ${fileName}`);
+
+  // Rotate old local backups
+  await rotateBackups();
+
+  return filePath;
+}
+
+/**
  * Perform automated backup
  */
 async function performBackup() {
   try {
     log.info('Starting scheduled backup...');
 
-    await ensureBackupDir();
-
-    const fileName = backupFileName();
-    const filePath = path.join(BACKUP_DIR, fileName);
-
-    await backupToFile(filePath);
-
-    log.info(`Backup created: ${fileName}`);
-
-    // Rotate old local backups
-    await rotateBackups();
+    const filePath = await createLocalBackup();
+    const fileName = path.basename(filePath);
 
     lastBackup = {
       timestamp: new Date().toISOString(),
