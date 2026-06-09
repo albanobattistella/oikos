@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.67.6] - 2026-06-09
+
+### Fixed
+- **Docker/Podman**: `BACKUP_DIR` in `docker-compose.yml` and `podman-compose.yml` is now hardcoded to `/backups` in the container's `environment:` section. Previously, setting `BACKUP_DIR=./backups` in `.env` to control the host-side volume mount source would also inject that host path into the container, where it does not exist — causing backups to fail silently. The container-side mount target is always `/backups` (fixed in `volumes:`), so the env var is now set unconditionally to that value.
+
 ## [0.67.5] - 2026-06-09
 
 ### Security
