@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.70.0] - 2026-06-10
+
+### Added
+- **WebDAV document storage**: admins can select WebDAV as the global destination for new document files, including calendar attachments, with per-field environment overrides, connection tests, protected configuration changes, and clear local/WebDAV/DMS status throughout the interface.
+
+### Changed
+- **Document binary handling**: previews, downloads, calendar attachments, deletion, and Paperless/DMS uploads now share one storage layer. Existing local files stay local, failed WebDAV uploads never fall back silently, failed database writes clean up staged remote files, and database backups explicitly exclude WebDAV binaries, which must be backed up separately.
+
 ## [0.69.0] - 2026-06-10
 
 ### Added

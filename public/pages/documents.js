@@ -50,6 +50,7 @@ let state = {
   folders: [],
   members: [],
   dmsAccounts: [],
+  activeUploadBackend: 'local',
   view: localStorage.getItem('oikos-documents-view') || 'grid',
   status: 'active',
   category: '',
@@ -147,8 +148,10 @@ async function loadMetaOptions() {
   try {
     const res = await api.get('/documents/meta/options');
     state.dmsAccounts = res.data?.dms_accounts || [];
+    state.activeUploadBackend = res.data?.active_upload_backend || 'local';
   } catch {
     state.dmsAccounts = [];
+    state.activeUploadBackend = 'local';
   }
 }
 
@@ -336,12 +339,32 @@ function renderMeta(doc) {
     ${doc.folder_name ? `<span><i data-lucide="folder" aria-hidden="true"></i>${esc(doc.folder_name)}</span>` : ''}
     <span><i data-lucide="${doc.visibility === 'family' ? 'users' : doc.visibility === 'private' ? 'lock' : 'user-check'}" aria-hidden="true"></i>${t(`documents.visibility.${doc.visibility}`)}</span>
     <span>${formatFileSize(doc.file_size)}</span>
-    ${doc.storage_provider === 'external' ? `<span class="doc-badge doc-badge--dms">${t('documents.dmsLinked')}</span>` : ''}
+    ${storageBadgeHtml(doc)}
   `;
+}
+
+function documentStorageBackend(doc) {
+  if (doc.storage_backend) return doc.storage_backend;
+  return doc.storage_provider === 'external' ? 'dms' : 'local';
+}
+
+function storageBadgeHtml(doc) {
+  const backend = documentStorageBackend(doc);
+  if (backend === 'webdav') {
+    return `<span class="doc-badge doc-badge--webdav">${t('documents.storageWebdav')}</span>`;
+  }
+  if (backend === 'dms' && !doc.dms_account_id) {
+    return `<span class="doc-badge doc-badge--unavailable">${t('documents.storageDmsUnavailable')}</span>`;
+  }
+  if (backend === 'dms') {
+    return `<span class="doc-badge doc-badge--dms">${t('documents.storageDms')}</span>`;
+  }
+  return `<span class="doc-badge doc-badge--local">${t('documents.storageLocal')}</span>`;
 }
 
 function renderActions(doc) {
   const canView = VIEWABLE_MIME.has(doc.mime_type);
+  const storageBackend = documentStorageBackend(doc);
   return `
     ${canView ? `
     <button class="btn btn--ghost btn--icon btn--icon-sm" data-action="view" data-id="${doc.id}" title="${t('documents.viewAction')}" aria-label="${t('documents.viewAction')}">
@@ -356,7 +379,7 @@ function renderActions(doc) {
     <button class="btn btn--ghost btn--icon btn--icon-sm" data-action="archive" data-id="${doc.id}" data-archived="${doc.status === 'archived'}" title="${doc.status === 'archived' ? t('documents.restoreAction') : t('documents.archiveAction')}" aria-label="${doc.status === 'archived' ? t('documents.restoreAction') : t('documents.archiveAction')}">
       <i data-lucide="${doc.status === 'archived' ? 'archive-restore' : 'archive'}" class="icon-md" aria-hidden="true"></i>
     </button>
-    ${doc.storage_provider === 'local' && state.dmsAccounts.length > 0 ? `
+    ${storageBackend !== 'dms' && state.dmsAccounts.length > 0 ? `
     <button class="btn btn--ghost btn--icon btn--icon-sm" data-action="push-dms" data-id="${doc.id}" title="${t('documents.pushToDms')}" aria-label="${t('documents.pushToDms')}">
       <i data-lucide="upload" class="icon-md" aria-hidden="true"></i>
     </button>` : ''}
@@ -516,6 +539,14 @@ function openDocumentModal(doc = null) {
         ${!isEdit ? `
         <div class="form-group">
           <label class="label" for="document-file">${t('documents.fileLabel')}</label>
+          <p class="document-storage-target">
+            <i data-lucide="${state.activeUploadBackend === 'webdav' ? 'cloud' : 'database'}" aria-hidden="true"></i>
+            <span>${t('documents.activeUploadTarget', {
+              target: state.activeUploadBackend === 'webdav'
+                ? t('documents.storageWebdav')
+                : t('documents.storageLocal'),
+            })}</span>
+          </p>
           <label class="document-dropzone" id="document-dropzone" for="document-file">
             <input class="sr-only" id="document-file" type="file" required>
             <span class="document-dropzone__icon">
@@ -839,7 +870,7 @@ function openDocumentViewer(doc) {
   const downloadUrl = `/api/v1/documents/${doc.id}/download`;
   // Defense-in-Depth: nur http(s)-Deep-Links rendern, niemals javascript:/data:-Schemata
   // (zusätzlich zur serverseitigen base_url-Validierung bei der DMS-Account-Anlage).
-  const externalUrl = doc.storage_provider === 'external' && /^https?:\/\//i.test(doc.external_url || '')
+  const externalUrl = documentStorageBackend(doc) === 'dms' && /^https?:\/\//i.test(doc.external_url || '')
     ? doc.external_url
     : '';
 

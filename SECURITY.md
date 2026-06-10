@@ -38,6 +38,7 @@ Vulnerabilities that require physical access to the host or root on the server a
 - API rate limiting (300 requests/min per IP)
 - Content Security Policy via Helmet (`self`-only)
 - Optional SQLCipher AES-256 database encryption (built into the official Docker image; enable by setting `DB_ENCRYPTION_KEY`. Bare-metal installs require a SQLCipher-enabled build of better-sqlite3.)
+- Existing WebDAV documents protect their connection configuration: changing the URL, username, password, or base path requires explicit admin confirmation and a successful read test against an existing object; required connection data cannot be removed while WebDAV documents exist
 - No API endpoint accessible without session auth (except login)
 - `SESSION_SECRET` is mandatory - server refuses to start if unset
 

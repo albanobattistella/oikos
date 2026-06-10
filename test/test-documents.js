@@ -7,12 +7,19 @@
  */
 
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import http from 'node:http';
+import test from 'node:test';
 import express from 'express';
 import Database from 'better-sqlite3';
-import { MIGRATIONS, _setTestDatabase } from '../server/db.js';
-import documentsRouter from '../server/routes/documents.js';
+
+process.env.DB_PATH = ':memory:';
+const {
+  MIGRATIONS,
+  get,
+  _resetTestDatabase,
+  _setTestDatabase,
+} = await import('../server/db.js');
+const { default: documentsRouter } = await import('../server/routes/documents.js');
 
 function buildTestDb() {
   const db = new Database(':memory:');
@@ -52,11 +59,16 @@ const pngId = seedDoc('image/png', 'pic.png');
 
 // Express-App mit injizierter Session aufsetzen
 const app = express();
-app.use((req, _res, next) => { req.session = { userId, role: 'member' }; next(); });
+app.use((req, _res, next) => {
+  req.authUserId = userId;
+  req.authRole = 'member';
+  req.session = { userId, role: 'member' };
+  next();
+});
 app.use('/api/v1/documents', documentsRouter);
 
 const server = http.createServer(app);
-await new Promise((resolve) => server.listen(0, resolve));
+await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const port = server.address().port;
 
 function fetchPreview(id) {
@@ -80,4 +92,14 @@ test('preview CSP: Nicht-PDFs behalten strikte default-src none Policy', async (
   assert.ok(csp.includes("default-src 'none'"), 'Bilder müssen strikt bleiben');
 });
 
-test.after(() => server.close());
+test.after(async () => {
+  await new Promise((resolve, reject) => {
+    server.close((err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+  db.close();
+  _resetTestDatabase();
+  get().close();
+});

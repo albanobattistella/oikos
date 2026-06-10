@@ -4,13 +4,27 @@
  * Ausführen: node --test test/test-dms-routes.js
  */
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import http from 'node:http';
+import test from 'node:test';
 import express from 'express';
 import Database from 'better-sqlite3';
-import { MIGRATIONS, _setTestDatabase } from '../server/db.js';
-import dmsRouter, { _setAdapterFactory } from '../server/routes/dms.js';
-import documentsRouter, { _setDmsAdapterFactory } from '../server/routes/documents.js';
+
+process.env.DB_PATH = ':memory:';
+
+const {
+  MIGRATIONS,
+  get,
+  _resetTestDatabase,
+  _setTestDatabase,
+} = await import('../server/db.js');
+const {
+  default: dmsRouter,
+  _setAdapterFactory,
+} = await import('../server/routes/dms.js');
+const {
+  default: documentsRouter,
+  _setDmsAdapterFactory,
+} = await import('../server/routes/documents.js');
 
 function buildTestDb() {
   const db = new Database(':memory:');
@@ -36,11 +50,16 @@ const memberId = db.prepare(`INSERT INTO users (username, display_name, password
 let session = { userId: adminId, role: 'admin' };
 const app = express();
 app.use(express.json());
-app.use((req, _res, next) => { req.session = session; next(); });
+app.use((req, _res, next) => {
+  req.authUserId = session.userId;
+  req.authRole = session.role;
+  req.session = { userId: session.userId, role: session.role };
+  next();
+});
 app.use('/api/v1/documents/dms', dmsRouter);
 app.use('/api/v1/documents', documentsRouter);
 const server = http.createServer(app);
-await new Promise((r) => server.listen(0, r));
+await new Promise((r) => server.listen(0, '127.0.0.1', r));
 const base = `http://127.0.0.1:${server.address().port}/api/v1/documents/dms`;
 
 async function call(method, path, body) {
@@ -157,11 +176,13 @@ test('POST /link: legt external-Referenz in family_documents an', async () => {
   });
   assert.equal(res.status, 201);
   assert.equal(res.body.data.storage_provider, 'external');
+  assert.equal(res.body.data.storage_backend, 'dms');
   assert.equal(res.body.data.storage_key, '42');
   assert.equal(res.body.data.name, 'Stromrechnung');
 
   const row = db.prepare('SELECT * FROM family_documents WHERE id = ?').get(res.body.data.id);
   assert.equal(row.content_data, '');
+  assert.equal(row.storage_backend, 'dms');
   assert.equal(row.dms_account_id, accId);
   assert.equal(row.external_url, 'https://t/d/42');
 });
@@ -251,12 +272,134 @@ test('POST /push: lädt lokales Dokument hoch, gibt taskId zurück', async () =>
   assert.equal(uploaded.buffer.toString(), 'hello');
 });
 
-test('POST /push: 400 für bereits externes Dokument', async () => {
+test('POST /push: lädt WebDAV-Dokument auch bei deaktivierten neuen Uploads hoch', async (t) => {
+  session = { userId: adminId, role: 'admin' };
+  const remoteBytes = Buffer.from('remote dms push bytes');
+  const webdav = http.createServer((req, res) => {
+    assert.equal(req.headers.authorization, `Basic ${Buffer.from('alice:secret').toString('base64')}`);
+    if (req.method === 'GET' && req.url === '/documents/archive/push.pdf') {
+      res.writeHead(200, {
+        'Content-Type': 'application/pdf',
+        'Content-Length': remoteBytes.length,
+      });
+      res.end(remoteBytes);
+      return;
+    }
+    res.writeHead(404);
+    res.end();
+  });
+  await new Promise((resolve) => webdav.listen(0, '127.0.0.1', resolve));
+  t.after(async () => {
+    delete process.env.DOCUMENT_STORAGE_WEBDAV_ENABLED;
+    delete process.env.DOCUMENT_STORAGE_WEBDAV_URL;
+    delete process.env.DOCUMENT_STORAGE_WEBDAV_USERNAME;
+    delete process.env.DOCUMENT_STORAGE_WEBDAV_PASSWORD;
+    delete process.env.DOCUMENT_STORAGE_WEBDAV_PATH;
+    if (webdav.listening) {
+      await new Promise((resolve) => webdav.close(resolve));
+    }
+  });
+  process.env.DOCUMENT_STORAGE_WEBDAV_ENABLED = '0';
+  process.env.DOCUMENT_STORAGE_WEBDAV_URL =
+    `http://127.0.0.1:${webdav.address().port}`;
+  process.env.DOCUMENT_STORAGE_WEBDAV_USERNAME = 'alice';
+  process.env.DOCUMENT_STORAGE_WEBDAV_PASSWORD = 'secret';
+  process.env.DOCUMENT_STORAGE_WEBDAV_PATH = 'documents';
+
+  const documentId = db.prepare(`
+    INSERT INTO family_documents (
+      name, category, visibility, original_name, mime_type, file_size,
+      content_data, storage_provider, storage_backend, storage_key, created_by
+    ) VALUES (
+      'Remote brief', 'other', 'family', 'push.pdf', 'application/pdf', ?,
+      '', 'external', 'webdav', 'archive/push.pdf', ?
+    )
+  `).run(remoteBytes.length, adminId).lastInsertRowid;
+
+  let uploaded = null;
+  _setAdapterFactory(() => ({
+    async upload(args) {
+      uploaded = args;
+      return { taskId: 'task-webdav' };
+    },
+  }));
+  const accId = (await call('GET', '/accounts')).body.data[0].id;
+  const res = await call('POST', '/push', {
+    account_id: accId,
+    document_id: documentId,
+  });
+
+  assert.equal(res.status, 202);
+  assert.equal(res.body.data.taskId, 'task-webdav');
+  assert.equal(uploaded.filename, 'push.pdf');
+  assert.deepEqual(uploaded.buffer, remoteBytes);
+});
+
+test('POST /push: WebDAV-Lesefehler liefert stabilen Storage-Fehler ohne DMS-Upload', async (t) => {
+  session = { userId: adminId, role: 'admin' };
+  const webdav = http.createServer((_req, res) => {
+    res.writeHead(503);
+    res.end();
+  });
+  await new Promise((resolve) => webdav.listen(0, '127.0.0.1', resolve));
+  t.after(async () => {
+    delete process.env.DOCUMENT_STORAGE_WEBDAV_ENABLED;
+    delete process.env.DOCUMENT_STORAGE_WEBDAV_URL;
+    delete process.env.DOCUMENT_STORAGE_WEBDAV_USERNAME;
+    delete process.env.DOCUMENT_STORAGE_WEBDAV_PASSWORD;
+    delete process.env.DOCUMENT_STORAGE_WEBDAV_PATH;
+    if (webdav.listening) {
+      await new Promise((resolve) => webdav.close(resolve));
+    }
+  });
+  process.env.DOCUMENT_STORAGE_WEBDAV_ENABLED = '0';
+  process.env.DOCUMENT_STORAGE_WEBDAV_URL =
+    `http://127.0.0.1:${webdav.address().port}`;
+  process.env.DOCUMENT_STORAGE_WEBDAV_USERNAME = 'alice';
+  process.env.DOCUMENT_STORAGE_WEBDAV_PASSWORD = 'secret';
+  process.env.DOCUMENT_STORAGE_WEBDAV_PATH = 'documents';
+
+  const documentId = db.prepare(`
+    INSERT INTO family_documents (
+      name, category, visibility, original_name, mime_type, file_size,
+      content_data, storage_provider, storage_backend, storage_key, created_by
+    ) VALUES (
+      'Unreadable remote brief', 'other', 'family', 'missing.pdf',
+      'application/pdf', 0, '', 'external', 'webdav', 'missing.pdf', ?
+    )
+  `).run(adminId).lastInsertRowid;
+
+  let uploadCalled = false;
+  _setAdapterFactory(() => ({
+    async upload() {
+      uploadCalled = true;
+      return { taskId: 'must-not-run' };
+    },
+  }));
+  const accId = (await call('GET', '/accounts')).body.data[0].id;
+  const res = await call('POST', '/push', {
+    account_id: accId,
+    document_id: documentId,
+  });
+
+  assert.equal(res.status, 502);
+  assert.equal(res.body.code, 502);
+  assert.equal(res.body.storage_code, 'DOCUMENT_STORAGE_READ_FAILED');
+  assert.equal(uploadCalled, false);
+});
+
+test('POST /push: 400 für bereits im DMS gespeichertes Dokument', async () => {
   session = { userId: adminId, role: 'admin' };
   const accId = (await call('GET', '/accounts')).body.data[0].id;
   const ext = db.prepare(`INSERT INTO family_documents
-    (name, category, visibility, original_name, mime_type, file_size, content_data, storage_provider, storage_key, dms_account_id, created_by)
-    VALUES ('X','other','family','x.pdf','application/pdf',0,'','external','9',?,?)`).run(accId, adminId).lastInsertRowid;
+    (name, category, visibility, original_name, mime_type, file_size, content_data,
+     storage_provider, storage_backend, storage_key, dms_account_id, created_by)
+    VALUES ('X','other','family','x.pdf','application/pdf',0,'','external','dms','9',?,?)`)
+    .run(accId, adminId).lastInsertRowid;
+  assert.equal(
+    db.prepare('SELECT storage_backend FROM family_documents WHERE id = ?').get(ext).storage_backend,
+    'dms'
+  );
   const res = await call('POST', '/push', { account_id: accId, document_id: ext });
   assert.equal(res.status, 400);
 });
@@ -287,9 +430,14 @@ test('DELETE account: verlinktes Dokument verliert dms_account_id (SET NULL) und
 
   // Account löschen → FK ON DELETE SET NULL
   assert.equal((await call('DELETE', `/accounts/${acc.id}`)).status, 204);
-  const row = db.prepare('SELECT dms_account_id, storage_provider FROM family_documents WHERE id = ?').get(linked.id);
+  const row = db.prepare(`
+    SELECT dms_account_id, storage_provider, storage_backend
+    FROM family_documents
+    WHERE id = ?
+  `).get(linked.id);
   assert.equal(row.dms_account_id, null);
   assert.equal(row.storage_provider, 'external');
+  assert.equal(row.storage_backend, 'dms');
 
   // Preview kann den Inhalt nicht mehr proxen → 404 statt Crash
   const res = await fetch(`http://127.0.0.1:${server.address().port}/api/v1/documents/${linked.id}/preview`);
@@ -298,4 +446,14 @@ test('DELETE account: verlinktes Dokument verliert dms_account_id (SET NULL) und
 
 // Server schließen, damit der offene Listener die Event-Loop nicht offen hält
 // (sonst beendet sich `node --test` nie). Gleiches Muster wie in test-documents.js.
-test.after(() => server.close());
+test.after(async () => {
+  await new Promise((resolve, reject) => {
+    server.close((err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+  db.close();
+  _resetTestDatabase();
+  get().close();
+});

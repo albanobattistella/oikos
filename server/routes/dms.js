@@ -8,6 +8,7 @@ import * as db from '../db.js';
 import { createLogger } from '../logger.js';
 import { str, MAX_TITLE } from '../middleware/validate.js';
 import { getAdapter as defaultGetAdapter, SUPPORTED_PROVIDERS } from '../services/dms/index.js';
+import { StorageError, readDocumentContent } from '../services/document-storage.js';
 
 let adapterFactory = defaultGetAdapter;
 export function _setAdapterFactory(fn) { adapterFactory = fn || defaultGetAdapter; }
@@ -136,7 +137,7 @@ router.post('/link', async (req, res) => {
 
     const dupe = db.get().prepare(`
       SELECT id FROM family_documents
-      WHERE storage_provider = 'external' AND dms_account_id = ? AND storage_key = ?
+      WHERE storage_backend = 'dms' AND dms_account_id = ? AND storage_key = ?
     `).get(account.id, dmsId);
     if (dupe) return res.status(409).json({ error: 'This DMS document is already linked.', code: 409 });
 
@@ -148,8 +149,8 @@ router.post('/link', async (req, res) => {
     const result = db.get().prepare(`
       INSERT INTO family_documents
         (name, category, visibility, original_name, mime_type, file_size, content_data,
-         storage_provider, storage_key, dms_account_id, external_url, external_meta, created_by)
-      VALUES (?, ?, ?, ?, ?, 0, '', 'external', ?, ?, ?, ?, ?)
+         storage_provider, storage_backend, storage_key, dms_account_id, external_url, external_meta, created_by)
+      VALUES (?, ?, ?, ?, ?, 0, '', 'external', 'dms', ?, ?, ?, ?, ?)
     `).run(doc.title, category, visibility, doc.filename, mimeFromFilename(doc.filename), dmsId, account.id, doc.url, meta, userId(req));
 
     const row = db.get().prepare('SELECT * FROM family_documents WHERE id = ?').get(result.lastInsertRowid);
@@ -175,17 +176,33 @@ router.post('/push', async (req, res) => {
       )
     `).get({ id: docId, userId: userId(req) });
     if (!doc) return res.status(404).json({ error: 'Document not found.', code: 404 });
-    if (doc.storage_provider === 'external') {
+    if (doc.storage_backend === 'dms') {
       return res.status(400).json({ error: 'Document is already stored in a DMS.', code: 400 });
     }
 
-    const buffer = Buffer.from(doc.content_data, 'base64');
+    const content = await readDocumentContent(doc, {
+      dmsResolver: async (dmsDocument) => {
+        const sourceAccount = getAccount(dmsDocument.dms_account_id);
+        if (!sourceAccount) throw new Error('DMS account is unavailable.');
+        return adapterFactory(sourceAccount).fetchContent(dmsDocument.storage_key);
+      },
+    });
     const out = await adapterFactory(account).upload({
-      buffer, filename: doc.original_name, mime: doc.mime_type, title: doc.name,
+      buffer: content.buffer,
+      filename: doc.original_name,
+      mime: content.mime,
+      title: doc.name,
     });
     res.status(202).json({ data: { taskId: out.taskId } });
   } catch (err) {
     log.error('POST /push error:', err);
+    if (err instanceof StorageError) {
+      return res.status(502).json({
+        error: 'Failed to read document from storage.',
+        code: 502,
+        storage_code: err.storageCode,
+      });
+    }
     res.status(502).json({ error: 'Failed to upload document to DMS.', code: 502 });
   }
 });

@@ -470,9 +470,66 @@ export async function render(container, { user }) {
         ` : ''}
 
         ${user?.role === 'admin' ? `
-        <section class="settings-section" id="dms-section">
-          <h2 class="settings-section__title">${t('settings.sectionDms')}</h2>
-          <div class="settings-card" id="dms-card">
+        <section class="settings-section" id="documents-section">
+          <h2 class="settings-section__title">${t('settings.sectionDocuments')}</h2>
+          <div class="settings-card settings-card--document-storage" id="document-storage-card">
+            <h3 class="settings-card__title">${t('settings.documentStorageTitle')}</h3>
+            <p class="settings-card-description">${t('settings.documentStorageDescription')}</p>
+            <form class="settings-form settings-form--compact" id="document-storage-form" novalidate autocomplete="off">
+              <div class="settings-webdav-toggle-row">
+                <label class="toggle-row">
+                  <input type="checkbox" id="document-storage-enabled" name="enabled" />
+                  <span>${t('settings.documentStorageEnabled')}</span>
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="document-storage-url">${t('settings.documentStorageUrl')}</label>
+                <input class="form-input" type="url" id="document-storage-url" name="url" placeholder="https://..." />
+                <span class="form-hint" data-env-hint="url" hidden>${t('settings.documentStorageEnvHint')}</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="document-storage-username">${t('settings.documentStorageUsername')}</label>
+                <input class="form-input" type="text" id="document-storage-username" name="username" autocomplete="username" />
+                <span class="form-hint" data-env-hint="username" hidden>${t('settings.documentStorageEnvHint')}</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="document-storage-password">${t('settings.documentStoragePassword')}</label>
+                <div class="settings-webdav-pw-wrap">
+                  <input class="form-input" type="password" id="document-storage-password" name="password"
+                    autocomplete="new-password" placeholder="${t('settings.documentStoragePasswordPlaceholder')}" />
+                  <button type="button" class="btn btn--icon btn--ghost settings-webdav-reveal-btn"
+                    data-reveal-target="document-storage-password" aria-label="${t('common.togglePasswordVisibility')}">
+                    <i data-lucide="eye" aria-hidden="true"></i>
+                  </button>
+                </div>
+                <span class="form-hint" data-env-hint="password" hidden>${t('settings.documentStorageEnvHint')}</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="document-storage-path">${t('settings.documentStoragePath')}</label>
+                <input class="form-input" type="text" id="document-storage-path" name="path" />
+                <span class="form-hint" data-env-hint="path" hidden>${t('settings.documentStorageEnvHint')}</span>
+              </div>
+              <div class="form-hint" data-env-hint="enabled" hidden>${t('settings.documentStorageEnvHint')}</div>
+              <div id="document-storage-test-result" class="form-hint" hidden></div>
+              <div class="settings-form-actions">
+                <button type="button" class="btn btn--secondary" id="document-storage-test-btn">
+                  <i data-lucide="plug-zap" aria-hidden="true"></i>
+                  ${t('settings.documentStorageTest')}
+                </button>
+                <button type="submit" class="btn btn--primary" id="document-storage-save-btn">
+                  ${t('settings.documentStorageSave')}
+                </button>
+              </div>
+            </form>
+            <div class="settings-info-grid document-storage-status" id="document-storage-status"></div>
+            <p class="settings-document-storage-warning">
+              <i data-lucide="triangle-alert" aria-hidden="true"></i>
+              <span>${t('settings.documentStorageBackupWarning')}</span>
+            </p>
+          </div>
+
+          <div class="settings-card settings-card--document-storage" id="dms-card">
+            <h3 class="settings-card__title">${t('settings.dmsTitle')}</h3>
             <p class="settings-card-description">${t('settings.dmsDescription')}</p>
             <ul class="dms-account-list" id="dms-account-list"></ul>
             <form class="settings-form settings-form--compact" id="dms-form" novalidate autocomplete="off">
@@ -1143,6 +1200,7 @@ docker cp oikos:/data/oikos-backup.db ./oikos-backup.db</code></pre>
 
   renderSettingsSubTabs(container, user, activeTab);
   bindEvents(container, user, users, categories, icsSubscriptions, apiTokens, thirdPartyModules);
+  bindDocumentStorageEvents(container);
   bindDmsEvents(container);
   if (window.lucide) window.lucide.createIcons({ el: container });
 }
@@ -1529,6 +1587,203 @@ async function loadCardDAVAccounts(container, user) {
   } catch (err) {
     console.error('Failed to load CardDAV accounts:', err);
   }
+}
+
+// --------------------------------------------------------
+// Document storage
+// --------------------------------------------------------
+
+function documentStorageTarget(data) {
+  if (data.effective_target) return data.effective_target;
+  if (!data.url) return t('settings.documentStorageNotConfigured');
+  const basePath = data.base_path ?? data.basePath ?? '';
+  return basePath ? `${data.url.replace(/\/+$/, '')}/${String(basePath).replace(/^\/+/, '')}` : data.url;
+}
+
+function renderDocumentStorageStatus(container, data) {
+  const status = container.querySelector('#document-storage-status');
+  if (!status) return;
+  const activeBackend = data.active_upload_backend ?? (data.enabled ? 'webdav' : 'local');
+  const activeLabel = activeBackend === 'webdav'
+    ? t('documents.storageWebdav')
+    : t('documents.storageLocal');
+  const lastTest = data.last_test ?? data.lastTest;
+  const lastTestLabel = lastTest
+    ? `${formatDate(lastTest)} ${formatTime(lastTest)}`
+    : t('settings.documentStorageNeverTested');
+  const lastError = data.last_error ?? data.lastError;
+
+  status.replaceChildren();
+  status.insertAdjacentHTML('beforeend', `
+    <div class="settings-info-row">
+      <span class="settings-info-label">${t('settings.documentStorageActive')}</span>
+      <span class="settings-info-value settings-info-value--success">${esc(activeLabel)}</span>
+    </div>
+    <div class="settings-info-row">
+      <span class="settings-info-label">${t('settings.documentStorageTarget')}</span>
+      <span class="settings-info-value"><code>${esc(documentStorageTarget(data))}</code></span>
+    </div>
+    <div class="settings-info-row">
+      <span class="settings-info-label">${t('settings.documentStorageCount')}</span>
+      <span class="settings-info-value">${Number(data.webdav_document_count ?? 0)}</span>
+    </div>
+    <div class="settings-info-row">
+      <span class="settings-info-label">${t('settings.documentStorageLastTest')}</span>
+      <span class="settings-info-value">${esc(lastTestLabel)}</span>
+    </div>
+    ${lastError ? `
+      <div class="settings-info-row">
+        <span class="settings-info-label">${t('settings.documentStorageLastError')}</span>
+        <span class="settings-info-value settings-document-storage-error">${esc(lastError)}</span>
+      </div>
+    ` : ''}
+  `);
+}
+
+async function loadDocumentStorageConfig(container) {
+  const form = container.querySelector('#document-storage-form');
+  if (!form) return;
+  try {
+    const res = await api.get('/documents/storage/config');
+    const data = res.data ?? {};
+    const envControlled = data.env_controlled ?? data.envControlled ?? {};
+    const basePath = data.base_path ?? data.basePath ?? '';
+    form._documentStorageConfig = {
+      ...data,
+      base_path: basePath,
+      env_controlled: envControlled,
+    };
+
+    form.querySelector('#document-storage-enabled').checked = Boolean(data.enabled);
+    form.querySelector('#document-storage-url').value = data.url ?? '';
+    form.querySelector('#document-storage-username').value = data.username ?? '';
+    form.querySelector('#document-storage-password').value = '';
+    form.querySelector('#document-storage-password').placeholder = data.password_configured
+      ? '****'
+      : t('settings.documentStoragePasswordPlaceholder');
+    form.querySelector('#document-storage-path').value = basePath;
+
+    const fieldIds = {
+      enabled: 'document-storage-enabled',
+      url: 'document-storage-url',
+      username: 'document-storage-username',
+      password: 'document-storage-password',
+      path: 'document-storage-path',
+    };
+    for (const [field, id] of Object.entries(fieldIds)) {
+      const input = form.querySelector(`#${id}`);
+      const controlled = Boolean(envControlled[field]);
+      if (input) input.disabled = controlled;
+      const hint = form.querySelector(`[data-env-hint="${field}"]`);
+      if (hint) hint.hidden = !controlled;
+    }
+    renderDocumentStorageStatus(container, data);
+  } catch (err) {
+    console.error('Failed to load document storage config:', err);
+  }
+}
+
+function documentStoragePayload(form) {
+  const envControlled = form._documentStorageConfig?.env_controlled ?? {};
+  const payload = {};
+  if (!envControlled.enabled) {
+    payload.enabled = form.querySelector('#document-storage-enabled')?.checked ?? false;
+  }
+  if (!envControlled.url) {
+    payload.url = form.querySelector('#document-storage-url')?.value?.trim() ?? '';
+  }
+  if (!envControlled.username) {
+    payload.username = form.querySelector('#document-storage-username')?.value?.trim() ?? '';
+  }
+  if (!envControlled.path) {
+    payload.path = form.querySelector('#document-storage-path')?.value?.trim() ?? '';
+  }
+  const password = form.querySelector('#document-storage-password')?.value;
+  if (!envControlled.password && password && password !== '****') payload.password = password;
+  return payload;
+}
+
+function hasProtectedDocumentStorageChange(form, payload) {
+  const current = form._documentStorageConfig ?? {};
+  if (Number(current.webdav_document_count ?? 0) < 1) return false;
+  const envControlled = current.env_controlled ?? {};
+  if (Object.hasOwn(payload, 'url') && payload.url !== (current.url ?? '')) return true;
+  if (Object.hasOwn(payload, 'username') && payload.username !== (current.username ?? '')) return true;
+  if (Object.hasOwn(payload, 'path') && payload.path !== (current.base_path ?? '')) return true;
+  return !envControlled.password && Object.hasOwn(payload, 'password');
+}
+
+function bindDocumentStorageEvents(container) {
+  const form = container.querySelector('#document-storage-form');
+  const testBtn = container.querySelector('#document-storage-test-btn');
+  const result = container.querySelector('#document-storage-test-result');
+  if (!form) return;
+
+  loadDocumentStorageConfig(container);
+
+  form.querySelector('[data-reveal-target]')?.addEventListener('click', (event) => {
+    const button = event.currentTarget;
+    const input = form.querySelector(`#${button.dataset.revealTarget}`);
+    if (!input) return;
+    const reveal = input.type === 'password';
+    input.type = reveal ? 'text' : 'password';
+    const icon = button.querySelector('[data-lucide]');
+    if (icon) icon.dataset.lucide = reveal ? 'eye-off' : 'eye';
+    if (window.lucide) window.lucide.createIcons({ el: button });
+  });
+
+  testBtn?.addEventListener('click', async () => {
+    testBtn.disabled = true;
+    if (result) {
+      result.hidden = false;
+      result.textContent = t('settings.documentStorageTesting');
+      result.className = 'form-hint';
+    }
+    try {
+      await api.post('/documents/storage/test', documentStoragePayload(form));
+      if (result) {
+        result.textContent = t('settings.documentStorageTestSuccess');
+        result.className = 'form-hint settings-document-storage-success';
+      }
+      await loadDocumentStorageConfig(container);
+    } catch (err) {
+      if (result) {
+        result.textContent = t('settings.documentStorageTestFailed', { error: err.message });
+        result.className = 'form-hint settings-document-storage-error';
+      }
+    } finally {
+      testBtn.disabled = false;
+    }
+  });
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const saveBtn = form.querySelector('#document-storage-save-btn');
+    const payload = documentStoragePayload(form);
+    if (hasProtectedDocumentStorageChange(form, payload)) {
+      const confirmed = await confirmModal(t('settings.documentStorageConfirmExisting'), {
+        confirmLabel: t('common.confirm'),
+      });
+      if (!confirmed) return;
+      payload.confirm_existing_access = true;
+    }
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = t('common.saving');
+    }
+    try {
+      await api.put('/documents/storage/config', payload);
+      window.oikos?.showToast(t('settings.documentStorageSaved'), 'success');
+      await loadDocumentStorageConfig(container);
+    } catch (err) {
+      window.oikos?.showToast(err.message ?? t('common.errorGeneric'), 'danger');
+    } finally {
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = t('settings.documentStorageSave');
+      }
+    }
+  });
 }
 
 // --------------------------------------------------------

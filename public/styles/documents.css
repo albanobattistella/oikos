@@ -730,6 +730,30 @@
   color: var(--color-info);
 }
 
+.doc-badge--local {
+  background: var(--color-surface-2);
+  color: var(--color-text-secondary);
+}
+
+.doc-badge--webdav {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.doc-badge--unavailable {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.document-storage-target {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
 /* --------------------------------------------------------
    DMS Viewer Deep-Link
    -------------------------------------------------------- */
@@ -740,4 +764,3 @@
   gap: var(--space-1);
   font-size: var(--text-sm);
 }
-
