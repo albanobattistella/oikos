@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.71.13] - 2026-06-11
+
+### Changed
+- **Docs**: updated installation guide, SPEC, and Unraid CA template to document the `OIDC_TRUST_EMAIL_WITHOUT_VERIFIED_CLAIM` opt-in variable introduced in v0.71.11.
+
 ## [0.71.12] - 2026-06-11
 
 ### Security
