@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.71.20] - 2026-06-12
+
+### Changed
+- **Calmer dashboard above the fold**: the home dashboard no longer stacks three separate representations of the same four areas (Tasks, Calendar, Shopping, Meals) before any new information appears. The redundant quick-action row in the greeting header has been removed — the bottom-right action button (and the sidebar on desktop) already cover creating and navigating — so the personal greeting and the "Today at a glance" summary now lead the screen. On mobile this also removes a row of unlabeled icon-only buttons. The duplicate date that the summary repeated directly under the greeting is gone, leaving a single date. No data, widgets, or customization were changed.
+
 ## [0.71.19] - 2026-06-12
 
 ### Fixed

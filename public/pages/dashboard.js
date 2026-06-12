@@ -615,15 +615,6 @@ function renderBudgetWidget(budget, currency) {
   </div>`;
 }
 
-function renderQuickAction({ route, label, icon, tone = '' }) {
-  return `
-    <button type="button" class="dashboard-action ${tone ? `dashboard-action--${tone}` : ''}" data-route="${route}" aria-label="${esc(label)}">
-      <span class="dashboard-action__icon"><i data-lucide="${icon}" aria-hidden="true"></i></span>
-      <span class="dashboard-action__label">${label}</span>
-    </button>
-  `;
-}
-
 function renderTodayCard(icon, label, value, route, tone) {
   return `
     <button type="button" class="today-cockpit-card today-cockpit-card--${tone}" data-route="${route}">
@@ -644,7 +635,6 @@ function renderTodayCockpit(data) {
     <section class="today-cockpit" aria-labelledby="today-cockpit-title">
       <div class="today-cockpit__header">
         <h2 id="today-cockpit-title">${esc(t('dashboard.todayTitle'))}</h2>
-        <span class="today-cockpit__date">${esc(formatDate(new Date()))}</span>
       </div>
       <div class="today-cockpit__grid">
         ${!window.oikos?.isModuleDisabled('tasks')    ? renderTodayCard('check-square',   t('dashboard.todayTask'),     taskTitle, '/tasks', 'task') : ''}
@@ -659,13 +649,6 @@ function renderTodayCockpit(data) {
 
 function renderDashboardOverview(user, editing = false) {
   const dateLabel = formatDate(new Date());
-
-  const actions = [
-    { route: '/tasks', label: t('nav.tasks'), icon: 'check-square', tone: 'blue' },
-    { route: '/calendar', label: t('nav.calendar'), icon: 'calendar', tone: 'violet' },
-    { route: '/shopping', label: t('nav.shopping'), icon: 'shopping-cart', tone: 'green' },
-    { route: '/notes', label: t('nav.notes'), icon: 'sticky-note', tone: 'amber' },
-  ].map(renderQuickAction).join('');
 
   return `
     <section class="dashboard-overview">
@@ -684,7 +667,7 @@ function renderDashboardOverview(user, editing = false) {
             <button class="btn btn--ghost" id="dashboard-customize-reset">${t('dashboard.customizeReset')}</button>
             <button class="btn btn--secondary" id="dashboard-customize-cancel">${t('common.cancel')}</button>
             <button class="btn btn--primary" id="dashboard-customize-save">${t('common.save')}</button>
-          </div>` : `<div class="dashboard-overview__actions">${actions}</div>`}
+          </div>` : ''}
           <button class="dashboard-icon-btn" id="dashboard-customize-btn"
                   aria-label="${editing ? t('dashboard.customizeExit') : t('dashboard.customize')}"
                   title="${editing ? t('dashboard.customizeExit') : t('dashboard.customize')}"

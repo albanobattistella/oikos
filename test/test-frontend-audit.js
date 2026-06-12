@@ -1457,11 +1457,6 @@ test('phase 2 mobile dashboard cockpit uses wider important cards with tokenized
     /@media \(max-width:\s*640px\)[\s\S]*\.today-cockpit-card--task,\s*\n\s*\.today-cockpit-card--event\s*\{[\s\S]*grid-column:\s*1\s*\/\s*-1/,
     'task and event cards should span the mobile cockpit grid for wider text'
   );
-  assert.match(
-    dashboard,
-    /@media \(max-width:\s*640px\)[\s\S]*\.dashboard-action\s*\{[\s\S]*width:\s*var\(--target-base\)[\s\S]*height:\s*var\(--target-base\)/,
-    'mobile quick actions should keep tokenized icon-button dimensions'
-  );
 });
 
 test('phase 2 dashboard FAB uses tokenized position and reserved mobile scroll room', () => {
@@ -1475,12 +1470,6 @@ test('phase 2 dashboard FAB uses tokenized position and reserved mobile scroll r
     /@media \(max-width:\s*640px\)[\s\S]*\.dashboard-shell\s*\{[\s\S]*padding-bottom:\s*calc\(var\(--target-lg\)\s*\+\s*var\(--space-8\)\)/,
     'mobile dashboard should reserve scroll room for the fixed FAB'
   );
-});
-
-test('phase 2 mobile dashboard quick actions keep accessible names when labels are visually compact', () => {
-  const dashboardPage = read('../public/pages/dashboard.js');
-
-  assert.match(dashboardPage, /class="dashboard-action \$\{tone \? `dashboard-action--\$\{tone\}` : ''\}" data-route="\$\{route\}" aria-label="\$\{esc\(label\)\}"/);
 });
 
 // ============================================================
