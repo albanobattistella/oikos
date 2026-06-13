@@ -193,6 +193,15 @@
   color: var(--color-text-primary);
 }
 
+/* Nach der Leaf-Navigation erhält der Titel programmatisch den Fokus
+ * (tabIndex=-1 + focus()), damit Screenreader/Tastatur in die neue Seite
+ * springen. Er ist ein Region-Fokus-Ziel, kein interaktives Element — daher
+ * kein sichtbarer Fokusring (gleiche Behandlung wie .app-content/#main-content). */
+.settings-leaf-header__title:focus,
+.settings-leaf-header__title:focus-visible {
+  outline: none;
+}
+
 .settings-mobile-overview__description,
 .settings-leaf-header__description {
   margin: 0;
