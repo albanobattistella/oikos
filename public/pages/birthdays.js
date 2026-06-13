@@ -241,14 +241,7 @@ function renderPage() {
   _container.insertAdjacentHTML('beforeend', `
     <div class="birthdays-page">
       <div class="birthdays-toolbar">
-        <h1 class="birthdays-toolbar__title">
-          <i data-lucide="cake" class="birthdays-toolbar__title-icon" aria-hidden="true"></i>
-          <span>${t('birthdays.title')}</span>
-        </h1>
-        <button class="btn btn--primary birthdays-header__action" id="birthdays-add-btn">
-          <i data-lucide="plus" style="width:16px;height:16px;margin-right:4px;" aria-hidden="true"></i>
-          ${t('birthdays.addButton')}
-        </button>
+        <h1 class="u-toolbar-title">${t('birthdays.title')}</h1>
       </div>
       <p class="birthdays-toolbar__subtitle">${t('birthdays.calendarHint')}</p>
 
@@ -264,7 +257,7 @@ function renderPage() {
         <section class="birthdays-panel birthdays-panel--list">
           <div class="birthdays-toolbar birthdays-toolbar--embedded">
             <label class="birthdays-toolbar__search" for="birthdays-search">
-              <span class="birthdays-toolbar__search-label">${t('birthdays.searchPlaceholder')}</span>
+              <span class="birthdays-toolbar__search-label sr-only">${t('birthdays.searchPlaceholder')}</span>
               <span class="birthdays-toolbar__search-control">
                 <i data-lucide="search" class="birthdays-toolbar__search-icon" aria-hidden="true"></i>
                 <input type="search" class="birthdays-toolbar__search-input" id="birthdays-search"
@@ -295,7 +288,6 @@ function renderPage() {
 
 function bindEvents() {
   const openCreate = () => openBirthdayModal({ mode: 'create' });
-  _container.querySelector('#birthdays-add-btn').addEventListener('click', openCreate);
   _container.querySelector('#fab-new-birthday').addEventListener('click', openCreate);
 
   const search = _container.querySelector('#birthdays-search');

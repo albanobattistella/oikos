@@ -2161,7 +2161,7 @@ test('birthday and navigation headings keep a sequential hierarchy', () => {
   const birthdays = read('../public/pages/birthdays.js');
   const navigation = read('../public/settings/pages/modules-navigation.js');
 
-  assert.match(birthdays, /<h1 class="birthdays-toolbar__title"/);
+  assert.match(birthdays, /<h1 class="u-toolbar-title">/);
   assert.doesNotMatch(birthdays, /<h3>/);
   assert.match(navigation, /<h2 class="settings-navigation-panel__title"/);
   assert.match(navigation, /<h3 class="settings-navigation-group__title"/);
