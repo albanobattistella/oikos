@@ -798,6 +798,32 @@ function renderAppShell(container) {
   sidebar.appendChild(sidebarLogo);
   sidebar.appendChild(sidebarToggle);
   sidebar.appendChild(sidebarItems);
+
+  // Hilfe-Eintrag im Sidebar-Footer (Aktion, keine Route → kein data-route, damit
+  // Route-Delegation/Indikator ihn ignorieren).
+  const sidebarHelp = document.createElement('button');
+  sidebarHelp.type = 'button';
+  sidebarHelp.className = 'nav-item nav-item--help';
+  sidebarHelp.setAttribute('aria-label', t('nav.help'));
+  sidebarHelp.setAttribute('title', t('nav.help'));
+  sidebarHelp.addEventListener('click', () => showHelpModal());
+  const helpWrap = document.createElement('div');
+  helpWrap.className = 'nav-item__icon-wrap';
+  const helpWell = document.createElement('div');
+  helpWell.className = 'nav-item__icon-well';
+  const helpIcon = document.createElement('i');
+  helpIcon.dataset.lucide = 'circle-help';
+  helpIcon.className = 'nav-item__icon';
+  helpIcon.setAttribute('aria-hidden', 'true');
+  helpWell.appendChild(helpIcon);
+  helpWrap.appendChild(helpWell);
+  const helpLabel = document.createElement('span');
+  helpLabel.className = 'nav-item__label';
+  helpLabel.textContent = t('nav.help');
+  sidebarHelp.appendChild(helpWrap);
+  sidebarHelp.appendChild(helpLabel);
+  sidebar.appendChild(sidebarHelp);
+
   if (window.lucide) window.lucide.createIcons({ el: sidebar });
 
   const main = document.createElement('main');
@@ -858,6 +884,29 @@ function renderAppShell(container) {
     moreSheet.appendChild(moreSearchBar);
 
     secondaryMobileItems().forEach((item) => moreSheet.appendChild(moreItemEl(item)));
+
+    // Hilfe-Zeile im „Mehr“-Sheet: schließt das Sheet und öffnet das Overlay.
+    const moreHelp = document.createElement('button');
+    moreHelp.type = 'button';
+    moreHelp.className = 'more-item more-item--help';
+    moreHelp.setAttribute('aria-label', t('nav.help'));
+    moreHelp.addEventListener('click', () => {
+      if (window._closeMoreSheet) window._closeMoreSheet({ restoreFocus: false });
+      showHelpModal();
+    });
+    const moreHelpWell = document.createElement('div');
+    moreHelpWell.className = 'more-item__icon-well';
+    const moreHelpIcon = document.createElement('i');
+    moreHelpIcon.dataset.lucide = 'circle-help';
+    moreHelpIcon.className = 'more-item__icon';
+    moreHelpIcon.setAttribute('aria-hidden', 'true');
+    moreHelpWell.appendChild(moreHelpIcon);
+    const moreHelpLabel = document.createElement('span');
+    moreHelpLabel.className = 'more-item__label';
+    moreHelpLabel.textContent = t('nav.help');
+    moreHelp.appendChild(moreHelpWell);
+    moreHelp.appendChild(moreHelpLabel);
+    moreSheet.appendChild(moreHelp);
   }
 
   bottomNav.appendChild(bottomItems);
