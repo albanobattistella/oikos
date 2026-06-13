@@ -736,6 +736,37 @@ html.fab-anim-done .page-fab {
   margin-left: auto;
 }
 
+/* Center-Slot des Canonical Page Head: wachsende Mitte (Suche, Datums-Nav).
+ * flex:1 schiebt die Aktionen via deren margin-left:auto an den Rand. Auf
+ * schmalen Viewports darf der Kopf umbrechen — der Center-Slot nimmt dann
+ * eine eigene Zeile ein (siehe .page-toolbar--wrap). */
+.page-toolbar__center {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Opt-in: Kopf darf umbrechen; Center-Slot rutscht auf Zeile 2 unter
+ * Titel + Aktionen, sobald der Platz in einer Zeile nicht reicht. */
+.page-toolbar--wrap {
+  flex-wrap: wrap;
+  row-gap: var(--space-2);
+}
+
+.page-toolbar--wrap .page-toolbar__center {
+  flex-basis: 100%;
+  order: 3;
+}
+
+@media (min-width: 768px) {
+  .page-toolbar--wrap .page-toolbar__center {
+    flex-basis: auto;
+    order: 0;
+  }
+}
+
 @media (max-width: 640px) {
   .page-toolbar {
     padding: var(--space-2) var(--space-3);

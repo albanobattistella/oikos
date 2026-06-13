@@ -60,9 +60,9 @@ export async function render(container, { user }) {
   container.replaceChildren();
   container.insertAdjacentHTML('beforeend', `
     <div class="contacts-page">
-      <h1 class="sr-only">${t('contacts.title')}</h1>
-      <div class="contacts-toolbar">
-        <label class="contacts-toolbar__search" for="contacts-search">
+      <div class="page-toolbar page-toolbar--wrap contacts-toolbar">
+        <h1 class="page-toolbar__title">${t('contacts.title')}</h1>
+        <label class="contacts-toolbar__search page-toolbar__center" for="contacts-search">
           <span class="contacts-toolbar__search-label sr-only">${t('contacts.searchPlaceholder')}</span>
           <span class="contacts-toolbar__search-control">
             <i data-lucide="search" class="contacts-toolbar__search-icon" aria-hidden="true"></i>
@@ -71,15 +71,17 @@ export async function render(container, { user }) {
                    autocomplete="off">
           </span>
         </label>
-        <label class="btn btn--secondary" title="${t('contacts.importTooltip')}" aria-label="${t('contacts.importLabel')}">
-          <i data-lucide="upload" style="width:16px;height:16px;margin-right:4px;" aria-hidden="true"></i>
-          ${t('contacts.importButton')}
-          <input type="file" id="contacts-import-input" accept=".vcf,text/vcard" style="display:none">
-        </label>
-        <button class="btn btn--primary toolbar-new-btn" id="contacts-add-btn">
-          <i data-lucide="plus" style="width:16px;height:16px;margin-right:4px;" aria-hidden="true"></i>
-          ${t('contacts.addButton')}
-        </button>
+        <div class="page-toolbar__actions">
+          <label class="btn btn--secondary" title="${t('contacts.importTooltip')}" aria-label="${t('contacts.importLabel')}">
+            <i data-lucide="upload" style="width:16px;height:16px;margin-right:4px;" aria-hidden="true"></i>
+            ${t('contacts.importButton')}
+            <input type="file" id="contacts-import-input" accept=".vcf,text/vcard" style="display:none">
+          </label>
+          <button class="btn btn--primary toolbar-new-btn" id="contacts-add-btn">
+            <i data-lucide="plus" style="width:16px;height:16px;margin-right:4px;" aria-hidden="true"></i>
+            ${t('contacts.addButton')}
+          </button>
+        </div>
       </div>
       <div class="contacts-filters" id="contacts-filters">
         <button class="contact-filter-chip contact-filter-chip--active" data-cat="">${t('contacts.filterAll')}</button>
