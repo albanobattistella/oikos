@@ -9,6 +9,7 @@ import { initI18n, getLocale, t } from '/i18n.js';
 import { esc } from '/utils/html.js';
 import { init as initReminders, stop as stopReminders } from '/reminders.js';
 import { isKitchenRoute, getLastKitchenRoute } from '/utils/kitchen-tabs.js';
+import { buildHelpRows } from '/utils/help.js';
 import { NAV_ICONS } from '/nav-icons.js';
 import { SETTINGS_LEAVES } from '/settings/registry.js';
 import {
@@ -970,7 +971,7 @@ const SHORTCUTS = [
     document.getElementById('more-sheet-search')?.click();
   } },
   { key: 'n',   description: () => t('shortcuts.new'),     action: () => document.querySelector('.page-fab')?.click() },
-  { key: '?',   description: () => t('shortcuts.help'),    action: () => showShortcutsModal() },
+  { key: '?',   description: () => t('shortcuts.help'),    action: () => showHelpModal() },
   { key: 'g d', description: () => t('shortcuts.goDash'),  action: () => navigate('/') },
   { key: 'g t', description: () => t('shortcuts.goTasks'), action: () => navigate('/tasks') },
   { key: 'g c', description: () => t('shortcuts.goCal'),   action: () => navigate('/calendar') },
@@ -1038,7 +1039,12 @@ function initKeyboardShortcuts() {
   });
 }
 
-function showShortcutsModal() {
+function showHelpModal() {
+  // Mirrors the CSS sidebar↔bottom-nav breakpoint (sidebar is min-width:1024px):
+  // without a keyboard, shortcut rows are useless — show a plain-language guide.
+  const coarsePointer = window.matchMedia('(max-width: 1023px)').matches;
+  const helpRows = buildHelpRows({ coarsePointer, shortcuts: SHORTCUTS, t });
+
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
   overlay.setAttribute('aria-modal', 'true');
@@ -1047,18 +1053,22 @@ function showShortcutsModal() {
   const panel = document.createElement('div');
   panel.className = 'modal-panel modal-panel--sm';
   panel.setAttribute('role', 'dialog');
-  panel.setAttribute('aria-label', t('shortcuts.help'));
+  panel.setAttribute('aria-label', t('help.title'));
 
-  const rows = SHORTCUTS.map((s) => `
-    <div class="shortcuts-row">
-      <kbd class="shortcut-kbd">${esc(s.key)}</kbd>
-      <span class="shortcut-desc">${esc(s.description())}</span>
-    </div>
-  `).join('');
+  const rows = helpRows.map((r) => r.key
+    ? `<div class="help-row">
+         <kbd class="shortcut-kbd">${esc(r.key)}</kbd>
+         <span class="shortcut-desc">${esc(r.desc)}</span>
+       </div>`
+    : `<div class="help-row">
+         <i data-lucide="${esc(r.icon)}" class="help-row__icon icon-md" aria-hidden="true"></i>
+         <span class="shortcut-desc">${esc(r.desc)}</span>
+       </div>`
+  ).join('');
 
   panel.insertAdjacentHTML('beforeend', `
     <div class="modal-panel__header">
-      <span class="modal-panel__title">${esc(t('shortcuts.help'))}</span>
+      <span class="modal-panel__title">${esc(t('help.title'))}</span>
       <button class="modal-panel__close btn--ghost" aria-label="${esc(t('common.close'))}">
         <i data-lucide="x" class="icon-md" aria-hidden="true"></i>
       </button>
