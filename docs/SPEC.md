@@ -411,7 +411,26 @@ Per-user reminders attached to tasks or calendar events.
 | entity_id | INTEGER | FK → tasks or calendar_events, NOT NULL |
 | remind_at | TEXT | ISO 8601 datetime, NOT NULL |
 | dismissed | INTEGER | 0/1, default 0 |
+| pushed_at | TEXT | ISO 8601 datetime, nullable — set once the reminder has been delivered as a Web Push, so it is not pushed again |
 | created_by | INTEGER | FK → Users (CASCADE delete), NOT NULL |
+
+### Push Subscriptions
+
+Per-device Web Push subscriptions (one row per browser/device endpoint). Used by the push
+scheduler to deliver due reminders as system notifications even when the PWA is closed.
+
+| Column | Type | Constraint |
+|--------|------|-----------|
+| user_id | INTEGER | FK → Users (CASCADE delete), NOT NULL |
+| endpoint | TEXT | Push service endpoint URL, NOT NULL, UNIQUE |
+| p256dh | TEXT | Client public key (ECDH), NOT NULL |
+| auth | TEXT | Client auth secret, NOT NULL |
+| user_agent | TEXT | Nullable — device/browser label |
+| created_at | TEXT | ISO 8601 datetime, default now |
+| last_used_at | TEXT | ISO 8601 datetime, nullable — updated on each successful push |
+
+VAPID keys are generated on first use and stored in **Sync Config** (`push_vapid_public`,
+`push_vapid_private`); they can be overridden via `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` env vars.
 
 ### Birthdays
 
@@ -1030,6 +1049,7 @@ Time-based reminders attached to tasks or calendar events.
 - **Birthday reminders** auto-synced from the Birthdays module (1 day before each occurrence)
 - Dismissing a reminder marks it `dismissed = 1`; dismissed reminders are not shown again
 - API: `GET /api/v1/reminders/pending`, `GET /api/v1/reminders?entity_type=&entity_id=`, `POST /api/v1/reminders`, `DELETE /api/v1/reminders/:id`, `POST /api/v1/reminders/:id/dismiss`
+- **Web Push (PWA):** when a device opts in via Settings → Personal → Notifications, a service-worker push handler shows due reminders as system notifications even while the app is closed. A 60-second server-side scheduler (`server/services/push-scheduler.js`) delivers due, undismissed, unpushed reminders via VAPID/RFC 8291 (`web-push`) and marks `pushed_at`. The foreground in-app toast still runs; only the in-page `Notification(...)` is suppressed on devices with an active push subscription (push takes over). **Requires HTTPS** (service workers + Push API). API: `GET /api/v1/push/vapid-public-key`, `POST /api/v1/push/subscribe`, `POST /api/v1/push/unsubscribe`, `POST /api/v1/push/test`
 
 ### Third-Party Modules (`/modules/<id>`)
 
