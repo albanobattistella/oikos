@@ -12,6 +12,7 @@ import { t, formatDate, getLocale } from '/i18n.js';
 import { esc } from '/utils/html.js';
 import { renderSkeletonList } from '/utils/skeleton.js';
 import { render as renderSplitExpenses } from '/pages/split-expenses.js';
+import { openSubscriptionModal, render as renderSubscriptions } from '/pages/subscriptions.js';
 import { toLocalDateKey } from '/utils/date.js';
 import { budgetCategoryLabel } from '/utils/category-labels.js';
 import '/components/category-manager.js';
@@ -55,6 +56,12 @@ const SUBCATEGORY_I18N = () => ({
   insurance_other:          t('budget.subcatInsuranceOther'),
   investments:              t('budget.subcatInvestments'),
   taxes:                    t('budget.subcatTaxes'),
+  subscription_entertainment: t('budget.subcatSubscriptionEntertainment'),
+  subscription_productivity:  t('budget.subcatSubscriptionProductivity'),
+  subscription_utilities:     t('budget.subcatSubscriptionUtilities'),
+  subscription_health:        t('budget.subcatSubscriptionHealth'),
+  subscription_education:     t('budget.subcatSubscriptionEducation'),
+  subscription_other:         t('budget.subcatSubscriptionOther'),
 });
 
 function categoryLabel(category) {
@@ -230,6 +237,9 @@ export async function render(container, { user }) {
             <button class="budget-tab" id="budget-tab-budget" type="button" role="tab" aria-selected="true" data-tab="budget">
               ${t('budget.budgetTab')}
             </button>
+            <button class="budget-tab" id="budget-tab-subscriptions" type="button" role="tab" aria-selected="false" data-tab="subscriptions">
+              ${t('subscriptions.tabLabel')}
+            </button>
             <button class="budget-tab" id="budget-tab-loans" type="button" role="tab" aria-selected="false" data-tab="loans">
               ${t('budget.loansTab')}
             </button>`}
@@ -292,6 +302,10 @@ function wireNav() {
       _container.querySelector('#split-add-expense')?.click();
       return;
     }
+    if (state.activeTab === 'subscriptions') {
+      openSubscriptionModal();
+      return;
+    }
     openBudgetModal({ mode: 'create' });
   };
   _container.querySelector('#budget-add').addEventListener('click', addHandler);
@@ -326,6 +340,13 @@ function renderBody() {
     setHtml(body, renderLoansPage());
     wireLoansPage();
     if (window.lucide) lucide.createIcons({ el: body });
+    return;
+  }
+  if (state.activeTab === 'subscriptions') {
+    setHtml(body, '<div class="budget-tab-panel budget-tab-panel--subscriptions" id="budget-subscriptions-panel"></div>');
+    renderSubscriptions(body.querySelector('#budget-subscriptions-panel'), { user: _user }).catch((err) => {
+      console.error('[Budget] subscriptions render error:', err);
+    });
     return;
   }
   if (state.activeTab === 'split-expenses') {
@@ -419,6 +440,7 @@ function renderBody() {
 function updateTabs() {
   _container.classList.toggle('budget-page--split-active', state.activeTab === 'split-expenses' || _user?.access_scope === 'split_guest');
   _container.classList.toggle('budget-page--loans-active', state.activeTab === 'loans');
+  _container.classList.toggle('budget-page--subscriptions-active', state.activeTab === 'subscriptions');
   _container.querySelectorAll('.budget-tab').forEach((tab) => {
     const active = tab.dataset.tab === state.activeTab;
     tab.classList.toggle('budget-tab--active', active);
@@ -426,18 +448,21 @@ function updateTabs() {
   });
   const splitActive = state.activeTab === 'split-expenses' || _user?.access_scope === 'split_guest';
   const loansActive = state.activeTab === 'loans';
+  const subscriptionsActive = state.activeTab === 'subscriptions';
   ['#budget-today', '#budget-label', '#budget-add'].forEach((selector) => {
     const el = _container.querySelector(selector);
-    if (el) el.hidden = splitActive;
+    if (el) el.hidden = splitActive || subscriptionsActive;
   });
   ['#budget-prev', '#budget-next'].forEach((selector) => {
     const el = _container.querySelector(selector);
-    if (el) el.hidden = splitActive || loansActive;
+    if (el) el.hidden = splitActive || loansActive || subscriptionsActive;
   });
   const fab = _container.querySelector('#fab-new-budget');
   if (fab) {
     fab.hidden = false;
-    fab.setAttribute('aria-label', splitActive ? t('splitExpenses.addExpense') : t('budget.newEntryFabLabel'));
+    fab.setAttribute('aria-label', splitActive
+      ? t('splitExpenses.addExpense')
+      : subscriptionsActive ? t('subscriptions.add') : t('budget.newEntryFabLabel'));
   }
 }
 

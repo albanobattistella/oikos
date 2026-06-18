@@ -556,6 +556,19 @@ Enable single sign-on via any OpenID Connect provider (Authentik, Keycloak, Goog
 
 When all four OIDC variables are set, a **"Sign in with SSO"** button appears on the login page. The flow uses Authorization Code + PKCE (S256) with a nonce. On first login, the user is matched by their OIDC `sub`. If no match exists, an existing local account is linked automatically **only when the provider reports a verified email (`email_verified: true`) and exactly one local account holds that email address**; otherwise a new account is provisioned. Unverified or ambiguous emails never take over an existing account. If your provider omits the `email_verified` claim, set `OIDC_TRUST_EMAIL_WITHOUT_VERIFIED_CLAIM=true` to enable linking.
 
+### Subscription Currency Conversion (Optional)
+
+Budget → Subscriptions works fully without external services. Fixer can optionally provide live
+exchange rates; this sends only currency codes to the configured provider.
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `FIXER_API_KEY` | Fixer API key for live currency conversion. Rates are cached for 12 hours. | — | No |
+
+Logo discovery fetches only public HTTPS sites, rejects private/link-local targets, does not execute
+page scripts, and stores only a size-limited image. Service-name logo searches derive likely public
+domains and inspect those sites directly; they do not scrape search-engine image results.
+
 ### Automated Backups (Optional)
 
 Built-in cron-based database backup (default: 2 AM daily, keep last 7 copies). Status and manual trigger available in **Settings → Administration → Backup and restore**.

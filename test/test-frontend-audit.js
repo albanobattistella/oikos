@@ -1982,6 +1982,20 @@ test('budget chart exposes a screen-reader summary (audit 1.7)', () => {
   }
 });
 
+test('Budget places Subscriptions between Budget and Loans with secure rendering', () => {
+  const budget = read('../public/pages/budget.js');
+  const subscriptions = read('../public/pages/subscriptions.js');
+  const budgetTab = budget.indexOf('data-tab="budget"');
+  const subscriptionsTab = budget.indexOf('data-tab="subscriptions"');
+  const loansTab = budget.indexOf('data-tab="loans"');
+
+  assert.ok(budgetTab >= 0 && subscriptionsTab > budgetTab && loansTab > subscriptionsTab);
+  assert.match(budget, /renderSubscriptions/);
+  assert.doesNotMatch(subscriptions, /\.innerHTML\s*=/);
+  assert.match(subscriptions, /replaceChildren\(\)/);
+  assert.match(subscriptions, /insertAdjacentHTML\(/);
+});
+
 test('search fields keep visible labels after users enter a query', () => {
   const fields = [
     ['../public/pages/birthdays.js', 'birthdays-search'],

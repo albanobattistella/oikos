@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Subscriptions tracker under Budget:** a new tab between Budget and Loans tracks daily, weekly, monthly, and yearly services with renewal dates, pause/disable state, custom categories and payment methods, search/filter/sort controls, uploaded or securely discovered logos, brand colors, and responsive mobile cards.
+- **Subscription budgeting and analytics:** configurable monthly budget, remaining/over-budget status, yearly projection, category and payment-method breakdowns, native-currency amounts, and optional Fixer-backed conversion into a household base currency with a 12-hour server cache.
+- **Subscription reminders:** per-subscription reminder timing feeds the existing in-app reminder center.
+- **Budget-linked subscription expenses:** every active subscription maintains its next payment as a Budget expense under a localized `Subscription` category. Subscription categories are mirrored as Budget subcategories, disabling removes the pending expense, and renewal preserves the paid entry while creating the next one.
+- **Redesigned subscription editor:** grouped identity, billing, renewal, organization, and service sections replace the flat form. The logo sits beside the name, currency/category/payment method use searchable in-modal lists, and logo discovery shows an immediate preview.
+- **Compact subscription dashboard:** the Subscriptions tab now uses the Budget accent tab color, Split-style page gradient, denser subscription rows, compact summary cards, a renewal forecast area chart, category pie chart, and payment-method breakdown.
+- **Selectable subscription logo search:** logo discovery now opens a picker with site-owned candidates (declared icons, favicon, Open Graph image) so users can choose the exact logo before saving.
+
+### Security
+- **Protected external subscription integrations:** all subscription APIs require the existing authenticated session and CSRF middleware; logo discovery validates every public HTTPS redirect, blocks private/link-local addresses, reads only bounded page/search metadata, and constrains remote image size/type.
+
+### Fixed
+- **Subscription settings and logo discovery:** the base currency now uses the searchable currency picker, an unset subscription budget is shown as unlimited instead of over budget, and logo search tries page icons plus the standard favicon without failing on large page bodies.
+- **Subscription service-name logo search:** plain service names now generate likely public domain candidates and inspect those sites directly under the existing SSRF protections, and logo search failures surface in the UI while detailed diagnostics are written to server logs.
+- **Subscription modal polish:** the next payment field now uses the native date picker, the billing cycle control no longer relies on the unstable native select in the modal, and newer subscription labels are localized across all supported languages.
+
 ## [0.72.0] - 2026-06-17
 
 ### Added
