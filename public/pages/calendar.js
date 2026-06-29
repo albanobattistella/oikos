@@ -213,6 +213,7 @@ const CALENDAR_VIEW_STORAGE_KEY = 'oikos:calendar:view';
 const LEGACY_CALENDAR_VIEW_STORAGE_KEY = 'oikos-calendar-view';
 const LAYER_HOLIDAYS_KEY = 'oikos:calendar:layer:holidays';
 const LAYER_SCHOOL_KEY   = 'oikos:calendar:layer:school';
+const DATE_KEY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 const HOUR_HEIGHT = 56; // px pro Stunde in Wochen-/Tagesansicht
 
@@ -431,6 +432,21 @@ function localDate(str) {
   if (!str || str.length <= 10) return (str || '').slice(0, 10);
   const d = new Date(str);
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function validDateParam(value) {
+  return DATE_KEY_RE.test(String(value || '')) ? String(value) : '';
+}
+
+function deepLinkTargetDate(initialEvent, dateParam) {
+  return validDateParam(dateParam) || localDate(initialEvent?.start_datetime);
+}
+
+function findDeepLinkedOccurrence(events, initialEvent, targetDate) {
+  if (!initialEvent) return null;
+  return events.find(
+    (ev) => ev.id === initialEvent.id && localDate(ev.start_datetime) === targetDate
+  ) || initialEvent;
 }
 
 // Extract HH:MM in the browser's local timezone from a datetime string.
@@ -835,18 +851,16 @@ export async function render(container, { user }) {
     </div>
   `);
 
-  const params  = new URLSearchParams(window.location.search);
-  const openId   = params.get('open');
-  const dateParam = params.get('date'); // YYYY-MM-DD der gewünschten Instanz (bei Wiederholungen)
+  const params    = new URLSearchParams(window.location.search);
+  const openId    = params.get('open');
+  const dateParam = validDateParam(params.get('date'));
   let initialEvent = null;
   if (openId && /^\d+$/.test(openId)) {
     try {
       const eventRes = await api.get(`/calendar/${openId}`);
       if (eventRes?.data) {
         initialEvent = eventRes.data;
-        // dateParam nutzen wenn vorhanden (zeigt auf die richtige Instanz einer Serie);
-        // sonst auf das Original-Startdatum des Master-Events zurückfallen.
-        state.cursor = dateParam || localDate(initialEvent.start_datetime);
+        state.cursor = deepLinkTargetDate(initialEvent, dateParam);
       } else {
         console.warn('[Calendar] Deep-link event not found:', openId);
       }
@@ -873,16 +887,9 @@ export async function render(container, { user }) {
   container.querySelector('#fab-new-event')?.addEventListener('click', () => openEventModal({ mode: 'create' }));
 
   if (initialEvent) {
-    // Das Ziel-Datum für die Instanz (dateParam hat Vorrang vor dem Master-Startdatum).
-    const targetDate = dateParam || localDate(initialEvent.start_datetime);
+    const targetDate = deepLinkTargetDate(initialEvent, dateParam);
+    const occurrence = findDeepLinkedOccurrence(state.events, initialEvent, targetDate);
 
-    // Die konkrete Instanz aus state.events holen (expandiert, mit korrektem start_datetime).
-    // Bei Nicht-Wiederholungen ist das identisch mit initialEvent.
-    const occurrence = state.events.find(
-      (ev) => ev.id === initialEvent.id && localDate(ev.start_datetime) === targetDate
-    ) || initialEvent;
-
-    // Chip im richtigen Tag-Container suchen; Fallback auf beliebigen Chip mit der ID.
     const chip =
       container.querySelector(`[data-date="${CSS.escape(targetDate)}"] [data-id="${CSS.escape(openId)}"]`)
       ?? container.querySelector(`[data-id="${CSS.escape(openId)}"]`);
@@ -1570,6 +1577,9 @@ export const __test = {
   isMultiDayEvent,
   isAllDayLike,
   agendaSegmentKind,
+  deepLinkTargetDate,
+  findDeepLinkedOccurrence,
+  validDateParam,
   hasAttachment,
   attachmentUrls,
   clickedTime,

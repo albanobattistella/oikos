@@ -8,6 +8,7 @@ import { api } from '/api.js';
 import { t, formatDate, formatTime, getLocale } from '/i18n.js';
 import { getReadableTextColor } from '/utils/color.js';
 import { esc, fmtLocation, renderMarkdownLight } from '/utils/html.js';
+import { toLocalDateKey } from '/utils/date.js';
 import { openModal, closeModal } from '/components/modal.js';
 import { renderAvatarStack } from '/components/user-multi-select.js';
 
@@ -19,6 +20,23 @@ let _fabController = null;
 
 const ONBOARDING_KEY = 'oikos-onboarded';
 const APP_NAME_STORAGE_KEY = 'oikos-app-name';
+
+function eventOccurrenceDateKey(event) {
+  const value = String(event?.start_datetime || '');
+  if (!value) return '';
+  if (value.length <= 10) return value.slice(0, 10);
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value.slice(0, 10) : toLocalDateKey(date);
+}
+
+function calendarEventRoute(event) {
+  if (!event?.id) return '/calendar';
+  const params = new URLSearchParams({ open: String(event.id) });
+  const occurrenceDate = eventOccurrenceDateKey(event);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(occurrenceDate)) params.set('date', occurrenceDate);
+  return `/calendar?${params.toString()}`;
+}
 
 function getAppName() {
   return localStorage.getItem(APP_NAME_STORAGE_KEY) || 'Yuvomi';
@@ -471,7 +489,7 @@ function renderUpcomingEvents(events) {
     const _suffix = t('calendar.timeSuffix');
     const timeStr = e.all_day ? t('dashboard.allDay') : `${formatTime(d)}${_suffix ? ' ' + _suffix : ''}`.trim();
     return `
-      <div class="event-item" data-route="/calendar?open=${esc(e.id)}&date=${esc(e.start_datetime.slice(0, 10))}" role="button" tabindex="0">
+      <div class="event-item" data-route="${esc(calendarEventRoute(e))}" role="button" tabindex="0">
         <div class="event-item__bar" style="background-color:${esc(e.color || e.cal_color) || 'var(--color-accent)'}"></div>
         <div class="event-item__content">
           <div class="event-item__title">${esc(e.title)}</div>
@@ -665,7 +683,7 @@ function renderTodayCockpit(data) {
       </div>
       <div class="today-cockpit__grid">
         ${!window.oikos?.isModuleDisabled('tasks')    ? renderTodayCard('check-square',   t('dashboard.todayTask'),     taskTitle, '/tasks', 'task', highlights.taskCount) : ''}
-        ${!window.oikos?.isModuleDisabled('calendar') ? renderTodayCard('calendar',        t('dashboard.todayEvent'),    eventTitle, highlights.nextEvent?.id ? `/calendar?open=${esc(highlights.nextEvent.id)}&date=${esc(highlights.nextEvent.start_datetime.slice(0, 10))}` : '/calendar', 'event', highlights.eventCount) : ''}
+        ${!window.oikos?.isModuleDisabled('calendar') ? renderTodayCard('calendar',        t('dashboard.todayEvent'),    eventTitle, calendarEventRoute(highlights.nextEvent), 'event', highlights.eventCount) : ''}
         ${!window.oikos?.isModuleDisabled('shopping') ? renderTodayCard('shopping-cart',   t('dashboard.todayShopping'), t('dashboard.todayShoppingCount', { count: highlights.openShoppingCount }), '/shopping', 'shopping') : ''}
         ${!window.oikos?.isModuleDisabled('meals')    ? renderTodayCard('utensils',        t('dashboard.todayDinner'),   dinnerTitle, '/meals', 'dinner') : ''}
       </div>
@@ -1518,7 +1536,7 @@ export async function render(container, { user }) {
   }
 }
 
-export const __test = { buildTodayHighlights, normalizeVisibleMealTypes, renderTodayMeals };
+export const __test = { buildTodayHighlights, normalizeVisibleMealTypes, renderTodayMeals, calendarEventRoute, eventOccurrenceDateKey };
 
 function wireWeatherRefresh(container, onUpdated = null) {
   const refreshBtn = container.querySelector('#weather-refresh-btn');

@@ -550,6 +550,27 @@ test('getUpcomingEvents: wiederkehrender Termin mit Vergangenheits-Start erschei
   assert(sofia.id === recurId, 'Behält die Original-Event-ID der Serie');
 });
 
+test('calendarEventRoute: Dashboard-Link enthält die expandierte Instanz-Datumskomponente', async () => {
+  const { __test: dashboardHelpers } = await import('../public/pages/dashboard.js');
+  const events = getUpcomingEvents(cdb, { userId: cuTheo, limit: 10 });
+  const sofia = events.find((e) => e.title === 'Sofia Field Trip');
+  const route = dashboardHelpers.calendarEventRoute(sofia);
+  const params = new URLSearchParams(route.split('?')[1]);
+  assert(route.startsWith('/calendar?'), `Unerwartete Route: ${route}`);
+  assert(params.get('open') === String(recurId), 'Route muss die Serien-ID öffnen');
+  assert(params.get('date') === sofia.start_datetime.slice(0, 10),
+    'Route muss auf die expandierte Dashboard-Instanz zeigen');
+});
+
+test('calendarEventRoute: ungültige oder fehlende Startdaten erzeugen keinen kaputten date-Parameter', async () => {
+  const { __test: dashboardHelpers } = await import('../public/pages/dashboard.js');
+  const route = dashboardHelpers.calendarEventRoute({ id: 123, start_datetime: 'not-a-date' });
+  const params = new URLSearchParams(route.split('?')[1]);
+  assert(params.get('open') === '123', 'Event-ID bleibt erhalten');
+  assert(params.has('date') === false, 'Ungültiges Datum darf nicht in die Kalender-Query');
+  assert(dashboardHelpers.calendarEventRoute(null) === '/calendar', 'Ohne Event geht es zur Kalenderübersicht');
+});
+
 test('getUpcomingEvents: vergangene Einzeltermine erscheinen nicht', () => {
   const events = getUpcomingEvents(cdb, { userId: cuTheo, limit: 10 });
   assert(!events.find((e) => e.title === 'Past one-off'), 'Vergangener Einzeltermin darf nicht erscheinen');
