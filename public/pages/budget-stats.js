@@ -8,6 +8,12 @@ import { toLocalDateKey, parseLocalDateKey, addLocalDays } from '/utils/date.js'
 
 const view = { range: 'month', anchor: toLocalDateKey(new Date()), data: null, ctx: null, root: null };
 
+const RANGE_LABELS = {
+  week: 'budget.statsRangeWeek',
+  month: 'budget.statsRangeMonth',
+  year: 'budget.statsRangeYear',
+};
+
 export async function renderStats(panel, ctx) {
   view.ctx = ctx;
   view.root = panel;
@@ -37,7 +43,7 @@ function renderShell() {
         <div class="budget-stats__ranges" role="tablist">
           ${['week', 'month', 'year'].map((r) => `
             <button type="button" class="budget-stats__range${r === view.range ? ' is-active' : ''}"
-              data-range="${r}">${t('budget.statsRange' + r[0].toUpperCase() + r.slice(1))}</button>`).join('')}
+              data-range="${r}">${t(RANGE_LABELS[r])}</button>`).join('')}
         </div>
         <div class="budget-stats__stepper">
           <button class="btn btn--icon" data-step="-1" aria-label="prev"><i data-lucide="chevron-left"></i></button>
