@@ -340,8 +340,6 @@
         "saveAsRecipe": "Save as recipe",
         "recipeScaleLabel": "Scale ingredients",
         "deletedToast": "Meal deleted",
-        "todaySection": "Сегодня",
-        "nextDaysSection": "Ближайшие дни",
         "recurrenceLabel": "Повторять каждую неделю",
         "recurrenceHint": "Yuvomi автоматически добавляет это блюдо в тот же день недели в следующих неделях.",
         "recurrenceBadge": "Повторяющееся блюдо",

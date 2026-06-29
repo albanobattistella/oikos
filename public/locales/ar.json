@@ -340,8 +340,6 @@
         "saveAsRecipe": "Save as recipe",
         "recipeScaleLabel": "Scale ingredients",
         "deletedToast": "Meal deleted",
-        "todaySection": "اليوم",
-        "nextDaysSection": "الأيام القادمة",
         "recurrenceLabel": "كرر أسبوعياً",
         "recurrenceHint": "ينشئ Yuvomi هذه الوجبة تلقائياً في نفس يوم الأسبوع في الأسابيع القادمة.",
         "recurrenceBadge": "وجبة متكررة",

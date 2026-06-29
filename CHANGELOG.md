@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.78.3] - 2026-06-29
+
+### Fixed
+- **Meals → Mobile week view:** the meal planner now shows the full week (Mon–Sun) on phones instead of a fixed three-day window, so days 4–7 are reachable again. The week is stacked vertically, scrollable, and auto-scrolls to today on open. (Closes #416)
+
 ## [0.78.2] - 2026-06-29
 
 ### Changed

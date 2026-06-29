@@ -78,21 +78,6 @@ function mealCategories() {
   return state.categories.filter((c) => !EXCLUDED_MEAL_CATEGORY_NAMES.has(c.name));
 }
 
-function buildMobileMealDays(currentWeek, today = toLocalDateKey(new Date())) {
-  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(currentWeek, i));
-  const todayIndex = weekDays.indexOf(today);
-  const visibleDays = todayIndex >= 0
-    ? Array.from({ length: 3 }, (_, i) => addDays(today, i))
-    : weekDays.slice(0, 3);
-
-  return {
-    primary: visibleDays[0] ?? currentWeek,
-    nextDays: visibleDays.slice(1),
-    visibleDays,
-    hasToday: todayIndex >= 0,
-  };
-}
-
 // --------------------------------------------------------
 // API-Wrapper
 // --------------------------------------------------------
@@ -101,17 +86,7 @@ async function loadWeek(week) {
   try {
     const currentWeek = getMondayOf(week);
     const res = await api.get(`/meals?week=${currentWeek}`);
-    const mobileDays = buildMobileMealDays(currentWeek);
-    const extraWeeks = [...new Set(
-      mobileDays.visibleDays
-        .map((date) => getMondayOf(date))
-        .filter((monday) => monday !== currentWeek)
-    )];
-    const extraMeals = await Promise.all(extraWeeks.map((monday) => api.get(`/meals?week=${monday}`)));
-    state.meals       = [
-      ...res.data,
-      ...extraMeals.flatMap((extra) => Array.isArray(extra.data) ? extra.data : []),
-    ];
+    state.meals       = Array.isArray(res.data) ? res.data : [];
     state.currentWeek = currentWeek;
   } catch (err) {
     console.error('[Meals] loadWeek Fehler:', err);
@@ -224,32 +199,15 @@ function renderWeekGrid() {
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(state.currentWeek, i));
   const dayNames = DAY_NAMES();
-  const mobileDays = buildMobileMealDays(state.currentWeek);
-  const mobileVisibleDates = new Set(mobileDays.visibleDays);
-  const firstNextMobileDate = mobileDays.nextDays[0] ?? null;
-  const days = [
-    ...weekDays,
-    ...mobileDays.visibleDays.filter((date) => !weekDays.includes(date)),
-  ];
 
   grid.replaceChildren();
-  grid.insertAdjacentHTML('beforeend', days.map((date) => {
+  grid.insertAdjacentHTML('beforeend', weekDays.map((date) => {
     const mealsForDay = state.meals.filter((m) => m.date === date);
     const todayClass  = isToday(date) ? 'day-header--today' : '';
     const dayNameIndex = (new Date(`${date}T00:00:00`).getDay() + 6) % 7;
-    const extraClass = weekDays.includes(date) ? '' : 'day-column--mobile-extra';
-    const mobileClass = mobileVisibleDates.has(date)
-      ? date === mobileDays.primary ? 'day-column--mobile-primary' : 'day-column--mobile-next'
-      : 'day-column--mobile-hidden';
-    const mobileSection = mobileDays.hasToday && date === mobileDays.primary
-      ? `<div class="mobile-meal-section">${t('meals.todaySection')}</div>`
-      : mobileDays.hasToday && date === firstNextMobileDate
-        ? `<div class="mobile-meal-section">${t('meals.nextDaysSection')}</div>`
-        : '';
 
     return `
-      ${mobileSection}
-      <div class="day-column ${extraClass} ${mobileClass}">
+      <div class="day-column">
         <div class="day-header ${todayClass}">
           <span class="day-header__name">${dayNames[dayNameIndex]}</span>
           <span class="day-header__date">${formatDayDate(date)}</span>
@@ -264,9 +222,13 @@ function renderWeekGrid() {
   if (window.lucide) lucide.createIcons({ el: grid });
   stagger(grid.querySelectorAll('.meal-card'));
   wireGrid(grid);
-}
 
-export const __test = { buildMobileMealDays };
+  // Auf schmalen Viewports (gestapelte Tage) den heutigen Tag in den Blick scrollen.
+  if (window.matchMedia?.('(max-width: 640px)').matches) {
+    grid.querySelector('.day-header--today')?.closest('.day-column')
+      ?.scrollIntoView({ block: 'start' });
+  }
+}
 
 function renderSlot(date, type, mealsForDay) {
   const meals = mealsForDay.filter((m) => m.meal_type === type.key);

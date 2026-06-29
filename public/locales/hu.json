@@ -340,8 +340,6 @@
         "saveAsRecipe": "Mentés receptként",
         "recipeScaleLabel": "Hozzávalók arányosítása",
         "deletedToast": "Étkezés törölve",
-        "todaySection": "Ma",
-        "nextDaysSection": "Következő napok",
         "recurrenceLabel": "Ismétlés hetente",
         "recurrenceHint": "A Yuvomi a következő hetekben automatikusan létrehozza ezt az ételt ugyanazon a hétköznapon.",
         "recurrenceBadge": "Ismétlődő étel",

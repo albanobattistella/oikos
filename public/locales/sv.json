@@ -340,8 +340,6 @@
         "saveAsRecipe": "Spara som recept",
         "recipeScaleLabel": "Skala ingredienser",
         "deletedToast": "Måltid borttagen",
-        "todaySection": "Idag",
-        "nextDaysSection": "Kommande dagar",
         "recurrenceLabel": "Upprepa varje vecka",
         "recurrenceHint": "Yuvomi lägger automatiskt till den här måltiden samma veckodag kommande veckor.",
         "recurrenceBadge": "Återkommande måltid",

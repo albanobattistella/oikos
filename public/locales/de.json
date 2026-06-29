@@ -346,8 +346,6 @@
         "saveAsRecipe": "Als Rezept speichern",
         "recipeScaleLabel": "Zutaten skalieren",
         "deletedToast": "Mahlzeit gelöscht",
-        "todaySection": "Heute",
-        "nextDaysSection": "Nächste Tage",
         "recurrenceLabel": "Wöchentlich wiederholen",
         "recurrenceHint": "Yuvomi legt diese Mahlzeit in zukünftigen Wochen automatisch am gleichen Wochentag an.",
         "recurrenceBadge": "Wiederkehrende Mahlzeit",

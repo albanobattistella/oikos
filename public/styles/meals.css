@@ -77,20 +77,12 @@
   container: week-grid / inline-size;
 }
 
-.mobile-meal-section {
-  display: none;
-}
-
 .day-column {
   border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .day-column:last-child {
   border-bottom: none;
-}
-
-.day-column--mobile-extra {
-  display: none;
 }
 
 .day-header {
@@ -134,26 +126,6 @@
 @media (max-width: 640px) {
   .week-grid {
     padding-bottom: var(--space-8);
-  }
-
-  .mobile-meal-section {
-    display: block;
-    padding: var(--space-4) var(--space-4) var(--space-2);
-    color: var(--color-text-secondary);
-    font-size: var(--text-sm);
-    font-weight: var(--font-weight-semibold);
-  }
-
-  .day-column--mobile-hidden {
-    display: none;
-  }
-
-  .day-column--mobile-extra.day-column--mobile-next {
-    display: block;
-  }
-
-  .day-column--mobile-primary {
-    border-bottom-color: var(--color-border);
   }
 
   .day-header {

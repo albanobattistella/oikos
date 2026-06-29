@@ -340,8 +340,6 @@
         "saveAsRecipe": "Uložit jako recept",
         "recipeScaleLabel": "Upravit množství ingrediencí",
         "deletedToast": "Jídlo smazáno",
-        "todaySection": "Dnes",
-        "nextDaysSection": "Další dny",
         "recurrenceLabel": "Opakovat každý týden",
         "recurrenceHint": "Yuvomi tuto večeři nebo jídlo automaticky vytvoří ve stejný den v dalších týdnech.",
         "recurrenceBadge": "Opakované jídlo",

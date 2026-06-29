@@ -340,8 +340,6 @@
         "saveAsRecipe": "Зберегти як рецепт",
         "recipeScaleLabel": "Кількість інгредієнтів",
         "deletedToast": "Харчування видалено",
-        "todaySection": "Сьогодні",
-        "nextDaysSection": "Найближчі дні",
         "recurrenceLabel": "Повторювати щотижня",
         "recurrenceHint": "Yuvomi автоматично додає цю страву в той самий день тижня в наступних тижнях.",
         "recurrenceBadge": "Повторювана страва",

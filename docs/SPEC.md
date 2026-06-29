@@ -977,7 +977,7 @@ Skeleton loading instead of spinners (skeleton renders all 9 widgets at their co
 
 ### Meal Plan (`/meals`)
 
-**Desktop:** full weekly grid (Mon–Sun), slots: breakfast / lunch / dinner / snack. **Mobile:** a focused Today layout showing today's slots and the next few days — the full week grid is hidden on narrow viewports to reduce scroll.
+**Desktop:** full weekly grid (Mon–Sun), slots: breakfast / lunch / dinner / snack. **Mobile:** the same full week (Mon–Sun) stacked vertically and scrollable, auto-scrolled to today on open.
 
 - Meal: title + notes + ingredient list
 - "→ Shopping list" button: transfer unchecked ingredients of the week to a selected list

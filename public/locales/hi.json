@@ -340,8 +340,6 @@
         "saveAsRecipe": "Save as recipe",
         "recipeScaleLabel": "Scale ingredients",
         "deletedToast": "Meal deleted",
-        "todaySection": "आज",
-        "nextDaysSection": "अगले दिन",
         "recurrenceLabel": "हर सप्ताह दोहराएं",
         "recurrenceHint": "Yuvomi आने वाले सप्ताहों में इसी सप्ताह-दिन पर यह भोजन अपने आप जोड़ता है।",
         "recurrenceBadge": "दोहराया जाने वाला भोजन",
