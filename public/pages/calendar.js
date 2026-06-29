@@ -835,14 +835,18 @@ export async function render(container, { user }) {
     </div>
   `);
 
-  const openId = new URLSearchParams(window.location.search).get('open');
+  const params  = new URLSearchParams(window.location.search);
+  const openId   = params.get('open');
+  const dateParam = params.get('date'); // YYYY-MM-DD der gewünschten Instanz (bei Wiederholungen)
   let initialEvent = null;
   if (openId && /^\d+$/.test(openId)) {
     try {
       const eventRes = await api.get(`/calendar/${openId}`);
       if (eventRes?.data) {
         initialEvent = eventRes.data;
-        state.cursor = localDate(initialEvent.start_datetime);
+        // dateParam nutzen wenn vorhanden (zeigt auf die richtige Instanz einer Serie);
+        // sonst auf das Original-Startdatum des Master-Events zurückfallen.
+        state.cursor = dateParam || localDate(initialEvent.start_datetime);
       } else {
         console.warn('[Calendar] Deep-link event not found:', openId);
       }
@@ -869,16 +873,29 @@ export async function render(container, { user }) {
   container.querySelector('#fab-new-event')?.addEventListener('click', () => openEventModal({ mode: 'create' }));
 
   if (initialEvent) {
-    const chip = container.querySelector(`[data-id="${CSS.escape(openId)}"]`);
+    // Das Ziel-Datum für die Instanz (dateParam hat Vorrang vor dem Master-Startdatum).
+    const targetDate = dateParam || localDate(initialEvent.start_datetime);
+
+    // Die konkrete Instanz aus state.events holen (expandiert, mit korrektem start_datetime).
+    // Bei Nicht-Wiederholungen ist das identisch mit initialEvent.
+    const occurrence = state.events.find(
+      (ev) => ev.id === initialEvent.id && localDate(ev.start_datetime) === targetDate
+    ) || initialEvent;
+
+    // Chip im richtigen Tag-Container suchen; Fallback auf beliebigen Chip mit der ID.
+    const chip =
+      container.querySelector(`[data-date="${CSS.escape(targetDate)}"] [data-id="${CSS.escape(openId)}"]`)
+      ?? container.querySelector(`[data-id="${CSS.escape(openId)}"]`);
+
     if (chip) {
       chip.scrollIntoView({ block: 'center', behavior: 'instant' });
-      showEventPopup(initialEvent, chip);
+      showEventPopup(occurrence, chip);
     } else {
       try {
         const reminder = await loadReminderForEvent(openId);
-        openEventModal({ mode: 'edit', event: initialEvent, reminder });
+        openEventModal({ mode: 'edit', event: occurrence, reminder });
       } catch {
-        openEventModal({ mode: 'edit', event: initialEvent });
+        openEventModal({ mode: 'edit', event: occurrence });
       }
     }
   }
