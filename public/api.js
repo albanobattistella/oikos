@@ -156,11 +156,15 @@ const api = {
 const auth = {
   login: (username, password) => api.post('/auth/login', { username, password }),
   logout: async () => {
-    const res = await api.post('/auth/logout');
-    // API-Cache leeren, damit am selben Gerät kein Nutzer die offline
-    // gecachten Daten des vorigen sieht.
-    clearApiCache();
-    return res;
+    try {
+      return await api.post('/auth/logout');
+    } finally {
+      // API-Cache IMMER leeren — auch wenn der Logout-Request offline oder bei
+      // nicht erreichbarem Server fehlschlägt. Der Settings-Handler navigiert in
+      // seinem finally trotzdem zu /login, daher darf hier kein offline gecachter
+      // Stand des vorigen Nutzers am selben Gerät zurückbleiben.
+      clearApiCache();
+    }
   },
   me: () => api.get('/auth/me'),
   setup: (username, display_name, password) => api.post('/auth/setup', { username, display_name, password }),

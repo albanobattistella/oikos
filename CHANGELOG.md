@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.78.9] - 2026-06-30
+
+### Fixed
+- **Offline cache isolation on logout failure:** the read-only offline API cache is now cleared even when the logout request itself fails (offline or unreachable server). Previously the cache clear was skipped if the logout POST threw, so a subsequent user on the same device could still fall back to the previous user's cached data.
+
 ## [0.78.8] - 2026-06-30
 
 ### Added
