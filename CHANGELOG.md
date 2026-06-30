@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.79.0] - 2026-06-30
+
+### Changed
+- **Oikos → Yuvomi migration (automatic, no user action required):** the SQLite database file (`oikos.db` → `yuvomi.db`), the session cookie, browser storage keys, service-worker caches, the API-token prefix, and internal web-component/global identifiers are renamed to Yuvomi. On the first start after updating, an existing database is migrated in place, you stay signed in (the session cookie is migrated seamlessly), and stored preferences carry over. Existing Docker / Podman / Unraid / TrueNAS installations keep receiving updates without editing any configuration — the legacy `ghcr.io/ulsklyc/oikos` image mirror is retained permanently, and a `window.oikos` alias keeps pre-rename third-party modules working.
+- **Default database path** for new installations is now `/data/yuvomi.db` across all deploy targets (Docker Compose, Podman, Portainer, Unraid, TrueNAS, Quadlet). Existing `/data/oikos.db` installs are migrated automatically on boot; custom `DB_PATH` values are left untouched.
+- **Database backups** are now written with a `yuvomi-backup-` filename prefix; previously created `oikos-backup-` files remain restorable.
+- New API tokens use the `yuvomi_` prefix; existing `oikos_` tokens remain valid.
+
 ## [0.78.13] - 2026-06-30
 
 ### Changed

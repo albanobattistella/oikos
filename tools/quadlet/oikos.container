@@ -34,7 +34,7 @@ EnvironmentFile=%h/.config/oikos/.env
 
 # Laufzeit-Defaults (entsprechen docker-compose.yml).
 Environment=NODE_ENV=production
-Environment=DB_PATH=/data/oikos.db
+Environment=DB_PATH=/data/yuvomi.db
 Environment=BACKUP_DIR=/backups
 
 # Veröffentlichter Port. Rootless hinter Reverse-Proxy stattdessen:
