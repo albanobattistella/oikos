@@ -7,7 +7,7 @@
 import { createLogger } from '../logger.js';
 import express from 'express';
 import * as db from '../db.js';
-import { nextOccurrence } from '../services/recurrence.js';
+import { nextOccurrenceAfter } from '../services/recurrence.js';
 import * as v from '../middleware/validate.js';
 
 const log = createLogger('Tasks');
@@ -339,7 +339,11 @@ router.patch('/:id/status', (req, res) => {
     if (status === 'done') {
       const task = db.get().prepare('SELECT * FROM tasks WHERE id = ?').get(req.params.id);
       if (task?.is_recurring && task.recurrence_rule && !task.parent_task_id) {
-        const nextDate = nextOccurrence(task.due_date, task.recurrence_rule);
+        // Überfällige Serien aufholen: nächste Instanz liegt immer in der Zukunft,
+        // statt blind altes Fälligkeitsdatum + Intervall (das selbst überfällig sein kann).
+        // Schwelle "heute" in UTC, konsistent zur Listen-Filterung mit SQL date('now').
+        const today = new Date().toISOString().slice(0, 10);
+        const nextDate = nextOccurrenceAfter(task.due_date, task.recurrence_rule, today);
         if (nextDate) {
           const existingAssignments = db.get()
             .prepare('SELECT user_id FROM task_assignments WHERE task_id = ?')

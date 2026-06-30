@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.78.7] - 2026-06-30
+
+### Changed
+- **Tasks → recurring tasks:** completing an overdue recurring task now schedules its next instance at the next occurrence on or after today, instead of advancing a single interval from the old (possibly still-overdue) due date. A skipped routine no longer reappears already overdue, and only one open instance ever exists. (Discussion #405)
+
 ## [0.78.6] - 2026-06-30
 
 ### Fixed

@@ -39,6 +39,8 @@ Every table: `id INTEGER PRIMARY KEY`, `created_at TEXT`, `updated_at TEXT` (ISO
 | recurrence_rule | TEXT | iCal RRULE |
 | parent_task_id | INTEGER | FK → Tasks (max 2 levels) |
 
+Recurring tasks keep only one open instance: the next instance is created on completion, not on a schedule. When an overdue recurring task is marked done, its next due date catches up to the next occurrence at or after today (skipping missed periods) instead of advancing a single interval from the old — possibly still overdue — due date.
+
 ### Task Assignments
 Join table for multi-person task assignment (migration v32). Existing `assigned_to` values were migrated automatically.
 
