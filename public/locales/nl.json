@@ -38,7 +38,8 @@
         "requiredFields": "Vul alle verplichte velden in.",
         "invalidInput": "Ongeldige invoer.",
         "togglePasswordVisibility": "Wachtwoord tonen/verbergen",
-        "errorOfflineMutation": "Wijzigingen zijn offline niet mogelijk. Maak opnieuw verbinding."
+        "errorOfflineMutation": "Wijzigingen zijn offline niet mogelijk. Maak opnieuw verbinding.",
+        "retry": "Opnieuw proberen"
     },
     "nav": {
         "dashboard": "Overzicht",
@@ -128,7 +129,6 @@
         "monthlyBalance": "Saldo",
         "savingsRate": "Spaarquote",
         "topExpense": "Grootste uitgave",
-        "budgetEntries": "Boekingen",
         "noBudgetData": "Geen budgetgegevens deze maand.",
         "customize": "Aanpassen",
         "customizeTitle": "Widgets aanpassen",
@@ -140,7 +140,6 @@
         "overdueTasksChipPlural": "{{count}} verlopen taken",
         "customizeManage": "Widgets",
         "customizeExit": "Aanpassing beëindigen",
-        "customizeDrag": "Widget verslepen",
         "customizeSize": "Grootte",
         "customizeSizeFor": "Grootte voor {{widget}}",
         "customizeHide": "{{widget}} verbergen",
@@ -148,7 +147,13 @@
         "widgetSizeNarrow": "Smal (2×1)",
         "widgetSizeStandard": "Standaard (2×2)",
         "widgetSizeLarge": "Groot (3×2)",
-        "widgetSizeFull": "Volledig (4×2)"
+        "widgetSizeFull": "Volledig (4×2)",
+        "noShoppingLists": "Geen boodschappenlijsten",
+        "customizeResetConfirm": "Lay-out terugzetten naar standaard?",
+        "loadErrorSession": "Je sessie is verlopen. Meld je opnieuw aan.",
+        "loadErrorServer": "De server reageert momenteel niet. Probeer het later opnieuw.",
+        "allWidgetsHidden": "Alle widgets zijn verborgen — schakel ze weer in via \"Aanpassen\".",
+        "customizeReorderHandle": "Widget herschikken (sleep of pijltoetsen omhoog/omlaag)"
     },
     "tasks": {
         "title": "Taken",

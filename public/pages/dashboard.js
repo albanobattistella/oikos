@@ -6,10 +6,10 @@
 
 import { api } from '/api.js';
 import { t, formatDate, formatTime, getLocale } from '/i18n.js';
-import { getReadableTextColor } from '/utils/color.js';
+import { getReadableTextColor, AVATAR_FALLBACK_COLOR } from '/utils/color.js';
 import { esc, fmtLocation, renderMarkdownLight } from '/utils/html.js';
 import { toLocalDateKey } from '/utils/date.js';
-import { openModal, closeModal } from '/components/modal.js';
+import { openModal, closeModal, confirmModal } from '/components/modal.js';
 import { renderAvatarStack } from '/components/user-multi-select.js';
 
 // Hält den AbortController des aktuellen FAB-Listeners - wird bei jedem render() erneuert.
@@ -20,6 +20,7 @@ let _fabController = null;
 
 const ONBOARDING_KEY = 'yuvomi-onboarded';
 const APP_NAME_STORAGE_KEY = 'yuvomi-app-name';
+const CUSTOMIZE_HINT_KEY = 'yuvomi-dash-customize-hint';
 
 function eventOccurrenceDateKey(event) {
   const value = String(event?.start_datetime || '');
@@ -51,7 +52,7 @@ function getOnboardingSteps() {
   ];
 }
 
-function showOnboarding(appContainer) {
+function showOnboarding(appContainer, onDone) {
   const steps = getOnboardingSteps();
   let current = 0;
 
@@ -126,25 +127,47 @@ function showOnboarding(appContainer) {
     setTimeout(() => nextBtn.focus(), 50);
   }
 
+  let finished = false;
   function finish() {
+    if (finished) return;
+    finished = true;
     document.removeEventListener('keydown', closeOnEscape);
     localStorage.setItem(ONBOARDING_KEY, '1');
     overlay.classList.add('onboarding-overlay--out');
     overlay.addEventListener('animationend', () => overlay.remove(), { once: true });
     // Fallback falls animationend nicht feuert (prefers-reduced-motion):
     setTimeout(() => overlay.remove(), 300);
+    onDone?.();
   }
 
   renderStep();
   appContainer.appendChild(overlay);
 }
 
+// Einmaliger, zurückhaltender Hinweis auf den „Anpassen"-Einstieg: Da vier Widgets
+// standardmäßig hinter dem Cockpit ausgeblendet sind, macht ein sanfter Puls beim
+// Erststart sichtbar, wo sie sich wieder einblenden lassen. Danach nie wieder.
+function maybeHintCustomize(container) {
+  if (localStorage.getItem(CUSTOMIZE_HINT_KEY)) return;
+  const btn = container.querySelector('#dashboard-customize-btn');
+  if (!btn) return;
+  const clear = () => {
+    btn.classList.remove('dashboard-icon-btn--hint');
+    localStorage.setItem(CUSTOMIZE_HINT_KEY, '1');
+  };
+  btn.classList.add('dashboard-icon-btn--hint');
+  btn.addEventListener('click', clear, { once: true });
+  setTimeout(clear, 6000);
+}
+
 // --------------------------------------------------------
 // Widget-Definitionen (Reihenfolge = Standard-Layout)
 // --------------------------------------------------------
 
-// weather (kompaktes 2x1) ganz oben, danach primäre Inhalte (tasks, calendar)
-const WIDGET_IDS = ['weather', 'tasks', 'calendar', 'meals', 'shopping', 'birthdays', 'budget', 'family', 'notes'];
+// Reihenfolge = Standard-Layout. Die primären Inhalte (tasks, calendar) führen,
+// damit sie beim Wieder-Einblenden oben stehen; das einzige passive Widget
+// (weather) steht bewusst am Ende, statt die sichtbare Grid-Spitze zu belegen.
+const WIDGET_IDS = ['tasks', 'calendar', 'meals', 'shopping', 'birthdays', 'budget', 'family', 'notes', 'weather'];
 
 const WIDGET_SIZE_PRESETS = [
   { value: '1x1', labelKey: 'dashboard.widgetSizeTiny'     },
@@ -165,6 +188,18 @@ function widgetSizeLabel(size) {
   return preset ? t(preset.labelKey) : size;
 }
 
+// Größen-Auswahl: dieselben fünf kuratierten Presets in Inline- und Modal-Ansicht.
+// Ist der aktuelle Wert ein Alt-Wert (z.B. 4x4 aus einer früheren Version), bleibt
+// er als einzelne Option erhalten, damit ein bestehendes Layout nicht still
+// zurückgesetzt wird — neue Auswahl steuert aber immer auf die Presets.
+function widgetSizeOptionsHtml(currentSize) {
+  const values = WIDGET_SIZE_PRESETS.map((p) => p.value);
+  const options = values.includes(currentSize) ? values : [currentSize, ...values];
+  return options
+    .map((size) => `<option value="${size}" ${size === currentSize ? 'selected' : ''}>${widgetSizeLabel(size)}</option>`)
+    .join('');
+}
+
 function defaultWidgetSize(id) {
   if (['tasks', 'calendar'].includes(id)) return '2x2';
   if (['weather', 'shopping'].includes(id)) return '2x1';
@@ -172,7 +207,16 @@ function defaultWidgetSize(id) {
   return '1x1';
 }
 
-const DEFAULT_WIDGET_CONFIG = WIDGET_IDS.map((id, i) => ({ id, visible: true, order: i, size: defaultWidgetSize(id) }));
+// Das „Heute"-Cockpit fasst diese vier Domänen bereits als Kurzüberblick zusammen.
+// Ihre Widgets starten deshalb ausgeblendet: kein Echo, keine Erststart-Überladung.
+// Über „Anpassen" jederzeit wieder einblendbar; Bestandskonfigurationen bleiben unberührt.
+const COCKPIT_COVERED_WIDGETS = new Set(['tasks', 'calendar', 'shopping', 'meals']);
+
+function defaultWidgetVisible(id) {
+  return !COCKPIT_COVERED_WIDGETS.has(id);
+}
+
+const DEFAULT_WIDGET_CONFIG = WIDGET_IDS.map((id, i) => ({ id, visible: defaultWidgetVisible(id), order: i, size: defaultWidgetSize(id) }));
 
 function normalizeDashboardConfig(input) {
   const valid = Array.isArray(input)
@@ -194,6 +238,12 @@ function normalizeDashboardConfig(input) {
   return valid
     .sort((a, b) => a.order - b.order)
     .map((w, i) => ({ ...w, order: i }));
+}
+
+function sameWidgetConfig(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+  return a.every((w, i) => w.id === b[i].id && w.visible === b[i].visible
+    && w.size === b[i].size && w.order === b[i].order);
 }
 
 function setHtml(element, html) {
@@ -370,6 +420,16 @@ function widgetHeader(icon, title, count, linkHref, linkLabel) {
       </button>
     </div>
   `;
+}
+
+// Dezente Aktivierungs-Affordance für Empty-States: verlinkt in den Modul-Flow,
+// damit ein Erststart-Nutzer nicht in einer beschreibenden Sackgasse landet.
+// Nutzt dasselbe [data-route]-System wie widget__link (wireLinks verkabelt es).
+function emptyStateCta(route, label) {
+  return `<button type="button" class="widget__empty-cta" data-route="${route}">
+    <i data-lucide="plus" aria-hidden="true"></i>
+    <span>${label}</span>
+  </button>`;
 }
 
 function buildTodayHighlights(data) {
@@ -600,7 +660,7 @@ function renderPinnedNotes(notes) {
 function renderFamilyWidget(users) {
   const visible = users.slice(0, 6);
   const avatars = visible.map((u) => `
-    <span class="family-widget-avatar" style="background:${esc(u.avatar_color || '#64748b')};color:${getReadableTextColor(u.avatar_color || '#64748b')}" title="${esc(u.display_name)}">
+    <span class="family-widget-avatar" style="background:${esc(u.avatar_color || AVATAR_FALLBACK_COLOR)};color:${getReadableTextColor(u.avatar_color || AVATAR_FALLBACK_COLOR)}" title="${esc(u.display_name)}">
       ${u.avatar_data ? `<img src="${esc(u.avatar_data)}" alt="${esc(u.display_name)}" loading="lazy">` : esc(initials(u.display_name))}
     </span>
   `).join('');
@@ -623,6 +683,17 @@ function renderBudgetWidget(budget, currency) {
   const balanceTone = balance >= 0 ? 'positive' : 'negative';
   const hasData = (budget?.entryCount || 0) > 0;
 
+  if (!hasData) {
+    return `<div class="widget widget--budget">
+      ${widgetHeader('wallet', t('dashboard.budgetOverview'), null, '/budget')}
+      <div class="widget__empty">
+        <i data-lucide="wallet" class="empty-state__icon" aria-hidden="true"></i>
+        <div>${t('dashboard.noBudgetData')}</div>
+        ${emptyStateCta('/budget', t('common.create'))}
+      </div>
+    </div>`;
+  }
+
   return `<div class="widget widget--budget">
     ${widgetHeader('wallet', t('dashboard.budgetOverview'), null, '/budget')}
     <div class="budget-widget">
@@ -630,23 +701,19 @@ function renderBudgetWidget(budget, currency) {
         <span>${t('dashboard.monthlyBalance')}</span>
         <strong class="budget-widget__balance budget-widget__balance--${balanceTone}">${formatCurrency(balance, currency)}</strong>
       </div>
-      <div class="budget-widget__grid">
-        <div class="budget-widget-metric budget-widget-metric--income">
+      <div class="budget-widget__savings">
+        <span>${t('dashboard.savingsRate')}</span>
+        <strong>${income > 0 ? `${savingsRate}%` : '–'}</strong>
+      </div>
+      <div class="budget-widget__flow">
+        <span class="budget-widget__flow-item budget-widget__flow-item--income">
           <span>${t('dashboard.monthlyIncome')}</span>
           <strong>${formatCurrency(income, currency)}</strong>
-        </div>
-        <div class="budget-widget-metric budget-widget-metric--expense">
+        </span>
+        <span class="budget-widget__flow-item budget-widget__flow-item--expense">
           <span>${t('dashboard.monthlyExpenses')}</span>
           <strong>${formatCurrency(expenses, currency)}</strong>
-        </div>
-        <div class="budget-widget-metric">
-          <span>${t('dashboard.savingsRate')}</span>
-          <strong>${income > 0 ? `${savingsRate}%` : '-'}</strong>
-        </div>
-        <div class="budget-widget-metric">
-          <span>${t('dashboard.budgetEntries')}</span>
-          <strong>${budget?.entryCount || 0}</strong>
-        </div>
+        </span>
       </div>
       <div class="budget-widget__footer">
         ${hasData && budget?.topExpenseCategory
@@ -742,16 +809,27 @@ function renderSizeMiniGridCells(size) {
   }).join('');
 }
 
-function renderWidgetCustomizeControls(w) {
-  const sizeOptions = WIDGET_SIZE_PRESETS.map(({ value: size }) => `
-    <option value="${size}" ${w.size === size ? 'selected' : ''}>${widgetSizeLabel(size)}</option>
-  `).join('');
+function renderWidgetCustomizeControls(w, index = 0, total = 1) {
+  const sizeOptions = widgetSizeOptionsHtml(w.size);
+  const isFirst = index === 0;
+  const isLast = index === total - 1;
 
   return `
     <div class="widget-edit-controls" data-widget-controls>
-      <button type="button" class="widget-edit-controls__handle" data-widget-drag-handle aria-label="${t('dashboard.customizeDrag')}">
+      <button type="button" class="widget-edit-controls__handle" data-widget-drag-handle
+              aria-label="${t('dashboard.customizeReorderHandle')}" aria-keyshortcuts="ArrowUp ArrowDown">
         <i data-lucide="grip-vertical" aria-hidden="true"></i>
       </button>
+      <div class="widget-edit-controls__move">
+        <button type="button" class="widget-edit-controls__move-btn" data-widget-move="up" data-widget-id="${esc(w.id)}"
+                ${isFirst ? 'disabled' : ''} aria-label="${t('dashboard.customizeMoveUp')}">
+          <i data-lucide="chevron-up" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="widget-edit-controls__move-btn" data-widget-move="down" data-widget-id="${esc(w.id)}"
+                ${isLast ? 'disabled' : ''} aria-label="${t('dashboard.customizeMoveDown')}">
+          <i data-lucide="chevron-down" aria-hidden="true"></i>
+        </button>
+      </div>
       <label class="widget-edit-controls__size">
         <span>${t('dashboard.customizeSize')}</span>
         ${renderSizeMiniGrid(w.size)}
@@ -786,18 +864,26 @@ function renderDashboardLayout(cfg, data, weather, currency, { editing = false, 
       const mod = MODULE_FOR_WIDGET[w.id];
       return !mod || !window.yuvomi?.isModuleDisabled(mod);
     })
-    .map((w) => {
+    .map((w, index, arr) => {
       const html = widgetById[w.id]();
       if (!html) return '';
       return `<div class="widget-wrapper ${widgetSizeClass(w.size)} ${editing ? 'widget-wrapper--editing' : ''}"
                    data-widget-id="${esc(w.id)}" ${editing ? 'draggable="true"' : ''}>
-        ${editing ? renderWidgetCustomizeControls(w) : ''}
+        ${editing ? renderWidgetCustomizeControls(w, index, arr.length) : ''}
         ${html}
       </div>`;
     })
     .join('');
 
-  return `<div class="dashboard__grid ${editing ? 'dashboard__grid--editing' : ''}" id="dashboard-widget-grid">${tiles}</div>`;
+  // Alle Widgets ausgeblendet: kein toter Screen, sondern ein Hinweis zurück
+  // in die Anpassung (das Cockpit oben bleibt als Orientierung erhalten).
+  const gridInner = tiles || `
+    <div class="dashboard-empty-grid">
+      <i data-lucide="layout-dashboard" class="empty-state__icon" aria-hidden="true"></i>
+      <p>${t('dashboard.allWidgetsHidden')}</p>
+    </div>
+  `;
+  return `<div class="dashboard__grid ${editing ? 'dashboard__grid--editing' : ''}" id="dashboard-widget-grid">${gridInner}</div>`;
 }
 
 function renderDashboardSkeleton() {
@@ -818,12 +904,43 @@ function renderDashboardSkeleton() {
   `;
 }
 
+// Distinkter Fehlerzustand: verhindert, dass ein Ladefehler wie ein ruhiger,
+// leerer Tag aussieht (falsch beruhigend). Bietet einen Retry, der neu lädt.
+// Die Meldung unterscheidet Sitzungsablauf (401/403) und Serverfehler (5xx)
+// von einem generischen Verbindungsproblem — Retry hilft nicht überall gleich.
+function renderDashboardError(status = null) {
+  const messageKey = status === 401 || status === 403
+    ? 'dashboard.loadErrorSession'
+    : (typeof status === 'number' && status >= 500)
+      ? 'dashboard.loadErrorServer'
+      : 'dashboard.loadError';
+  return `
+    <div class="dashboard-error" role="alert">
+      <i data-lucide="cloud-off" class="dashboard-error__icon" aria-hidden="true"></i>
+      <p class="dashboard-error__text">${t(messageKey)}</p>
+      <button type="button" class="btn btn--secondary" id="dashboard-retry">
+        <i data-lucide="refresh-cw" aria-hidden="true"></i>
+        ${t('common.retry')}
+      </button>
+    </div>
+  `;
+}
+
 // --------------------------------------------------------
 // Shopping-Widget
 // --------------------------------------------------------
 
 function renderShoppingLists(lists) {
-  if (!lists.length) return '';
+  if (!lists.length) {
+    return `<div class="widget widget--shopping">
+      ${widgetHeader('shopping-cart', t('nav.shopping'), 0, '/shopping')}
+      <div class="widget__empty">
+        <i data-lucide="shopping-cart" class="empty-state__icon" aria-hidden="true"></i>
+        <div>${t('dashboard.noShoppingLists')}</div>
+        ${emptyStateCta('/shopping', t('common.create'))}
+      </div>
+    </div>`;
+  }
 
   const totalOpen = lists.reduce((sum, l) => sum + l.open_count, 0);
 
@@ -1022,9 +1139,7 @@ function openCustomizeModal(currentConfig, onSave) {
     return draft.map((w, i) => {
       const isFirst = i === 0;
       const isLast  = i === draft.length - 1;
-      const sizeOptions = WIDGET_SIZE_OPTIONS.map((size) => `
-        <option value="${size}" ${w.size === size ? 'selected' : ''}>${widgetSizeLabel(size)}</option>
-      `).join('');
+      const sizeOptions = widgetSizeOptionsHtml(w.size);
       return `
         <div class="customize-row" data-id="${esc(w.id)}" style="view-transition-name: widget-row-${esc(w.id)}">
           <label class="customize-row__toggle">
@@ -1125,31 +1240,10 @@ function openCustomizeModal(currentConfig, onSave) {
           });
         });
 
-        list.querySelectorAll('.customize-row').forEach((row, idx) => {
-          row.setAttribute('draggable', 'true');
-          row.addEventListener('dragstart', (e) => {
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', String(idx));
-            row.classList.add('customize-row--dragging');
-          });
-          row.addEventListener('dragend', () => row.classList.remove('customize-row--dragging'));
-          row.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            row.classList.add('customize-row--over');
-          });
-          row.addEventListener('dragleave', () => row.classList.remove('customize-row--over'));
-          row.addEventListener('drop', (e) => {
-            e.preventDefault();
-            row.classList.remove('customize-row--over');
-            const fromIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
-            if (fromIdx === idx) return;
-            const [moved] = draft.splice(fromIdx, 1);
-            draft.splice(idx, 0, moved);
-            draft.forEach((w, i) => { w.order = i; });
-            rebuildList();
-          });
-        });
+        // Reorder im Modal ausschließlich über die Chevron-Buttons (oben) —
+        // tastatur- und touch-tauglich und konsistent mit dem Inline-Edit-Mode.
+        // Das frühere HTML5-Row-Drag war ein zweites, divergierendes Modell
+        // (feuerte nicht per Finger, nicht per Tastatur) und wurde entfernt.
       }
 
       wireRows();
@@ -1163,13 +1257,11 @@ function openCustomizeModal(currentConfig, onSave) {
         const saveBtn = panel.querySelector('#customize-save');
         saveBtn.disabled = true;
         try {
-          await api.put('/preferences', { dashboard_widgets: draft });
+          // Persistenz + Erfolgs-/Undo-Toast liegen zentral im Aufrufer (persistWidgetConfig).
+          await onSave(draft);
           closeModal({ force: true });
-          onSave(draft);
-          window.yuvomi?.showToast(t('dashboard.customizeSaved'), 'success', 1500);
         } catch {
           window.yuvomi?.showToast(t('common.errorGeneric'), 'error');
-        } finally {
           saveBtn.disabled = false;
         }
       });
@@ -1340,6 +1432,8 @@ export async function render(container, { user }) {
   let isCustomizing = false;
   let currency     = 'EUR';
   let visibleMealTypes = MEAL_ORDER;
+  let loadFailed   = false;
+  let loadErrorStatus = null;
   try {
     const [dashRes, weatherRes, prefsRes] = await Promise.all([
       api.get('/dashboard'),
@@ -1355,18 +1449,43 @@ export async function render(container, { user }) {
     visibleMealTypes = normalizeVisibleMealTypes(prefsRes.data?.visible_meal_types);
   } catch (err) {
     console.error('[Dashboard] Ladefehler:', err.message, 'Status:', err.status ?? 'network');
-    window.yuvomi?.showToast(t('dashboard.loadError'), 'warning');
+    loadFailed = true;
+    loadErrorStatus = Number.isFinite(err?.status) ? err.status : null;
   }
 
   const rerender = () => render(container, { user });
 
+  // Einziger Persist-Pfad für Inline- UND Modal-Speichern. Legt vor dem Schreiben
+  // einen Schnappschuss an und bietet — wenn sich etwas geändert hat — im Toast ein
+  // „Rückgängig" an, das den vorherigen Stand wiederherstellt (inkl. Server).
+  async function persistWidgetConfig(nextConfig) {
+    const previousConfig = savedWidgetConfig.map((w) => ({ ...w }));
+    widgetConfig = nextConfig.map((w) => ({ ...w }));
+    await api.put('/preferences', { dashboard_widgets: widgetConfig });
+    savedWidgetConfig = widgetConfig.map((w) => ({ ...w }));
+    isCustomizing = false;
+    rebuildDashboard(widgetConfig);
+
+    const changed = !sameWidgetConfig(previousConfig, widgetConfig);
+    const onUndo = changed
+      ? async () => {
+          try {
+            widgetConfig = previousConfig.map((w) => ({ ...w }));
+            await api.put('/preferences', { dashboard_widgets: widgetConfig });
+            savedWidgetConfig = widgetConfig.map((w) => ({ ...w }));
+          } catch {
+            window.yuvomi?.showToast(t('common.errorGeneric'), 'error');
+          }
+          isCustomizing = false;
+          rebuildDashboard(widgetConfig);
+        }
+      : null;
+    window.yuvomi?.showToast(t('dashboard.customizeSaved'), 'success', onUndo ? 6000 : 1500, onUndo);
+  }
+
   async function saveDashboardConfig() {
     try {
-      await api.put('/preferences', { dashboard_widgets: widgetConfig });
-      savedWidgetConfig = widgetConfig.map((w) => ({ ...w }));
-      isCustomizing = false;
-      rebuildDashboard(widgetConfig);
-      window.yuvomi?.showToast(t('dashboard.customizeSaved'), 'success', 1500);
+      await persistWidgetConfig(widgetConfig);
     } catch {
       window.yuvomi?.showToast(t('common.errorGeneric'), 'error');
     }
@@ -1378,7 +1497,11 @@ export async function render(container, { user }) {
     rebuildDashboard(widgetConfig);
   }
 
-  function resetDashboardConfig() {
+  async function resetDashboardConfig() {
+    const confirmed = await confirmModal(t('dashboard.customizeResetConfirm'), {
+      confirmLabel: t('dashboard.customizeReset'),
+    });
+    if (!confirmed) return;
     widgetConfig = DEFAULT_WIDGET_CONFIG.map((w) => ({ ...w }));
     rebuildDashboard(widgetConfig);
   }
@@ -1458,11 +1581,63 @@ export async function render(container, { user }) {
         rebuildDashboard(widgetConfig);
       });
     });
+
+    // Reorder ohne HTML5-DnD (das feuert nicht per Finger und ist nicht per
+    // Tastatur bedienbar). Ein Pfad für drei Auslöser: Touch-Up/Down-Buttons,
+    // Desktop-Grip-Pfeiltasten und (indirekt) das Modal — alle über den Nachbarn
+    // aus der gerenderten Grid-Reihenfolge und dasselbe reorderWidgetConfig.
+    const moveWidget = (id, dir) => {
+      const wrapper = grid.querySelector(`.widget-wrapper[data-widget-id="${CSS.escape(id)}"]`);
+      const sibling = dir === 'up' ? wrapper?.previousElementSibling : wrapper?.nextElementSibling;
+      const siblingId = sibling?.dataset?.widgetId;
+      if (!id || !siblingId) return false;
+      widgetConfig = reorderWidgetConfig(widgetConfig, id, siblingId, dir === 'up' ? 'before' : 'after');
+      rebuildDashboard(widgetConfig);
+      return true;
+    };
+
+    grid.querySelectorAll('[data-widget-move]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.widgetId;
+        const dir = btn.dataset.widgetMove;
+        if (!moveWidget(id, dir)) return;
+        // Fokus dem bewegten Widget nachführen (Tastatur-Kontinuität): gleiche
+        // Richtung, sonst die noch aktive Gegenrichtung.
+        const movedWrapper = container.querySelector(`.widget-wrapper[data-widget-id="${CSS.escape(id)}"]`);
+        const sameDir = movedWrapper?.querySelector(`[data-widget-move="${dir}"]:not([disabled])`);
+        const anyMove = movedWrapper?.querySelector('[data-widget-move]:not([disabled])');
+        (sameDir ?? anyMove)?.focus();
+      });
+    });
+
+    // Desktop-Tastatur: der Grip ist ein fokussierbarer Button — Pfeil hoch/runter
+    // ordnet um. Schließt die Inline-Reorder-Lücke für Tastatur-Nutzer, ohne die
+    // schmale Edit-Leiste mit zusätzlichen Buttons zu überladen (Drag bleibt Maus).
+    grid.querySelectorAll('[data-widget-drag-handle]').forEach((handle) => {
+      handle.addEventListener('keydown', (event) => {
+        const dir = event.key === 'ArrowUp' ? 'up' : event.key === 'ArrowDown' ? 'down' : null;
+        if (!dir) return;
+        event.preventDefault();
+        const id = handle.closest('.widget-wrapper[data-widget-id]')?.dataset.widgetId;
+        if (moveWidget(id, dir)) {
+          container.querySelector(`.widget-wrapper[data-widget-id="${CSS.escape(id)}"] [data-widget-drag-handle]`)?.focus();
+        }
+      });
+    });
   }
 
   function rebuildDashboard(cfg) {
     const shell = container.querySelector('#dashboard-shell');
     if (!shell) return;
+    if (loadFailed) {
+      setHtml(shell, `
+        ${renderDashboardOverview(user, false)}
+        ${renderDashboardError(loadErrorStatus)}
+      `);
+      if (window.lucide) window.lucide.createIcons({ el: shell });
+      container.querySelector('#dashboard-retry')?.addEventListener('click', rerender, { signal: _fabController.signal });
+      return;
+    }
     setHtml(shell, `
       ${renderDashboardOverview(user, isCustomizing)}
       ${renderTodayCockpit(data)}
@@ -1483,12 +1658,7 @@ export async function render(container, { user }) {
       rebuildDashboard(widgetConfig);
     }, { signal: _fabController.signal });
     container.querySelector('#dashboard-manage-widgets')?.addEventListener('click', () => {
-      openCustomizeModal(widgetConfig, (newConfig) => {
-        widgetConfig = normalizeDashboardConfig(newConfig);
-        savedWidgetConfig = widgetConfig.map((w) => ({ ...w }));
-        isCustomizing = false;
-        rebuildDashboard(widgetConfig);
-      });
+      openCustomizeModal(widgetConfig, (newConfig) => persistWidgetConfig(normalizeDashboardConfig(newConfig)));
     }, { signal: _fabController.signal });
     container.querySelector('#dashboard-customize-save')?.addEventListener('click', saveDashboardConfig, { signal: _fabController.signal });
     container.querySelector('#dashboard-customize-cancel')?.addEventListener('click', cancelDashboardConfig, { signal: _fabController.signal });
@@ -1498,7 +1668,15 @@ export async function render(container, { user }) {
 
   rebuildDashboard(widgetConfig);
 
-  initFab(container, _fabController.signal);
+  if (loadFailed) {
+    // Kein FAB im Fehler-Zustand: seine Schnellaktionen würden in Module
+    // navigieren, deren Daten gerade nicht geladen werden konnten — das würde
+    // dem Fehler-Banner widersprechen. Retry stellt bei Erfolg alles her.
+    container.querySelector('#fab-container')?.remove();
+    container.querySelector('#fab-backdrop')?.remove();
+  } else {
+    initFab(container, _fabController.signal);
+  }
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) return;
@@ -1532,7 +1710,9 @@ export async function render(container, { user }) {
   }
 
   if (!localStorage.getItem(ONBOARDING_KEY)) {
-    setTimeout(() => showOnboarding(container), 400);
+    setTimeout(() => showOnboarding(container, () => maybeHintCustomize(container)), 400);
+  } else {
+    maybeHintCustomize(container);
   }
 }
 

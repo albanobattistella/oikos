@@ -1223,9 +1223,13 @@ test('dashboard polish keeps one page heading and native quick-action controls',
   assert.doesNotMatch(dashboard, /class="fab-action"[^>]*role="button"/);
   assert.doesNotMatch(dashboard, /<button class="fab-action__btn"/);
   assert.match(css, /\.dashboard-icon-btn\s*\{[\s\S]*width:\s*var\(--target-lg\);[\s\S]*height:\s*var\(--target-lg\)/);
+  // width/height müssen INNERHALB derselben .dashboard-icon-btn-Regel liegen
+  // ([^{}] überschreitet keine Regelgrenze) — sonst matcht die Regex fälschlich
+  // ein --target-base aus einer beliebigen späteren Regel (z.B. dem
+  // pointer:coarse-Block der Edit-Controls) quer über die Datei.
   assert.doesNotMatch(
     css,
-    /@media \(max-width:\s*640px\)[\s\S]*\.dashboard-icon-btn\s*\{[\s\S]*width:\s*var\(--target-base\);[\s\S]*height:\s*var\(--target-base\)/,
+    /@media \(max-width:\s*640px\)[\s\S]*?\.dashboard-icon-btn\s*\{[^{}]*width:\s*var\(--target-base\)[^{}]*height:\s*var\(--target-base\)/,
     'mobile dashboard controls must keep the large touch target through the final cascade'
   );
   assert.match(
@@ -2134,20 +2138,25 @@ test('holiday chips derive readable ink from each configured color', () => {
 test('user-selected avatar colors derive readable text ink', () => {
   const dashboard = read('../public/pages/dashboard.js');
   const multiSelect = read('../public/components/user-multi-select.js');
+  const color = read('../public/utils/color.js');
 
-  assert.match(dashboard, /import \{ getReadableTextColor \} from '\/utils\/color\.js'/);
+  // Single source of truth for the neutral avatar fallback (concrete hex —
+  // getReadableTextColor needs a value it can measure luminance on).
+  assert.match(color, /export const AVATAR_FALLBACK_COLOR = '#[0-9a-fA-F]{6}';/);
+
+  assert.match(dashboard, /import \{ getReadableTextColor, AVATAR_FALLBACK_COLOR \} from '\/utils\/color\.js'/);
   assert.match(
     dashboard,
-    /color:\$\{getReadableTextColor\(u\.avatar_color \|\| '#64748b'\)\}/,
+    /color:\$\{getReadableTextColor\(u\.avatar_color \|\| AVATAR_FALLBACK_COLOR\)\}/,
   );
-  assert.match(multiSelect, /import \{ getReadableTextColor \} from '\/utils\/color\.js'/);
+  assert.match(multiSelect, /import \{ getReadableTextColor, AVATAR_FALLBACK_COLOR \} from '\/utils\/color\.js'/);
   assert.match(
     multiSelect,
-    /color:\$\{getReadableTextColor\(u\.color \?\? '#8E8E93'\)\}/,
+    /color:\$\{getReadableTextColor\(u\.color \?\? AVATAR_FALLBACK_COLOR\)\}/,
   );
   assert.match(
     multiSelect,
-    /color:\$\{getReadableTextColor\(u\.avatar_color \?\? '#8E8E93'\)\}/,
+    /color:\$\{getReadableTextColor\(u\.avatar_color \?\? AVATAR_FALLBACK_COLOR\)\}/,
   );
 });
 

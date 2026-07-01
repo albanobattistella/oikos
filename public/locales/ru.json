@@ -38,7 +38,8 @@
         "requiredFields": "Заполните все обязательные поля.",
         "invalidInput": "Недопустимый ввод.",
         "togglePasswordVisibility": "Показать/скрыть пароль",
-        "errorOfflineMutation": "Изменения недоступны офлайн. Подключитесь снова."
+        "errorOfflineMutation": "Изменения недоступны офлайн. Подключитесь снова.",
+        "retry": "Повторить"
     },
     "nav": {
         "dashboard": "Обзор",
@@ -128,7 +129,6 @@
         "monthlyBalance": "Баланс",
         "savingsRate": "Норма сбережений",
         "topExpense": "Крупнейший расход",
-        "budgetEntries": "Записи",
         "noBudgetData": "Нет данных бюджета за этот месяц.",
         "customize": "Настроить",
         "customizeTitle": "Настроить виджеты",
@@ -140,7 +140,6 @@
         "overdueTasksChipPlural": "{{count}} просроченных задач",
         "customizeManage": "Виджеты",
         "customizeExit": "Выйти из настройки",
-        "customizeDrag": "Перетащить виджет",
         "customizeSize": "Размер",
         "customizeSizeFor": "Размер для {{widget}}",
         "customizeHide": "Скрыть {{widget}}",
@@ -148,7 +147,13 @@
         "widgetSizeNarrow": "Узкий (2×1)",
         "widgetSizeStandard": "Стандартный (2×2)",
         "widgetSizeLarge": "Большой (3×2)",
-        "widgetSizeFull": "Полный (4×2)"
+        "widgetSizeFull": "Полный (4×2)",
+        "noShoppingLists": "Нет списков покупок",
+        "customizeResetConfirm": "Сбросить макет до стандартного?",
+        "loadErrorSession": "Сессия истекла. Пожалуйста, войдите снова.",
+        "loadErrorServer": "Сервер сейчас не отвечает. Попробуйте позже.",
+        "allWidgetsHidden": "Все виджеты скрыты — включите их через «Настроить».",
+        "customizeReorderHandle": "Переместить виджет (перетащите или стрелки вверх/вниз)"
     },
     "tasks": {
         "title": "Задачи",

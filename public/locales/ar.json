@@ -38,7 +38,8 @@
         "requiredFields": "يرجى ملء جميع الحقول المطلوبة.",
         "invalidInput": "إدخال غير صالح.",
         "togglePasswordVisibility": "إظهار/إخفاء كلمة المرور",
-        "errorOfflineMutation": "لا يمكن إجراء تغييرات دون اتصال. يرجى إعادة الاتصال."
+        "errorOfflineMutation": "لا يمكن إجراء تغييرات دون اتصال. يرجى إعادة الاتصال.",
+        "retry": "أعد المحاولة"
     },
     "nav": {
         "dashboard": "لوحة التحكم",
@@ -128,7 +129,6 @@
         "monthlyBalance": "الرصيد",
         "savingsRate": "معدل الادخار",
         "topExpense": "أكبر مصروف",
-        "budgetEntries": "القيود",
         "noBudgetData": "لا توجد بيانات ميزانية لهذا الشهر.",
         "customize": "تخصيص",
         "customizeTitle": "تخصيص الأدوات",
@@ -140,7 +140,6 @@
         "overdueTasksChipPlural": "{{count}} مهام متأخرة",
         "customizeManage": "الأدوات",
         "customizeExit": "إنهاء التخصيص",
-        "customizeDrag": "اسحب الأداة",
         "customizeSize": "الحجم",
         "customizeSizeFor": "حجم {{widget}}",
         "customizeHide": "إخفاء {{widget}}",
@@ -148,7 +147,13 @@
         "widgetSizeNarrow": "ضيق (2×1)",
         "widgetSizeStandard": "قياسي (2×2)",
         "widgetSizeLarge": "كبير (3×2)",
-        "widgetSizeFull": "كامل (4×2)"
+        "widgetSizeFull": "كامل (4×2)",
+        "noShoppingLists": "لا توجد قوائم تسوق",
+        "customizeResetConfirm": "إعادة تعيين التخطيط إلى الافتراضي؟",
+        "loadErrorSession": "انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.",
+        "loadErrorServer": "الخادم لا يستجيب حاليًا. حاول مرة أخرى لاحقًا.",
+        "allWidgetsHidden": "جميع العناصر مخفية — أعد إظهارها عبر «تخصيص».",
+        "customizeReorderHandle": "إعادة ترتيب العنصر (اسحب أو استخدم مفاتيح الأسهم لأعلى/لأسفل)"
     },
     "tasks": {
         "title": "المهام",

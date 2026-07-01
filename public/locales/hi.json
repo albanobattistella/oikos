@@ -38,7 +38,8 @@
         "requiredFields": "कृपया सभी आवश्यक फ़ील्ड भरें.",
         "invalidInput": "अमान्य इनपुट.",
         "togglePasswordVisibility": "पासवर्ड दिखाएं/छिपाएं",
-        "errorOfflineMutation": "ऑफ़लाइन रहते हुए बदलाव संभव नहीं हैं। कृपया दोबारा कनेक्ट करें।"
+        "errorOfflineMutation": "ऑफ़लाइन रहते हुए बदलाव संभव नहीं हैं। कृपया दोबारा कनेक्ट करें।",
+        "retry": "पुनः प्रयास करें"
     },
     "nav": {
         "dashboard": "डैशबोर्ड",
@@ -128,7 +129,6 @@
         "monthlyBalance": "शेष",
         "savingsRate": "बचत दर",
         "topExpense": "सबसे बड़ा खर्च",
-        "budgetEntries": "प्रविष्टियां",
         "noBudgetData": "इस महीने बजट डेटा नहीं है।",
         "customize": "अनुकूलित करें",
         "customizeTitle": "विजेट अनुकूलित करें",
@@ -140,7 +140,6 @@
         "overdueTasksChipPlural": "{{count}} विलंबित कार्य",
         "customizeManage": "विजेट",
         "customizeExit": "अनुकूलन से बाहर निकलें",
-        "customizeDrag": "विजेट खींचें",
         "customizeSize": "आकार",
         "customizeSizeFor": "{{widget}} का आकार",
         "customizeHide": "{{widget}} छिपाएँ",
@@ -148,7 +147,13 @@
         "widgetSizeNarrow": "संकरा (2×1)",
         "widgetSizeStandard": "मानक (2×2)",
         "widgetSizeLarge": "बड़ा (3×2)",
-        "widgetSizeFull": "पूर्ण (4×2)"
+        "widgetSizeFull": "पूर्ण (4×2)",
+        "noShoppingLists": "कोई खरीदारी सूची नहीं",
+        "customizeResetConfirm": "लेआउट को डिफ़ॉल्ट पर रीसेट करें?",
+        "loadErrorSession": "आपका सत्र समाप्त हो गया है. कृपया फिर से साइन इन करें.",
+        "loadErrorServer": "सर्वर अभी जवाब नहीं दे रहा है. कृपया बाद में पुनः प्रयास करें.",
+        "allWidgetsHidden": "सभी विजेट छिपे हैं — उन्हें \"अनुकूलित करें\" से फिर से दिखाएँ.",
+        "customizeReorderHandle": "विजेट पुनः क्रमित करें (खींचें या ऊपर/नीचे तीर कुंजियाँ)"
     },
     "tasks": {
         "title": "कार्य",

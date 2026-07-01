@@ -38,7 +38,8 @@
         "requiredFields": "Compila tutti i campi obbligatori.",
         "invalidInput": "Input non valido.",
         "togglePasswordVisibility": "Mostra/nascondi password",
-        "errorOfflineMutation": "Le modifiche non sono possibili offline. Riconnettiti."
+        "errorOfflineMutation": "Le modifiche non sono possibili offline. Riconnettiti.",
+        "retry": "Riprova"
     },
     "nav": {
         "dashboard": "Panoramica",
@@ -128,7 +129,6 @@
         "monthlyBalance": "Saldo",
         "savingsRate": "Tasso di risparmio",
         "topExpense": "Spesa principale",
-        "budgetEntries": "Movimenti",
         "noBudgetData": "Nessun dato di budget questo mese.",
         "customize": "Personalizza",
         "customizeTitle": "Personalizza widget",
@@ -140,7 +140,6 @@
         "overdueTasksChipPlural": "{{count}} compiti scaduti",
         "customizeManage": "Widget",
         "customizeExit": "Esci dalla personalizzazione",
-        "customizeDrag": "Trascina widget",
         "customizeSize": "Dimensione",
         "customizeSizeFor": "Dimensione di {{widget}}",
         "customizeHide": "Nascondi {{widget}}",
@@ -148,7 +147,13 @@
         "widgetSizeNarrow": "Stretto (2×1)",
         "widgetSizeStandard": "Standard (2×2)",
         "widgetSizeLarge": "Grande (3×2)",
-        "widgetSizeFull": "Pieno (4×2)"
+        "widgetSizeFull": "Pieno (4×2)",
+        "noShoppingLists": "Nessuna lista della spesa",
+        "customizeResetConfirm": "Ripristinare il layout predefinito?",
+        "loadErrorSession": "La sessione è scaduta. Accedi di nuovo.",
+        "loadErrorServer": "Il server non risponde al momento. Riprova più tardi.",
+        "allWidgetsHidden": "Tutti i widget sono nascosti: riattivali da «Personalizza».",
+        "customizeReorderHandle": "Riordina widget (trascina o frecce su/giù)"
     },
     "tasks": {
         "title": "Compiti",

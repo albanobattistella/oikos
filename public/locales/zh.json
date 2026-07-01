@@ -38,7 +38,8 @@
         "requiredFields": "请填写所有必填字段。",
         "invalidInput": "输入无效。",
         "togglePasswordVisibility": "显示/隐藏密码",
-        "errorOfflineMutation": "离线时无法进行更改。请重新连接。"
+        "errorOfflineMutation": "离线时无法进行更改。请重新连接。",
+        "retry": "重试"
     },
     "nav": {
         "dashboard": "概览",
@@ -128,7 +129,6 @@
         "monthlyBalance": "余额",
         "savingsRate": "储蓄率",
         "topExpense": "最大支出",
-        "budgetEntries": "记录",
         "noBudgetData": "本月没有预算数据。",
         "customize": "自定义",
         "customizeTitle": "自定义小组件",
@@ -140,7 +140,6 @@
         "overdueTasksChipPlural": "{{count}} 个逾期任务",
         "customizeManage": "小组件",
         "customizeExit": "退出自定义",
-        "customizeDrag": "拖动小组件",
         "customizeSize": "大小",
         "customizeSizeFor": "{{widget}} 的大小",
         "customizeHide": "隐藏 {{widget}}",
@@ -148,7 +147,13 @@
         "widgetSizeNarrow": "窄 (2×1)",
         "widgetSizeStandard": "标准 (2×2)",
         "widgetSizeLarge": "大 (3×2)",
-        "widgetSizeFull": "全宽 (4×2)"
+        "widgetSizeFull": "全宽 (4×2)",
+        "noShoppingLists": "暂无购物清单",
+        "customizeResetConfirm": "将布局重置为默认？",
+        "loadErrorSession": "您的会话已过期。请重新登录。",
+        "loadErrorServer": "服务器暂时无响应。请稍后再试。",
+        "allWidgetsHidden": "所有小组件已隐藏——通过\"自定义\"重新启用。",
+        "customizeReorderHandle": "重新排序小组件（拖动或使用上/下箭头键）"
     },
     "tasks": {
         "title": "任务",

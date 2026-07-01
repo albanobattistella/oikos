@@ -38,7 +38,8 @@
         "requiredFields": "Bitte alle Pflichtfelder ausfüllen.",
         "invalidInput": "Ungültige Eingabe.",
         "togglePasswordVisibility": "Passwort anzeigen/verbergen",
-        "errorOfflineMutation": "Änderungen sind offline nicht möglich. Bitte erneut verbinden."
+        "errorOfflineMutation": "Änderungen sind offline nicht möglich. Bitte erneut verbinden.",
+        "retry": "Erneut versuchen"
     },
     "nav": {
         "dashboard": "Übersicht",
@@ -134,7 +135,6 @@
         "monthlyBalance": "Saldo",
         "savingsRate": "Sparquote",
         "topExpense": "Größte Ausgabe",
-        "budgetEntries": "Einträge",
         "noBudgetData": "Keine Budgetdaten in diesem Monat.",
         "customize": "Anpassen",
         "customizeTitle": "Widgets anpassen",
@@ -146,7 +146,6 @@
         "overdueTasksChipPlural": "{{count}} überfällige Aufgaben",
         "customizeManage": "Widgets",
         "customizeExit": "Anpassung beenden",
-        "customizeDrag": "Widget ziehen",
         "customizeSize": "Größe",
         "customizeSizeFor": "Größe für {{widget}}",
         "customizeHide": "{{widget}} ausblenden",
@@ -154,7 +153,13 @@
         "widgetSizeNarrow": "Schmal (2×1)",
         "widgetSizeStandard": "Standard (2×2)",
         "widgetSizeLarge": "Groß (3×2)",
-        "widgetSizeFull": "Voll (4×2)"
+        "widgetSizeFull": "Voll (4×2)",
+        "noShoppingLists": "Keine Einkaufslisten",
+        "customizeResetConfirm": "Layout auf Standard zurücksetzen?",
+        "loadErrorSession": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
+        "loadErrorServer": "Der Server antwortet gerade nicht. Bitte später erneut versuchen.",
+        "allWidgetsHidden": "Alle Widgets ausgeblendet — über „Anpassen\" wieder einblenden.",
+        "customizeReorderHandle": "Widget umsortieren (ziehen oder Pfeiltasten hoch/runter)"
     },
     "tasks": {
         "title": "Aufgaben",

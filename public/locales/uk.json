@@ -38,7 +38,8 @@
         "requiredFields": "Заповніть усі обов’язкові поля.",
         "invalidInput": "Некоректне введення.",
         "togglePasswordVisibility": "Показати/приховати пароль",
-        "errorOfflineMutation": "Зміни недоступні офлайн. Підключіться знову."
+        "errorOfflineMutation": "Зміни недоступні офлайн. Підключіться знову.",
+        "retry": "Спробувати ще раз"
     },
     "nav": {
         "dashboard": "Огляд",
@@ -128,7 +129,6 @@
         "monthlyBalance": "Баланс",
         "savingsRate": "Рівень заощаджень",
         "topExpense": "Найбільша витрата",
-        "budgetEntries": "Записи",
         "noBudgetData": "Немає бюджетних даних за цей місяць.",
         "customize": "Налаштувати",
         "customizeTitle": "Налаштувати віджети",
@@ -140,7 +140,6 @@
         "overdueTasksChipPlural": "{{count}} прострочених завдань",
         "customizeManage": "Віджети",
         "customizeExit": "Вийти з налаштування",
-        "customizeDrag": "Перетягнути віджет",
         "customizeSize": "Розмір",
         "customizeSizeFor": "Розмір для {{widget}}",
         "customizeHide": "Приховати {{widget}}",
@@ -148,7 +147,13 @@
         "widgetSizeNarrow": "Вузький (2×1)",
         "widgetSizeStandard": "Стандартний (2×2)",
         "widgetSizeLarge": "Великий (3×2)",
-        "widgetSizeFull": "Повний (4×2)"
+        "widgetSizeFull": "Повний (4×2)",
+        "noShoppingLists": "Немає списків покупок",
+        "customizeResetConfirm": "Скинути макет до стандартного?",
+        "loadErrorSession": "Ваш сеанс завершився. Будь ласка, увійдіть знову.",
+        "loadErrorServer": "Сервер зараз не відповідає. Спробуйте пізніше.",
+        "allWidgetsHidden": "Усі віджети приховані — увімкніть їх через «Налаштувати».",
+        "customizeReorderHandle": "Перемістити віджет (перетягніть або стрілки вгору/вниз)"
     },
     "tasks": {
         "title": "Завдання",

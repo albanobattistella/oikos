@@ -38,7 +38,8 @@
         "requiredFields": "Completa todos los campos obligatorios.",
         "invalidInput": "Entrada no válida.",
         "togglePasswordVisibility": "Mostrar/ocultar contraseña",
-        "errorOfflineMutation": "No se pueden hacer cambios sin conexión. Vuelve a conectarte."
+        "errorOfflineMutation": "No se pueden hacer cambios sin conexión. Vuelve a conectarte.",
+        "retry": "Reintentar"
     },
     "nav": {
         "dashboard": "Inicio",
@@ -128,7 +129,6 @@
         "monthlyBalance": "Saldo",
         "savingsRate": "Tasa de ahorro",
         "topExpense": "Mayor gasto",
-        "budgetEntries": "Movimientos",
         "noBudgetData": "No hay datos de presupuesto este mes.",
         "customize": "Personalizar",
         "customizeTitle": "Personalizar widgets",
@@ -140,7 +140,6 @@
         "overdueTasksChipPlural": "{{count}} tareas vencidas",
         "customizeManage": "Widgets",
         "customizeExit": "Salir de personalización",
-        "customizeDrag": "Arrastrar widget",
         "customizeSize": "Tamaño",
         "customizeSizeFor": "Tamaño de {{widget}}",
         "customizeHide": "Ocultar {{widget}}",
@@ -148,7 +147,13 @@
         "widgetSizeNarrow": "Estrecho (2×1)",
         "widgetSizeStandard": "Estándar (2×2)",
         "widgetSizeLarge": "Grande (3×2)",
-        "widgetSizeFull": "Completo (4×2)"
+        "widgetSizeFull": "Completo (4×2)",
+        "noShoppingLists": "No hay listas de compras",
+        "customizeResetConfirm": "¿Restablecer el diseño predeterminado?",
+        "loadErrorSession": "Tu sesión ha caducado. Inicia sesión de nuevo.",
+        "loadErrorServer": "El servidor no responde en este momento. Inténtalo más tarde.",
+        "allWidgetsHidden": "Todos los widgets están ocultos: vuelve a activarlos en «Personalizar».",
+        "customizeReorderHandle": "Reordenar widget (arrastra o flechas arriba/abajo)"
     },
     "tasks": {
         "title": "Tareas",

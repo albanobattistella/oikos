@@ -38,7 +38,8 @@
         "requiredFields": "Wypełnij wszystkie wymagane pola.",
         "invalidInput": "Nieprawidłowe dane.",
         "togglePasswordVisibility": "Pokaż/ukryj hasło",
-        "errorOfflineMutation": "Zmiany nie są możliwe w trybie offline. Połącz się ponownie."
+        "errorOfflineMutation": "Zmiany nie są możliwe w trybie offline. Połącz się ponownie.",
+        "retry": "Spróbuj ponownie"
     },
     "nav": {
         "dashboard": "Pulpit",
@@ -134,7 +135,6 @@
         "monthlyBalance": "Saldo",
         "savingsRate": "Oszczędności",
         "topExpense": "Największy wydatek",
-        "budgetEntries": "Wpisy",
         "noBudgetData": "Brak danych budżetowych w tym miesiącu.",
         "customize": "Dostosuj",
         "customizeTitle": "Dostosuj widżety",
@@ -146,7 +146,6 @@
         "overdueTasksChipPlural": "{{count}} przeterminowane zadania",
         "customizeManage": "Widżety",
         "customizeExit": "Zakończ dostosowywanie",
-        "customizeDrag": "Przeciągnij widżet",
         "customizeSize": "Rozmiar",
         "customizeSizeFor": "Rozmiar dla {{widget}}",
         "customizeHide": "Ukryj {{widget}}",
@@ -154,7 +153,13 @@
         "widgetSizeNarrow": "Wąski (2×1)",
         "widgetSizeStandard": "Standardowy (2×2)",
         "widgetSizeLarge": "Duży (3×2)",
-        "widgetSizeFull": "Pełny (4×2)"
+        "widgetSizeFull": "Pełny (4×2)",
+        "noShoppingLists": "Brak list zakupów",
+        "customizeResetConfirm": "Przywrócić domyślny układ?",
+        "loadErrorSession": "Twoja sesja wygasła. Zaloguj się ponownie.",
+        "loadErrorServer": "Serwer teraz nie odpowiada. Spróbuj ponownie później.",
+        "allWidgetsHidden": "Wszystkie widżety są ukryte — włącz je ponownie w „Dostosuj\".",
+        "customizeReorderHandle": "Zmień kolejność widżetu (przeciągnij lub strzałki góra/dół)"
     },
     "tasks": {
         "title": "Zadania",

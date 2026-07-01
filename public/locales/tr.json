@@ -38,7 +38,8 @@
         "requiredFields": "Lütfen tüm zorunlu alanları doldurun.",
         "invalidInput": "Geçersiz giriş.",
         "togglePasswordVisibility": "Şifreyi göster/gizle",
-        "errorOfflineMutation": "Çevrimdışıyken değişiklik yapılamaz. Lütfen yeniden bağlanın."
+        "errorOfflineMutation": "Çevrimdışıyken değişiklik yapılamaz. Lütfen yeniden bağlanın.",
+        "retry": "Tekrar dene"
     },
     "nav": {
         "dashboard": "Genel Bakış",
@@ -128,7 +129,6 @@
         "monthlyBalance": "Bakiye",
         "savingsRate": "Tasarruf oranı",
         "topExpense": "En büyük gider",
-        "budgetEntries": "Kayıtlar",
         "noBudgetData": "Bu ay bütçe verisi yok.",
         "customize": "Özelleştir",
         "customizeTitle": "Widget'ları özelleştir",
@@ -140,7 +140,6 @@
         "overdueTasksChipPlural": "{{count}} gecikmiş görev",
         "customizeManage": "Widgetlar",
         "customizeExit": "Özelleştirmeden çık",
-        "customizeDrag": "Widgetı sürükle",
         "customizeSize": "Boyut",
         "customizeSizeFor": "{{widget}} boyutu",
         "customizeHide": "{{widget}} gizle",
@@ -148,7 +147,13 @@
         "widgetSizeNarrow": "Dar (2×1)",
         "widgetSizeStandard": "Standart (2×2)",
         "widgetSizeLarge": "Büyük (3×2)",
-        "widgetSizeFull": "Tam (4×2)"
+        "widgetSizeFull": "Tam (4×2)",
+        "noShoppingLists": "Alışveriş listesi yok",
+        "customizeResetConfirm": "Düzen varsayılana sıfırlansın mı?",
+        "loadErrorSession": "Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.",
+        "loadErrorServer": "Sunucu şu anda yanıt vermiyor. Lütfen daha sonra tekrar deneyin.",
+        "allWidgetsHidden": "Tüm widget’lar gizli — \"Özelleştir\" ile yeniden gösterin.",
+        "customizeReorderHandle": "Widget’ı yeniden sırala (sürükle veya yukarı/aşağı ok tuşları)"
     },
     "tasks": {
         "title": "Görevler",

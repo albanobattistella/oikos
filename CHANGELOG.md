@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.82.0] - 2026-07-01
+
+### Added
+- **Dashboard load errors now show a clear, retryable message** — a failed load renders a distinct error state with a Retry button (with different wording for a dropped connection, an expired session, or a server problem) instead of empty widgets that looked like a calm day.
+- **Empty Shopping and Budget widgets offer a "+ Create" shortcut** into the module, so a fresh household isn't left at a dead end.
+- **Dashboard widgets can be reordered by keyboard and on touch** — arrow keys move a focused widget in edit mode, and touch devices get Up/Down buttons (mouse drag still works on desktop).
+- **Hiding every widget now shows a "re-enable via Customize" hint** instead of a blank grid.
+
+### Changed
+- **The dashboard now leads with the Today Cockpit as its single overview** — the Tasks, Calendar, Shopping, and Meals widgets start hidden because the cockpit already summarizes them, so the first screen orients instead of overwhelming. A one-time hint points to Customize, and existing saved layouts are untouched.
+- **The Budget widget was redesigned** to lead with the monthly balance, one highlighted savings rate, and a quiet income/expenses line instead of four equal-weight metric boxes.
+- **Weather is no longer the first widget** in the default layout.
+- **Larger touch targets** on dashboard list rows and the edit-mode controls for easier tapping on phones.
+- **Resetting the dashboard layout now asks for confirmation** before discarding your arrangement.
+- **The Customize dialog reorders widgets with the same up/down buttons used elsewhere** (the older drag-the-row interaction was removed) for one consistent, keyboard-friendly model.
+
+### Fixed
+- **On the smallest Budget widget size, the income and expenses line no longer truncates** both label and amount — it stacks vertically instead.
+
 ## [0.81.1] - 2026-07-01
 
 ### Changed

@@ -38,7 +38,8 @@
         "requiredFields": "Veuillez remplir tous les champs obligatoires.",
         "invalidInput": "Saisie invalide.",
         "togglePasswordVisibility": "Afficher/masquer le mot de passe",
-        "errorOfflineMutation": "Les modifications sont impossibles hors ligne. Veuillez vous reconnecter."
+        "errorOfflineMutation": "Les modifications sont impossibles hors ligne. Veuillez vous reconnecter.",
+        "retry": "Réessayer"
     },
     "nav": {
         "dashboard": "Accueil",
@@ -128,7 +129,6 @@
         "monthlyBalance": "Solde",
         "savingsRate": "Taux d'épargne",
         "topExpense": "Plus grosse dépense",
-        "budgetEntries": "Écritures",
         "noBudgetData": "Aucune donnée de budget ce mois-ci.",
         "customize": "Personnaliser",
         "customizeTitle": "Personnaliser les widgets",
@@ -140,7 +140,6 @@
         "overdueTasksChipPlural": "{{count}} tâches en retard",
         "customizeManage": "Widgets",
         "customizeExit": "Quitter la personnalisation",
-        "customizeDrag": "Faire glisser le widget",
         "customizeSize": "Taille",
         "customizeSizeFor": "Taille de {{widget}}",
         "customizeHide": "Masquer {{widget}}",
@@ -148,7 +147,13 @@
         "widgetSizeNarrow": "Étroit (2×1)",
         "widgetSizeStandard": "Standard (2×2)",
         "widgetSizeLarge": "Grand (3×2)",
-        "widgetSizeFull": "Plein (4×2)"
+        "widgetSizeFull": "Plein (4×2)",
+        "noShoppingLists": "Aucune liste de courses",
+        "customizeResetConfirm": "Réinitialiser la disposition par défaut ?",
+        "loadErrorSession": "Votre session a expiré. Veuillez vous reconnecter.",
+        "loadErrorServer": "Le serveur ne répond pas pour le moment. Réessayez plus tard.",
+        "allWidgetsHidden": "Tous les widgets sont masqués — réactivez-les via « Personnaliser ».",
+        "customizeReorderHandle": "Réorganiser le widget (glisser ou flèches haut/bas)"
     },
     "tasks": {
         "title": "Tâches",

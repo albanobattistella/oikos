@@ -38,7 +38,8 @@
         "requiredFields": "Fyll i alla obligatoriska fält.",
         "invalidInput": "Ogiltig inmatning.",
         "togglePasswordVisibility": "Visa/dölj lösenord",
-        "errorOfflineMutation": "Ändringar går inte att göra offline. Anslut igen."
+        "errorOfflineMutation": "Ändringar går inte att göra offline. Anslut igen.",
+        "retry": "Försök igen"
     },
     "nav": {
         "dashboard": "Översikt",
@@ -128,7 +129,6 @@
         "monthlyBalance": "Saldo",
         "savingsRate": "Sparandegrad",
         "topExpense": "Största utgift",
-        "budgetEntries": "Poster",
         "noBudgetData": "Ingen budgetdata denna månad.",
         "customize": "Anpassa",
         "customizeTitle": "Anpassa widgets",
@@ -140,7 +140,6 @@
         "overdueTasksChipPlural": "{{count}} förfallna uppgifter",
         "customizeManage": "Widgetar",
         "customizeExit": "Avsluta anpassning",
-        "customizeDrag": "Dra widget",
         "customizeSize": "Storlek",
         "customizeSizeFor": "Storlek för {{widget}}",
         "customizeHide": "Dölj {{widget}}",
@@ -148,7 +147,13 @@
         "widgetSizeNarrow": "Smal (2×1)",
         "widgetSizeStandard": "Standard (2×2)",
         "widgetSizeLarge": "Stor (3×2)",
-        "widgetSizeFull": "Hel (4×2)"
+        "widgetSizeFull": "Hel (4×2)",
+        "noShoppingLists": "Inga inköpslistor",
+        "customizeResetConfirm": "Återställ layouten till standard?",
+        "loadErrorSession": "Din session har gått ut. Logga in igen.",
+        "loadErrorServer": "Servern svarar inte just nu. Försök igen senare.",
+        "allWidgetsHidden": "Alla widgetar är dolda — aktivera dem igen via \"Anpassa\".",
+        "customizeReorderHandle": "Ordna om widget (dra eller piltangenter upp/ner)"
     },
     "tasks": {
         "title": "Uppgifter",

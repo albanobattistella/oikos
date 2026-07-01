@@ -313,6 +313,7 @@
   flex-direction: row;
   align-items: center;
   gap: var(--space-2);
+  flex-wrap: wrap;
 }
 
 .widget__empty .empty-state__icon {
@@ -321,6 +322,32 @@
   flex-shrink: 0;
   color: var(--color-text-tertiary);
   opacity: 0.6;
+}
+
+/* Aktivierungs-CTA im Empty-State: dezente Akzent-Affordance am Zeilenende,
+   trägt die Modulfarbe (--widget-accent). Touch-sicher via min-height. */
+.widget__empty-cta {
+  margin-inline-start: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--target-base);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--widget-accent, var(--color-accent));
+  font-size: var(--type-secondary);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.widget__empty-cta:hover {
+  background-color: color-mix(in srgb, var(--widget-accent, var(--color-accent)) 10%, transparent);
+}
+
+.widget__empty-cta svg {
+  width: 15px;
+  height: 15px;
 }
 
 /* Widget hover lift (desktop) */
@@ -776,6 +803,18 @@
   transition: background var(--transition-fast);
 }
 
+/* Kompakte Optik im 2x1-Widget beibehalten, aber die Trefferfläche
+   unsichtbar auf das 44px-Minimum ausdehnen. */
+.weather-widget__refresh::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--target-base);
+  height: var(--target-base);
+  transform: translate(-50%, -50%);
+}
+
 .weather-widget__refresh:hover {
   background: var(--color-glass-hover);
 }
@@ -1195,37 +1234,19 @@ svg.weather-forecast__icon {
   background-color: var(--color-accent-light);
 }
 
+@media (pointer: coarse) {
+  .fab-action__btn {
+    width: var(--target-base);
+    height: var(--target-base);
+  }
+}
+
 .fab-action:focus-visible {
   outline: none;
 }
 
 .fab-action:focus-visible .fab-action__btn {
   outline: 2px solid var(--active-module-accent, var(--color-accent));
-  outline-offset: 2px;
-}
-
-/* --------------------------------------------------------
- * Widget-Customize-Button (im Greeting-Header)
- * -------------------------------------------------------- */
-.widget-customize-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-full);
-  background: var(--color-glass);
-  border: 1px solid var(--color-glass-hover);
-  color: var(--color-text-on-accent);
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background-color var(--transition-fast);
-}
-
-.widget-customize-btn:hover,
-.widget-customize-btn:focus-visible {
-  background: var(--color-glass-hover);
-  outline: 2px solid var(--glass-highlight-mid);
   outline-offset: 2px;
 }
 
@@ -1249,20 +1270,6 @@ svg.weather-forecast__icon {
 
 .customize-row:hover {
   background-color: var(--color-surface-hover);
-}
-
-.customize-row[draggable="true"] {
-  cursor: grab;
-}
-
-.customize-row--dragging {
-  opacity: 0.4;
-}
-
-.customize-row--over {
-  background-color: var(--color-surface-3);
-  outline: 1px dashed var(--color-border);
-  outline-offset: -1px;
 }
 
 .customize-row__toggle {
@@ -1336,7 +1343,7 @@ svg.weather-forecast__icon {
 }
 
 .customize-row__select {
-  min-height: 30px;
+  min-height: var(--target-md);
   width: 132px;
   padding: 0 var(--space-1);
   font-size: var(--text-xs);
@@ -1352,8 +1359,8 @@ svg.weather-forecast__icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: var(--target-md);
+  height: var(--target-md);
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
   background: transparent;
@@ -1490,6 +1497,52 @@ svg.weather-forecast__icon {
   gap: var(--space-5);
 }
 
+/* Dashboard-Ladefehler: ruhiger, zentrierter Zustand mit Retry — bewusst als
+   eigene Fläche statt eines still gefüllt wirkenden Leer-Layouts. */
+.dashboard-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.dashboard-error__icon {
+  width: 32px;
+  height: 32px;
+  color: var(--color-text-tertiary);
+}
+
+.dashboard-error__text {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  max-width: 40ch;
+}
+
+/* Leeres Grid (alle Widgets ausgeblendet): ruhiger, voll-breiter Hinweis. */
+.dashboard-empty-grid {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.dashboard-empty-grid .empty-state__icon {
+  width: 28px;
+  height: 28px;
+  color: var(--color-text-tertiary);
+  opacity: 0.6;
+}
+
 .today-cockpit {
   display: flex;
   flex-direction: column;
@@ -1605,7 +1658,10 @@ svg.weather-forecast__icon {
   padding: 0 var(--space-1);
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--today-card-accent) 16%, var(--color-surface-elevated));
-  color: var(--today-card-accent);
+  /* Dieselbe zur Ink-Seite gemischte Domänenfarbe wie das Label — hält die
+   * kleine Badge-Zahl bei allen Modultönen über AA 4.5:1 (statt reinem Akzent,
+   * der bei Pink/Grün/Orange auf ~3.5:1 fiel). */
+  color: color-mix(in srgb, var(--today-card-accent) 78%, var(--color-text-primary));
   font-size: var(--type-micro);
   font-weight: var(--font-weight-bold);
   line-height: 1;
@@ -1755,6 +1811,27 @@ svg.weather-forecast__icon {
   height: 18px;
 }
 
+/* Einmaliger Erststart-Hinweis: sanfter Akzent-Puls, der zeigt, wo Widgets
+   wieder eingeblendet werden. Läuft dreimal und endet ruhig. */
+@keyframes dashboard-icon-hint {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--active-module-accent, var(--color-accent)) 45%, transparent); }
+  70%  { box-shadow: 0 0 0 9px color-mix(in srgb, var(--active-module-accent, var(--color-accent)) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--active-module-accent, var(--color-accent)) 0%, transparent); }
+}
+
+.dashboard-icon-btn--hint {
+  color: var(--color-text-primary);
+  border-color: color-mix(in srgb, var(--active-module-accent, var(--color-accent)) 55%, var(--color-border));
+  animation: dashboard-icon-hint 1.6s var(--ease-out) 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-icon-btn--hint {
+    animation: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--active-module-accent, var(--color-accent)) 22%, transparent);
+  }
+}
+
 @media (min-width: 1024px) {
   .dashboard-icon-btn {
     width: var(--target-md);
@@ -1771,7 +1848,7 @@ svg.weather-forecast__icon {
 }
 
 .dashboard-customize-toolbar .btn {
-  min-height: 36px;
+  min-height: var(--target-md);
 }
 
 .dashboard-customize-toolbar .btn i {
@@ -1819,8 +1896,8 @@ svg.weather-forecast__icon {
 
 .widget-edit-controls__handle,
 .widget-edit-controls__hide {
-  width: 30px;
-  height: 30px;
+  width: var(--target-md);
+  height: var(--target-md);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xs);
   background: var(--color-surface);
@@ -1839,8 +1916,42 @@ svg.weather-forecast__icon {
   cursor: pointer;
 }
 
+/* Up/Down-Reorder: auf dem Desktop übernimmt der Grip (Maus-Drag), daher
+   standardmäßig aus; auf Fingereingabe (wo Drag nicht feuert) eingeblendet. */
+.widget-edit-controls__move {
+  display: none;
+  gap: var(--space-1);
+  flex: 0 0 auto;
+}
+
+.widget-edit-controls__move-btn {
+  width: var(--target-md);
+  height: var(--target-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.widget-edit-controls__move-btn:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.widget-edit-controls__move-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .widget-edit-controls__handle svg,
-.widget-edit-controls__hide svg {
+.widget-edit-controls__hide svg,
+.widget-edit-controls__move-btn svg {
   width: 15px;
   height: 15px;
 }
@@ -1857,12 +1968,38 @@ svg.weather-forecast__icon {
 
 .widget-edit-controls__select {
   min-width: 132px;
-  height: 30px;
+  height: var(--target-md);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xs);
   background: var(--color-surface);
   color: var(--color-text-primary);
   font-size: var(--text-xs);
+}
+
+/* Edit-Mode-Controls sind auf dem Desktop bewusst kompakt (40px = --target-md,
+   Maus-Minimum), müssen auf Fingereingabe aber das 44px-Minimum erreichen. */
+@media (pointer: coarse) {
+  .customize-row__select,
+  .widget-edit-controls__select,
+  .dashboard-customize-toolbar .btn {
+    min-height: var(--target-base);
+  }
+
+  .customize-row__btn,
+  .widget-edit-controls__hide,
+  .widget-edit-controls__move-btn {
+    width: var(--target-base);
+    height: var(--target-base);
+  }
+
+  /* Der Drag-Grip feuert auf Touch nicht — durch die Up/Down-Buttons ersetzen. */
+  .widget-edit-controls__handle {
+    display: none;
+  }
+
+  .widget-edit-controls__move {
+    display: inline-flex;
+  }
 }
 
 .widget-wrapper--drop-before::after,
@@ -1954,6 +2091,19 @@ svg.weather-forecast__icon {
 .dashboard .shopping-widget-list,
 .dashboard .note-item {
   border-radius: var(--radius-sm);
+}
+
+/* Touch-Targets: bei Fingereingabe die Zeilen-Trefferflächen auf das
+   iOS-Minimum (44px) heben, ohne die Desktop-Dichte anzufassen. */
+@media (pointer: coarse) {
+  .dashboard .task-item,
+  .dashboard .event-item,
+  .dashboard .birthday-widget-item,
+  .dashboard .shopping-widget-list,
+  .dashboard .meal-slot {
+    min-height: var(--target-base);
+    box-sizing: border-box;
+  }
 }
 
 .dashboard .task-item:hover,
@@ -2131,23 +2281,44 @@ svg.weather-forecast__icon {
   color: var(--color-danger);
 }
 
-.budget-widget__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+/* Hero-Balance führt; die Sparquote ist die eine hervorgehobene Stützmetrik
+   (Modulton), Einnahmen/Ausgaben laufen als ruhige, randlose Meta-Zeile — kein
+   gleichgewichtiges 4-Zellen-Raster mehr (Stat-Wall aufgelöst). */
+.budget-widget__savings {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
   gap: var(--space-2);
   margin-top: var(--space-3);
 }
 
-.budget-widget-metric {
-  min-width: 0;
-  padding: var(--space-3);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+.budget-widget__savings span {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
 }
 
-.budget-widget-metric span {
-  display: block;
+.budget-widget__savings strong {
+  color: var(--module-budget);
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.budget-widget__flow {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.budget-widget__flow-item {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.budget-widget__flow-item > span {
   color: var(--color-text-secondary);
   font-size: var(--text-xs);
   overflow: hidden;
@@ -2155,22 +2326,28 @@ svg.weather-forecast__icon {
   white-space: nowrap;
 }
 
-.budget-widget-metric strong {
-  display: block;
-  margin-top: 2px;
-  color: var(--color-text-primary);
+.budget-widget__flow-item > strong {
   font-size: var(--text-sm);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.budget-widget-metric--income strong {
+.budget-widget__flow-item--income > strong {
   color: var(--color-success);
 }
 
-.budget-widget-metric--expense strong {
+.budget-widget__flow-item--expense > strong {
   color: var(--color-danger);
+}
+
+/* Schmales Widget (1x1): Einnahmen/Ausgaben untereinander statt nebeneinander,
+   damit Label und Betrag nicht beide ellipsieren (Legibilitäts-Klippe). */
+@container dashboard-widget (max-width: 220px) {
+  .budget-widget__flow {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
 }
 
 .budget-widget__footer {

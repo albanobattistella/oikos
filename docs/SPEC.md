@@ -931,6 +931,8 @@ Responsive grid: 1 column on mobile, 2 on tablet, 3 on desktop.
 
 **Semantic interaction polish (v0.71.34):** the page exposes one primary heading, the greeting is a subordinate section heading, and FAB quick actions are native buttons without nested interactive controls. The customize control keeps a 48 px touch target on phones and a compact 40 px target on desktop.
 
+**Cockpit-first defaults & interaction polish (v0.82.0):** the four cockpit-covered domains (tasks, calendar, shopping, meals) start **hidden** by default so the Today Cockpit is the single orientation layer above the fold and the first screen is not a wall of widgets; they stay one tap away in **Customize**, and a one-time pulse highlights the customize control on first run. Existing saved layouts are untouched. Weather is ordered last in the default grid (the only passive widget no longer leads). Widget reordering works from every input: mouse drag on the live grid, **Up/Down buttons on touch**, and **arrow keys** when the drag handle is focused (`aria-keyshortcuts`); the Customize modal reorders via the same chevron buttons (the old HTML5 row-drag was removed). Resetting the layout asks for confirmation. When every widget is hidden the grid shows a "re-enable via Customize" placeholder instead of an empty screen. Empty Shopping and Budget widgets offer a subtle "+ Create" activation link (the "All done" task state stays deliberately reward-only). The Budget widget leads with the monthly balance, one highlighted savings-rate, and a quiet income/expenses line (no equal-weight metric grid). A **load failure renders a distinct error state with a Retry action** — network, expired-session, and server errors get different copy — instead of empty widgets that look like a calm day.
+
 **Widgets:**
 - Greeting: "Good [morning/afternoon/evening], [Name]" + date; auto-refreshes on `visibilitychange` so the greeting stays current during long sessions
 - Weather: server-side proxy with two providers — **Open-Meteo** (default, no API key, WMO codes mapped to Lucide icons and translated via `wmo.*` i18n keys) and **OpenWeatherMap** (legacy, via `OPENWEATHER_*`). Provider resolves from DB preferences (Settings → Modules → Overview) first, then env vars. 5-day preview, refresh every 30 min, hide widget on API error
@@ -942,7 +944,7 @@ Responsive grid: 1 column on mobile, 2 on tablet, 3 on desktop.
 
 **Widget sizes:** each widget has a configurable size using named presets (Tiny, Narrow, Standard, Large, Full) that map to `columns × rows` in the CSS grid. Sizes are persisted in user preferences and survive page reloads.
 
-Skeleton loading instead of spinners (skeleton renders all 9 widgets at their correct grid-spanning sizes to prevent layout shift). Clicking any widget navigates to that module.
+Skeleton loading instead of spinners (the skeleton mirrors the default-visible widgets at their correct grid-spanning sizes to prevent layout shift). Clicking any widget navigates to that module.
 
 ### Tasks (`/tasks`)
 

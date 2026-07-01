@@ -38,7 +38,8 @@
         "requiredFields": "Συμπληρώστε όλα τα υποχρεωτικά πεδία.",
         "invalidInput": "Μη έγκυρη είσοδος.",
         "togglePasswordVisibility": "Εμφάνιση/απόκρυψη κωδικού",
-        "errorOfflineMutation": "Οι αλλαγές δεν είναι δυνατές εκτός σύνδεσης. Συνδεθείτε ξανά."
+        "errorOfflineMutation": "Οι αλλαγές δεν είναι δυνατές εκτός σύνδεσης. Συνδεθείτε ξανά.",
+        "retry": "Δοκιμάστε ξανά"
     },
     "nav": {
         "dashboard": "Επισκόπηση",
@@ -128,7 +129,6 @@
         "monthlyBalance": "Υπόλοιπο",
         "savingsRate": "Ποσοστό αποταμίευσης",
         "topExpense": "Μεγαλύτερο έξοδο",
-        "budgetEntries": "Καταχωρήσεις",
         "noBudgetData": "Δεν υπάρχουν δεδομένα προϋπολογισμού αυτόν τον μήνα.",
         "customize": "Προσαρμογή",
         "customizeTitle": "Προσαρμογή widgets",
@@ -140,7 +140,6 @@
         "overdueTasksChipPlural": "{{count}} εκπρόθεσμες εργασίες",
         "customizeManage": "Widget",
         "customizeExit": "Έξοδος από προσαρμογή",
-        "customizeDrag": "Σύρετε widget",
         "customizeSize": "Μέγεθος",
         "customizeSizeFor": "Μέγεθος για {{widget}}",
         "customizeHide": "Απόκρυψη {{widget}}",
@@ -148,7 +147,13 @@
         "widgetSizeNarrow": "Στενό (2×1)",
         "widgetSizeStandard": "Τυπικό (2×2)",
         "widgetSizeLarge": "Μεγάλο (3×2)",
-        "widgetSizeFull": "Πλήρες (4×2)"
+        "widgetSizeFull": "Πλήρες (4×2)",
+        "noShoppingLists": "Δεν υπάρχουν λίστες αγορών",
+        "customizeResetConfirm": "Επαναφορά διάταξης στην προεπιλογή;",
+        "loadErrorSession": "Η συνεδρία σας έληξε. Συνδεθείτε ξανά.",
+        "loadErrorServer": "Ο διακομιστής δεν αποκρίνεται αυτή τη στιγμή. Δοκιμάστε ξανά αργότερα.",
+        "allWidgetsHidden": "Όλα τα widget είναι κρυμμένα — εμφανίστε τα ξανά μέσω «Προσαρμογή».",
+        "customizeReorderHandle": "Αναδιάταξη widget (σύρετε ή βέλη πάνω/κάτω)"
     },
     "tasks": {
         "title": "Εργασίες",

@@ -38,7 +38,8 @@
         "requiredFields": "Please fill in all required fields.",
         "invalidInput": "Invalid input.",
         "togglePasswordVisibility": "Toggle password visibility",
-        "errorOfflineMutation": "Changes aren't possible while offline. Please reconnect."
+        "errorOfflineMutation": "Changes aren't possible while offline. Please reconnect.",
+        "retry": "Try again"
     },
     "nav": {
         "dashboard": "Overview",
@@ -128,7 +129,6 @@
         "monthlyBalance": "Balance",
         "savingsRate": "Savings rate",
         "topExpense": "Top expense",
-        "budgetEntries": "Entries",
         "noBudgetData": "No budget data this month.",
         "customize": "Customize",
         "customizeTitle": "Customize widgets",
@@ -140,7 +140,6 @@
         "overdueTasksChipPlural": "{{count}} overdue tasks",
         "customizeManage": "Widgets",
         "customizeExit": "Exit customization",
-        "customizeDrag": "Drag widget",
         "customizeSize": "Size",
         "customizeSizeFor": "Size for {{widget}}",
         "customizeHide": "Hide {{widget}}",
@@ -148,7 +147,13 @@
         "widgetSizeNarrow": "Narrow (2×1)",
         "widgetSizeStandard": "Standard (2×2)",
         "widgetSizeLarge": "Large (3×2)",
-        "widgetSizeFull": "Full (4×2)"
+        "widgetSizeFull": "Full (4×2)",
+        "noShoppingLists": "No shopping lists",
+        "customizeResetConfirm": "Reset layout to default?",
+        "loadErrorSession": "Your session has expired. Please sign in again.",
+        "loadErrorServer": "The server is not responding right now. Please try again later.",
+        "allWidgetsHidden": "All widgets are hidden — re-enable them via \"Customize\".",
+        "customizeReorderHandle": "Reorder widget (drag or arrow keys up/down)"
     },
     "tasks": {
         "title": "Tasks",

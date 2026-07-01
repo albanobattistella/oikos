@@ -38,7 +38,8 @@
         "requiredFields": "Vyplňte prosím všechna povinná pole.",
         "invalidInput": "Neplatný vstup.",
         "togglePasswordVisibility": "Zobrazit/skrýt heslo",
-        "errorOfflineMutation": "Změny nejsou offline možné. Připojte se prosím znovu."
+        "errorOfflineMutation": "Změny nejsou offline možné. Připojte se prosím znovu.",
+        "retry": "Zkusit znovu"
     },
     "nav": {
         "dashboard": "Přehled",
@@ -128,7 +129,6 @@
         "monthlyBalance": "Bilance",
         "savingsRate": "Míra úspor",
         "topExpense": "Nejvyšší výdaj",
-        "budgetEntries": "Záznamy",
         "noBudgetData": "Tento měsíc nejsou žádná data o rozpočtu.",
         "customize": "Přizpůsobit",
         "customizeTitle": "Upravit widgety",
@@ -140,7 +140,6 @@
         "overdueTasksChipPlural": "{{count}} zpožděných úkolů",
         "customizeManage": "Widgety",
         "customizeExit": "Ukončit přizpůsobení",
-        "customizeDrag": "Přetáhnout widget",
         "customizeSize": "Velikost",
         "customizeSizeFor": "Velikost pro {{widget}}",
         "customizeHide": "Skrýt {{widget}}",
@@ -148,7 +147,13 @@
         "widgetSizeNarrow": "Úzký (2×1)",
         "widgetSizeStandard": "Standardní (2×2)",
         "widgetSizeLarge": "Velký (3×2)",
-        "widgetSizeFull": "Plná šířka (4×2)"
+        "widgetSizeFull": "Plná šířka (4×2)",
+        "noShoppingLists": "Žádné nákupní seznamy",
+        "customizeResetConfirm": "Obnovit výchozí rozvržení?",
+        "loadErrorSession": "Vaše relace vypršela. Přihlaste se prosím znovu.",
+        "loadErrorServer": "Server právě neodpovídá. Zkuste to prosím později.",
+        "allWidgetsHidden": "Všechny widgety jsou skryté — znovu je zapněte přes „Přizpůsobit\".",
+        "customizeReorderHandle": "Přeuspořádat widget (přetáhněte nebo šipky nahoru/dolů)"
     },
     "tasks": {
         "title": "Úkoly",

@@ -38,7 +38,8 @@
         "requiredFields": "Kérjük, töltse ki az összes kötelező mezőt.",
         "invalidInput": "Érvénytelen bevitel.",
         "togglePasswordVisibility": "Jelszó láthatóságának váltása",
-        "errorOfflineMutation": "Offline állapotban nem lehet módosítani. Csatlakozz újra."
+        "errorOfflineMutation": "Offline állapotban nem lehet módosítani. Csatlakozz újra.",
+        "retry": "Újra"
     },
     "nav": {
         "dashboard": "Áttekintés",
@@ -128,7 +129,6 @@
         "monthlyBalance": "Egyenleg",
         "savingsRate": "Megtakarítási arány",
         "topExpense": "Legnagyobb kiadás",
-        "budgetEntries": "Bejegyzések",
         "noBudgetData": "Nincs költségvetési adat ebben a hónapban.",
         "customize": "Testreszabás",
         "customizeTitle": "Widgetek testreszabása",
@@ -140,7 +140,6 @@
         "overdueTasksChipPlural": "{{count}} lejárt feladat",
         "customizeManage": "Widgetek kezelése",
         "customizeExit": "Kilépés a testreszabásból",
-        "customizeDrag": "Widget mozgatása",
         "customizeSize": "Méret",
         "customizeSizeFor": "Méret {{widget}} számára",
         "customizeHide": "Elrejtés {{widget}}",
@@ -148,7 +147,13 @@
         "widgetSizeNarrow": "Keskeny (2×1)",
         "widgetSizeStandard": "Normál (2×2)",
         "widgetSizeLarge": "Nagy (3×2)",
-        "widgetSizeFull": "Teljes (4×2)"
+        "widgetSizeFull": "Teljes (4×2)",
+        "noShoppingLists": "Nincsenek bevásárlólisták",
+        "customizeResetConfirm": "Visszaállítja az alapértelmezett elrendezést?",
+        "loadErrorSession": "A munkamenet lejárt. Jelentkezz be újra.",
+        "loadErrorServer": "A szerver most nem válaszol. Próbáld újra később.",
+        "allWidgetsHidden": "Minden widget rejtve — kapcsold vissza a „Testreszabás\" alatt.",
+        "customizeReorderHandle": "Widget átrendezése (húzd vagy nyíl fel/le)"
     },
     "tasks": {
         "title": "Feladatok",

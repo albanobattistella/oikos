@@ -38,7 +38,8 @@
         "requiredFields": "Vui lòng điền tất cả các trường bắt buộc.",
         "invalidInput": "Đầu vào không hợp lệ.",
         "togglePasswordVisibility": "Hiện/ẩn mật khẩu",
-        "errorOfflineMutation": "Không thể thay đổi khi ngoại tuyến. Vui lòng kết nối lại."
+        "errorOfflineMutation": "Không thể thay đổi khi ngoại tuyến. Vui lòng kết nối lại.",
+        "retry": "Thử lại"
     },
     "nav": {
         "dashboard": "Tổng quan",
@@ -128,7 +129,6 @@
         "monthlyBalance": "Số dư",
         "savingsRate": "Tỷ lệ tiết kiệm",
         "topExpense": "Chi phí cao nhất",
-        "budgetEntries": "Mục nhập",
         "noBudgetData": "Không có dữ liệu ngân sách trong tháng này.",
         "customize": "Tùy chỉnh",
         "customizeTitle": "Tùy chỉnh tiện ích",
@@ -140,7 +140,6 @@
         "overdueTasksChipPlural": "{{count}} nhiệm vụ quá hạn",
         "customizeManage": "Tiện ích",
         "customizeExit": "Thoát tùy chỉnh",
-        "customizeDrag": "Kéo tiện ích",
         "customizeSize": "Kích thước",
         "customizeSizeFor": "Kích thước cho {{widget}}",
         "customizeHide": "Ẩn {{widget}}",
@@ -148,7 +147,13 @@
         "widgetSizeNarrow": "Hẹp (2×1)",
         "widgetSizeStandard": "Tiêu chuẩn (2×2)",
         "widgetSizeLarge": "Lớn (3×2)",
-        "widgetSizeFull": "Toàn bộ (4×2)"
+        "widgetSizeFull": "Toàn bộ (4×2)",
+        "noShoppingLists": "Không có danh sách mua sắm",
+        "customizeResetConfirm": "Đặt lại bố cục về mặc định?",
+        "loadErrorSession": "Phiên của bạn đã hết hạn. Vui lòng đăng nhập lại.",
+        "loadErrorServer": "Máy chủ hiện không phản hồi. Vui lòng thử lại sau.",
+        "allWidgetsHidden": "Tất cả widget đã ẩn — bật lại qua \"Tùy chỉnh\".",
+        "customizeReorderHandle": "Sắp xếp lại widget (kéo hoặc phím mũi tên lên/xuống)"
     },
     "tasks": {
         "title": "Nhiệm vụ",
