@@ -19,35 +19,26 @@
   }
 }
 
-.recipes-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  border-top: 3px solid var(--module-accent);
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-surface);
-}
-
-.recipes-header__title {
-  margin: 0;
-}
-
 .recipes-list {
   flex: 1;
   overflow-y: auto;
   padding: var(--space-4);
   display: grid;
+  /* Kachelt 2–3-spaltig auf Desktop, automatisch einspaltig auf Mobil
+   * (Karten fassen ihre natürliche Höhe via align-items:start). */
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: var(--space-3);
   align-content: start;
+  align-items: start;
 }
 
 .recipe-card {
-  border: 1px solid var(--glass-border-subtle);
+  /* Arbeitsfläche = opak (Budget-Benchmark: Glass bleibt Overlays/Modals
+   * vorbehalten, Inhalt muss auf einen Blick lesbar sein). */
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-glass-card);
-  background-color: var(--glass-bg-card);
-  box-shadow: var(--glass-shadow-sm);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
   padding: var(--space-4);
   display: grid;
   gap: var(--space-2);
@@ -55,12 +46,14 @@
 }
 
 .recipe-card:hover {
-  background-color: var(--glass-bg-card-hover);
-  box-shadow: var(--glass-shadow-md);
+  background-color: var(--color-surface-hover);
+  box-shadow: var(--shadow-md);
 }
 
 .recipe-card__title {
   margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
   color: var(--color-text-primary);
 }
 
@@ -69,6 +62,12 @@
   color: var(--color-text-secondary);
   font-size: var(--type-body);
   white-space: pre-wrap;
+}
+
+/* Rezept-Link: natürliche Breite, links ausgerichtet — nicht als
+ * vollbreiter Grid-Child strecken (sonst zentriert das btn-Label). */
+.recipe-card__link {
+  justify-self: start;
 }
 
 .recipe-card__ingredients {
@@ -82,12 +81,70 @@
 .recipe-card__ingredient {
   font-size: var(--type-body);
   color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
 }
 
 .recipe-card__actions {
   display: flex;
+  align-items: center;
   gap: var(--space-2);
   flex-wrap: wrap;
+}
+
+/* Primäraktion drängt die Icon-Aktionen an den rechten Rand. */
+.recipe-card__primary {
+  margin-right: auto;
+}
+
+/* Sekundäraktionen folgen derselben Reveal-Policy wie Meal-Cards: auf Desktop
+ * per Hover/Focus einblenden, auf Touch dauerhaft sichtbar. Die Primäraktion
+ * ("Zu Mahlzeiten") bleibt immer sichtbar. So teilt die Karten-Familie
+ * (Rezepte + Mahlzeiten) genau ein Interaktionsmuster. */
+.recipe-card__icon-actions {
+  display: flex;
+  gap: var(--space-1);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.recipe-card:hover .recipe-card__icon-actions,
+.recipe-card:focus-within .recipe-card__icon-actions {
+  opacity: 1;
+}
+
+@media (max-width: 640px) {
+  .recipe-card__icon-actions {
+    opacity: 1;
+  }
+}
+
+.recipe-card__icon-btn {
+  width: var(--target-base);
+  height: var(--target-base);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.recipe-card__icon-btn:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.recipe-card__icon-btn:focus-visible {
+  outline: 2px solid var(--module-accent);
+  outline-offset: 2px;
+}
+
+.recipe-card__icon-btn--danger:hover {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
 }
 
 .recipe-ingredient-list {

@@ -35,7 +35,6 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-3) var(--space-4);
-  border-top: 3px solid var(--module-accent);
   border-bottom: 1px solid var(--color-border);
   background-color: var(--color-surface);
   flex-shrink: 0;
@@ -147,10 +146,6 @@
 
   .meal-slot__add-more-btn {
     opacity: 1;
-  }
-
-  #fab-new-meal {
-    display: none;
   }
 }
 
@@ -295,11 +290,13 @@
 .meal-card__ingredients-count {
   font-size: var(--text-xs);
   color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
 }
 
 .meal-card__ing-done {
   font-size: var(--text-xs);
   color: var(--color-success);
+  font-variant-numeric: tabular-nums;
 }
 
 .meal-card__actions {
@@ -534,8 +531,11 @@
 /* --------------------------------------------------------
  * Leer-Zustand (leere Slots im Wochenplan)
  * -------------------------------------------------------- */
-.meal-slot--empty {
-  opacity: 0.6;
+/* Leerer Slot recessed, aber ohne die Add-Affordanz zu verschlucken:
+ * gezielte AA-sichere Tertiärfarbe am Text statt Blanket-opacity:0.6 auf dem
+ * ganzen Slot (das dimmte auch den Add-Button und riskierte Kontrast). */
+.meal-slot--empty .empty-state__description {
+  color: var(--color-text-tertiary);
 }
 
 /* --------------------------------------------------------

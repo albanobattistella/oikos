@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.81.1] - 2026-07-01
+
+### Changed
+- **Kitchen modules (Meals, Recipes, Shopping) now share one consistent visual grammar.** A single module-accent strip lives on the shared tab bar and changes color with the active tab; recipe cards are opaque like the rest of the app instead of translucent glass; ingredient, meal and shopping quantities use aligned tabular figures; and the delete-undo window is a consistent 5 seconds across all three tabs.
+- **The Meals "add" button is now available on mobile**, matching Recipes and Shopping.
+- **The Recipe list now tiles across the available width on desktop** instead of a single column of full-width cards, and the Shopping list is centered in a readable column on wide screens.
+- **Recipe card actions** (edit, duplicate, delete) are now consistent, de-emphasized icon buttons that reveal on hover/focus, with delete no longer shown as a permanently visible red button.
+- **The active shopping list tab** now uses the Shopping module accent color.
+
+### Fixed
+- **Recipe titles no longer overflow their card**, and the "open recipe link" no longer stretches the full card width with its label centered.
+- **The Recipes tab no longer shows a redundant page title** that the shared tab bar already provides.
+
 ## [0.81.0] - 2026-07-01
 
 ### Added

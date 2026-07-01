@@ -37,7 +37,6 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
-  border-top: 3px solid var(--module-accent);
   border-bottom: 1px solid var(--color-border);
   background-color: var(--color-surface);
   overflow-x: auto;
@@ -70,8 +69,8 @@
 }
 
 .list-tab--active {
-  background-color: var(--color-accent);
-  border-color: var(--color-accent);
+  background-color: var(--module-accent);
+  border-color: var(--module-accent);
   color: var(--color-ink-on-vivid);
 }
 
@@ -116,7 +115,7 @@
   justify-content: space-between;
   padding: var(--space-3) var(--space-4) var(--space-2);
   flex-shrink: 0;
-  border-top: 3px solid var(--module-accent);
+  border-bottom: 1px solid var(--color-border-subtle);
   /* Opaque background required: backdrop-filter on position:sticky inside overflow:auto
    * triggers a WebKit compositor bug that blanks the entire scroll container (iOS 26+). */
   background-color: var(--color-surface);
@@ -199,6 +198,7 @@
   background-color: var(--color-surface);
   color: var(--color-text-primary);
   font-size: var(--text-base);
+  font-variant-numeric: tabular-nums;
   text-align: center;
   min-height: var(--target-base);
   height: var(--target-base);
@@ -306,6 +306,25 @@
   margin-bottom: var(--space-4);
 }
 
+/* Web: Einkauf-Content als zentrierte, breitenbegrenzte Spalte statt
+ * links auslaufender Vollbreite (Liste liest sich auf ≥1024px ruhiger). */
+@media (min-width: 1024px) {
+  .shopping-page .list-header,
+  .shopping-page .quick-add,
+  .shopping-page .item-category {
+    width: 100%;
+    max-width: var(--content-max-width-narrow);
+    margin-inline: auto;
+  }
+
+  /* Listen-Auswahl-Leiste bleibt Vollbreite-Toolbar (durchgehender Trenner),
+   * aber ihre Pills rücken per Padding auf dieselbe zentrierte Spalte ein,
+   * damit „Weekly Shop" (Pill) mit dem Listen-Header darunter fluchtet. */
+  .shopping-page .list-tabs-bar {
+    padding-inline: max(var(--space-4), calc((100% - var(--content-max-width-narrow)) / 2));
+  }
+}
+
 .item-category__header {
   color: var(--color-text-secondary);
   padding: var(--space-2) 0 var(--space-1);
@@ -411,6 +430,7 @@
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
   margin-top: 1px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Löschen-Button */

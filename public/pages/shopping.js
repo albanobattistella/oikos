@@ -769,7 +769,7 @@ function wireListContentEvents(container) {
       await toggleShoppingItem(id, checked, container);
     }
 
-    // ---- Artikel löschen (mit Undo, 4s Fenster) ----
+    // ---- Artikel löschen (mit Undo, 5s Fenster) ----
     if (action === 'delete-item') {
       const id        = Number(target.dataset.id);
       const item      = state.items.find((i) => i.id === id);
@@ -785,7 +785,7 @@ function wireListContentEvents(container) {
       window.yuvomi.showToast(
         t('shopping.itemDeletedToast', { name: snapshot?.name ?? '' }),
         'default',
-        4000,
+        5000,
         () => {
           // Undo: Artikel wiederherstellen
           undone = true;
@@ -815,10 +815,10 @@ function wireListContentEvents(container) {
           }
           window.yuvomi.showToast(err.message, 'danger');
         }
-      }, 4100);
+      }, 5100);
     }
 
-    // ---- Abgehakte löschen (mit Undo, 4s Fenster) ----
+    // ---- Abgehakte löschen (mit Undo, 5s Fenster) ----
     if (action === 'clear-checked') {
       const checked = state.items.filter((i) => i.is_checked);
       const count   = checked.length;
@@ -836,7 +836,7 @@ function wireListContentEvents(container) {
       window.yuvomi.showToast(
         t('shopping.itemsRemovedToast', { count }),
         'default',
-        4000,
+        5000,
         () => {
           undone = true;
           snapshot.forEach((item) => state.items.push(item));
@@ -859,7 +859,7 @@ function wireListContentEvents(container) {
           renderTabs(container);
           window.yuvomi.showToast(err.message, 'danger');
         }
-      }, 4100);
+      }, 5100);
     }
 
     // ---- Kategorien verwalten ----

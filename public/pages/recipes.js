@@ -41,22 +41,12 @@ export async function render(container) {
   const page = document.createElement('div');
   page.className = 'recipes-page';
 
-  const header = document.createElement('div');
-  header.className = 'recipes-header';
-
+  // sr-only Titel: die geteilte Kitchen-Tabs-Leiste labelt das Modul bereits
+  // sichtbar — konsistent mit Mahlzeiten/Einkauf. Der FAB ist die einzige
+  // Create-Affordanz (kein redundanter sichtbarer Kopf-Titel mehr).
   const title = document.createElement('h1');
-  title.className = 'recipes-header__title';
+  title.className = 'sr-only';
   title.textContent = t('recipes.title');
-
-  // toolbar-new-btn: global per CSS ausgeblendet (Audit 1.9) — der FAB ist die
-  // einzige Create-Affordanz, konsistent mit allen anderen Modulen.
-  const addBtn = document.createElement('button');
-  addBtn.className = 'btn btn--primary toolbar-new-btn';
-  addBtn.type = 'button';
-  addBtn.id = 'recipes-add';
-  addBtn.textContent = t('recipes.addRecipe');
-
-  header.append(title, addBtn);
 
   const list = document.createElement('div');
   list.className = 'recipes-list';
@@ -69,14 +59,14 @@ export async function render(container) {
   const fab = document.createElement('button');
   fab.className = 'page-fab';
   fab.type = 'button';
-  fab.id = 'recipes-fab';
+  fab.id = 'fab-new-recipe';
   fab.setAttribute('aria-label', t('recipes.addRecipe'));
   const fabIcon = document.createElement('i');
   fabIcon.dataset.lucide = 'plus';
   fabIcon.setAttribute('aria-hidden', 'true');
   fab.appendChild(fabIcon);
 
-  page.append(header, list, fab);
+  page.append(title, list, fab);
   container.replaceChildren(page);
   renderKitchenTabsBar(container, '/recipes');
 
@@ -85,7 +75,6 @@ export async function render(container) {
   await Promise.all([loadRecipes(), loadCategories()]);
   renderRecipeList();
 
-  addBtn.addEventListener('click', () => openRecipeModal('create'));
   fab.addEventListener('click', () => openRecipeModal('create'));
 
   list.addEventListener('click', async (e) => {
@@ -172,7 +161,7 @@ function renderRecipeList() {
 
     if (recipe.recipe_url) {
       const link = document.createElement('a');
-      link.className = 'btn btn--ghost';
+      link.className = 'btn btn--ghost recipe-card__link';
       link.href = recipe.recipe_url;
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
@@ -197,39 +186,46 @@ function renderRecipeList() {
     const actions = document.createElement('div');
     actions.className = 'recipe-card__actions';
 
+    // Primäraktion sichtbar; die selteneren/gefährlicheren Aktionen als
+    // de-emphasierte Icon-Buttons — konsistent mit dem Icon-Action-Muster
+    // des Einkaufs (statt vier gleichrangiger Buttons inkl. lautem roten Delete).
     const addToMeals = document.createElement('button');
-    addToMeals.className = 'btn btn--secondary';
+    addToMeals.className = 'btn btn--primary recipe-card__primary';
     addToMeals.type = 'button';
     addToMeals.dataset.action = 'add-to-meals';
     addToMeals.dataset.id = String(recipe.id);
     addToMeals.textContent = t('recipes.addToMeals');
 
-    const edit = document.createElement('button');
-    edit.className = 'btn btn--secondary';
-    edit.type = 'button';
-    edit.dataset.action = 'edit';
-    edit.dataset.id = String(recipe.id);
-    edit.textContent = t('common.edit');
+    const iconActions = document.createElement('div');
+    iconActions.className = 'recipe-card__icon-actions';
+    const secondaryActions = [
+      { action: 'edit',      icon: 'pencil',  label: t('common.edit') },
+      { action: 'duplicate', icon: 'copy',    label: t('recipes.duplicate') },
+      { action: 'delete',    icon: 'trash-2', label: t('common.delete'), danger: true },
+    ];
+    for (const a of secondaryActions) {
+      const btn = document.createElement('button');
+      btn.className = `recipe-card__icon-btn${a.danger ? ' recipe-card__icon-btn--danger' : ''}`;
+      btn.type = 'button';
+      btn.dataset.action = a.action;
+      btn.dataset.id = String(recipe.id);
+      btn.setAttribute('aria-label', a.label);
+      btn.title = a.label;
+      const ic = document.createElement('i');
+      ic.dataset.lucide = a.icon;
+      ic.className = 'icon-md';
+      ic.setAttribute('aria-hidden', 'true');
+      btn.appendChild(ic);
+      iconActions.appendChild(btn);
+    }
 
-    const del = document.createElement('button');
-    del.className = 'btn btn--danger';
-    del.type = 'button';
-    del.dataset.action = 'delete';
-    del.dataset.id = String(recipe.id);
-    del.textContent = t('common.delete');
-
-    const duplicate = document.createElement('button');
-    duplicate.className = 'btn btn--secondary';
-    duplicate.type = 'button';
-    duplicate.dataset.action = 'duplicate';
-    duplicate.dataset.id = String(recipe.id);
-    duplicate.textContent = t('recipes.duplicate');
-
-    actions.append(addToMeals, edit, duplicate, del);
+    actions.append(addToMeals, iconActions);
     card.appendChild(actions);
 
     list.appendChild(card);
   }
+
+  if (window.lucide) window.lucide.createIcons({ el: list });
 }
 
 function buildIngredientRow(name, qty, category = DEFAULT_CATEGORY_NAME) {
