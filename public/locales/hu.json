@@ -253,6 +253,12 @@
         "navLabelOverdue": "Feladatok, {{count}} lejárt"
     },
     "shopping": {
+        "detailsLabel": "{{name}} részletei",
+        "urlLabel": "Hivatkozás",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "Jegyzet",
+        "notesPlaceholder": "pl. márka, méret, íz…",
+        "openLink": "Hivatkozás megnyitása",
         "title": "Bevásárlás",
         "noLists": "Nincsenek listák",
         "noListsDescription": "Hozzon létre egy listát a + gombbal.",

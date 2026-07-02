@@ -253,6 +253,12 @@
         "navLabelOverdue": "Taken, {{count}} verlopen"
     },
     "shopping": {
+        "detailsLabel": "Details van {{name}}",
+        "urlLabel": "Link",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "Notitie",
+        "notesPlaceholder": "bijv. merk, maat, smaak…",
+        "openLink": "Link openen",
         "title": "Boodschappen",
         "noLists": "Geen lijsten",
         "noListsDescription": "Maak een lijst aan met de + knop.",

@@ -466,6 +466,69 @@
 
 .item-delete:hover { color: var(--color-danger); }
 
+/* Detail-Indikatoren (Link/Notiz) inline hinter dem Namen — dezent. */
+.item-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: var(--space-2);
+  color: var(--module-accent, var(--color-text-secondary));
+  vertical-align: middle;
+}
+
+.item-meta__icon {
+  width: 0.9em;
+  height: 0.9em;
+}
+
+.shopping-item--checked .item-meta {
+  color: var(--color-text-disabled);
+}
+
+/* Details-Button (URL/Notiz bearbeiten). Anders als der Löschen-Button bleibt er
+ * auf Touch erreichbar (kein Hover-Reveal), da es keine Swipe-Alternative gibt. */
+.item-details {
+  width: var(--target-base);
+  height: var(--target-base);
+  min-width: var(--target-base);
+  min-height: var(--target-base);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-disabled);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+  border: none;
+  flex-shrink: 0;
+}
+
+.shopping-item:hover .item-details,
+.shopping-item:focus-within .item-details {
+  opacity: 1;
+}
+
+.item-details:hover { color: var(--color-text-secondary); }
+
+/* Klickbare Link-Vorschau im Detail-Drawer. */
+.item-details__link-wrap:not(:empty) {
+  margin-top: var(--space-2);
+}
+
+.item-details__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--module-accent, var(--color-primary));
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.item-details__link:hover { text-decoration: underline; }
+
 /* --------------------------------------------------------
  * Swipe-Wrapper - Shopping-spezifische Styles
  * -------------------------------------------------------- */

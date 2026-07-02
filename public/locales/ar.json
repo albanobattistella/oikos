@@ -253,6 +253,12 @@
         "selectTask": "Select task"
     },
     "shopping": {
+        "detailsLabel": "تفاصيل {{name}}",
+        "urlLabel": "رابط",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "ملاحظة",
+        "notesPlaceholder": "مثال: العلامة التجارية، الحجم، النكهة…",
+        "openLink": "فتح الرابط",
         "title": "التسوق",
         "noLists": "لا توجد قوائم",
         "noListsDescription": "أنشئ قائمة عبر زر +.",

@@ -253,6 +253,12 @@
         "selectTask": "Select task"
     },
     "shopping": {
+        "detailsLabel": "{{name}} の詳細",
+        "urlLabel": "リンク",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "メモ",
+        "notesPlaceholder": "例: ブランド、サイズ、味…",
+        "openLink": "リンクを開く",
         "title": "買い物",
         "noLists": "リストなし",
         "noListsDescription": "+ ボタンでリストを作成できます。",

@@ -253,6 +253,12 @@
         "navLabelOverdue": "Nhiệm vụ, {{count}} quá hạn"
     },
     "shopping": {
+        "detailsLabel": "Chi tiết {{name}}",
+        "urlLabel": "Liên kết",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "Ghi chú",
+        "notesPlaceholder": "vd. thương hiệu, kích cỡ, hương vị…",
+        "openLink": "Mở liên kết",
         "title": "Mua sắm",
         "noLists": "Không có danh sách",
         "noListsDescription": "Tạo danh sách bằng nút +.",

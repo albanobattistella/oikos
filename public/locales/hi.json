@@ -253,6 +253,12 @@
         "selectTask": "Select task"
     },
     "shopping": {
+        "detailsLabel": "{{name}} का विवरण",
+        "urlLabel": "लिंक",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "नोट",
+        "notesPlaceholder": "जैसे ब्रांड, आकार, स्वाद…",
+        "openLink": "लिंक खोलें",
         "title": "खरीदारी",
         "noLists": "कोई सूची नहीं",
         "noListsDescription": "+ बटन से सूची बनाएं।",

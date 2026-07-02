@@ -259,6 +259,12 @@
         "showFuture": "Geplante anzeigen"
     },
     "shopping": {
+        "detailsLabel": "Details zu {{name}}",
+        "urlLabel": "Link",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "Notiz",
+        "notesPlaceholder": "z. B. Marke, Größe, Geschmack…",
+        "openLink": "Link öffnen",
         "title": "Einkauf",
         "noLists": "Keine Listen",
         "noListsDescription": "Erstelle eine Liste mit dem + Button.",

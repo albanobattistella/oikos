@@ -253,6 +253,12 @@
         "selectTask": "Select task"
     },
     "shopping": {
+        "detailsLabel": "Подробнее: {{name}}",
+        "urlLabel": "Ссылка",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "Заметка",
+        "notesPlaceholder": "напр. бренд, размер, вкус…",
+        "openLink": "Открыть ссылку",
         "title": "Покупки",
         "noLists": "Нет списков",
         "noListsDescription": "Создайте список с помощью кнопки +.",

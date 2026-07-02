@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.87.0] - 2026-07-02
+
+### Added
+- **Notes & links on shopping items (Discussion #426)** — each shopping item can now carry an optional free-text note (brand, size, instructions) and an http(s) product or store link. Both are edited in a compact per-item detail drawer opened from the pencil button, so the quick-add row stays as clean as before; a subtle inline icon marks items that have extra details. Notes are included in the global search, and links open safely in a new tab (only http/https URLs are accepted).
+
 ## [0.86.0] - 2026-07-02
 
 ### Changed

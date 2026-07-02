@@ -64,6 +64,12 @@ Join table for multi-person task assignment (migration v32). Existing `assigned_
 | category | TEXT | FK → Shopping Categories (by name) |
 | is_checked | INTEGER | 0/1 |
 | added_from_meal | INTEGER | FK → Meals, nullable |
+| notes | TEXT | Optional free-text note (brand, size, instructions); searchable |
+| url | TEXT | Optional http(s) product/store link (scheme-validated) |
+
+Notes and links are edited in a per-item detail drawer (progressive disclosure); the quick-add row
+stays name/quantity/category only. A subtle inline icon marks items that carry a note or link. The
+note is indexed in the global search.
 
 ### Shopping Categories
 Custom, household-wide category list for shopping items. Replaces the old hardcoded category set.

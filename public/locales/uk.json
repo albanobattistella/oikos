@@ -253,6 +253,12 @@
         "selectTask": "Виберіть завдання"
     },
     "shopping": {
+        "detailsLabel": "Деталі: {{name}}",
+        "urlLabel": "Посилання",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "Нотатка",
+        "notesPlaceholder": "напр. бренд, розмір, смак…",
+        "openLink": "Відкрити посилання",
         "title": "Покупки",
         "noLists": "Немає списків",
         "noListsDescription": "Створіть список кнопкою +.",

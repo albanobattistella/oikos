@@ -10,7 +10,7 @@
 import { createLogger } from '../logger.js';
 import express from 'express';
 import * as db from '../db.js';
-import { str, oneOf, num, collectErrors, MAX_TITLE, MAX_SHORT } from '../middleware/validate.js';
+import { str, oneOf, url, collectErrors, MAX_TITLE, MAX_SHORT, MAX_TEXT } from '../middleware/validate.js';
 
 const log = createLogger('Shopping');
 
@@ -208,8 +208,8 @@ router.get('/suggestions', (req, res) => {
 
 // --------------------------------------------------------
 // PATCH /api/v1/shopping/items/:itemId
-// Artikel aktualisieren (is_checked, name, quantity, category).
-// Body: { is_checked?, name?, quantity?, category? }
+// Artikel aktualisieren (is_checked, name, quantity, category, notes, url).
+// Body: { is_checked?, name?, quantity?, category?, notes?, url? }
 // Response: { data: ShoppingItem }
 // --------------------------------------------------------
 router.patch('/items/:itemId', (req, res) => {
@@ -224,6 +224,8 @@ router.patch('/items/:itemId', (req, res) => {
       name       = item.name,
       quantity   = item.quantity,
       category   = item.category,
+      notes      = item.notes,
+      url: urlVal = item.url,
     } = req.body;
 
     if (!name?.trim()) return res.status(400).json({ error: 'name darf nicht leer sein.', code: 400 });
@@ -232,11 +234,17 @@ router.patch('/items/:itemId', (req, res) => {
     if (category && !validNames.includes(category))
       return res.status(400).json({ error: 'Invalid category.', code: 400 });
 
+    // notes/url gleich validieren wie beim Anlegen (URL nur http/https → XSS-sicher).
+    const vNotes = str(notes, 'Notiz', { max: MAX_TEXT, required: false });
+    const vUrl   = url(urlVal, 'URL');
+    const fieldErrors = collectErrors([vNotes, vUrl]);
+    if (fieldErrors.length) return res.status(400).json({ error: fieldErrors.join(' '), code: 400 });
+
     db.get().prepare(`
       UPDATE shopping_items
-      SET is_checked = ?, name = ?, quantity = ?, category = ?
+      SET is_checked = ?, name = ?, quantity = ?, category = ?, notes = ?, url = ?
       WHERE id = ?
-    `).run(is_checked ? 1 : 0, name.trim(), quantity ?? null, category, req.params.itemId);
+    `).run(is_checked ? 1 : 0, name.trim(), quantity ?? null, category, vNotes.value, vUrl.value, req.params.itemId);
 
     const updated = db.get()
       .prepare('SELECT * FROM shopping_items WHERE id = ?')
@@ -397,7 +405,7 @@ router.get('/:listId/items', (req, res) => {
 // --------------------------------------------------------
 // POST /api/v1/shopping/:listId/items
 // Artikel zur Liste hinzufügen.
-// Body: { name, quantity?, category? }
+// Body: { name, quantity?, category?, notes?, url? }
 // Response: { data: ShoppingItem }
 // --------------------------------------------------------
 router.post('/:listId/items', (req, res) => {
@@ -411,16 +419,18 @@ router.post('/:listId/items', (req, res) => {
     const defaultCat = validNames[0] ?? 'Sonstiges';
     const requestedCat = req.body.category || defaultCat;
 
-    const vName = str(req.body.name, 'Name', { max: MAX_TITLE });
-    const vQty  = str(req.body.quantity, 'Menge', { max: MAX_SHORT, required: false });
-    const vCat  = oneOf(requestedCat, validNames, 'Kategorie');
-    const errors = collectErrors([vName, vQty, vCat]);
+    const vName  = str(req.body.name, 'Name', { max: MAX_TITLE });
+    const vQty   = str(req.body.quantity, 'Menge', { max: MAX_SHORT, required: false });
+    const vCat   = oneOf(requestedCat, validNames, 'Kategorie');
+    const vNotes = str(req.body.notes, 'Notiz', { max: MAX_TEXT, required: false });
+    const vUrl   = url(req.body.url, 'URL');
+    const errors = collectErrors([vName, vQty, vCat, vNotes, vUrl]);
     if (errors.length) return res.status(400).json({ error: errors.join(' '), code: 400 });
 
     const result = db.get().prepare(`
-      INSERT INTO shopping_items (list_id, name, quantity, category)
-      VALUES (?, ?, ?, ?)
-    `).run(req.params.listId, vName.value, vQty.value, vCat.value || defaultCat);
+      INSERT INTO shopping_items (list_id, name, quantity, category, notes, url)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(req.params.listId, vName.value, vQty.value, vCat.value || defaultCat, vNotes.value, vUrl.value);
 
     const item = db.get()
       .prepare('SELECT * FROM shopping_items WHERE id = ?')

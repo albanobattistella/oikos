@@ -253,6 +253,12 @@
         "selectTask": "Select task"
     },
     "shopping": {
+        "detailsLabel": "{{name}} ayrıntıları",
+        "urlLabel": "Bağlantı",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "Not",
+        "notesPlaceholder": "örn. marka, boyut, tat…",
+        "openLink": "Bağlantıyı aç",
         "title": "Alışveriş",
         "noLists": "Liste yok",
         "noListsDescription": "+ düğmesiyle bir liste oluşturun.",

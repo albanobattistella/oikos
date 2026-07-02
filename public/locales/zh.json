@@ -253,6 +253,12 @@
         "selectTask": "Select task"
     },
     "shopping": {
+        "detailsLabel": "{{name}} 的详情",
+        "urlLabel": "链接",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "备注",
+        "notesPlaceholder": "例如：品牌、尺寸、口味…",
+        "openLink": "打开链接",
         "title": "购物",
         "noLists": "暂无清单",
         "noListsDescription": "通过 + 按钮创建清单。",

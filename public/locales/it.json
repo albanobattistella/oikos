@@ -253,6 +253,12 @@
         "selectTask": "Select task"
     },
     "shopping": {
+        "detailsLabel": "Dettagli di {{name}}",
+        "urlLabel": "Link",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "Nota",
+        "notesPlaceholder": "es. marca, dimensione, gusto…",
+        "openLink": "Apri link",
         "title": "Spesa",
         "noLists": "Nessuna lista",
         "noListsDescription": "Crea una lista con il pulsante +.",

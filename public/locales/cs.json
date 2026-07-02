@@ -253,6 +253,12 @@
         "navLabelOverdue": "Úkoly, {{count}} po termínu"
     },
     "shopping": {
+        "detailsLabel": "Podrobnosti: {{name}}",
+        "urlLabel": "Odkaz",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "Poznámka",
+        "notesPlaceholder": "např. značka, velikost, příchuť…",
+        "openLink": "Otevřít odkaz",
         "title": "Nákupy",
         "noLists": "Žádné seznamy",
         "noListsDescription": "Vytvořte seznam pomocí tlačítka +.",

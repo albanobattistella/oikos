@@ -259,6 +259,12 @@
         "showFuture": "Pokaż zaplanowane"
     },
     "shopping": {
+        "detailsLabel": "Szczegóły: {{name}}",
+        "urlLabel": "Link",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "Notatka",
+        "notesPlaceholder": "np. marka, rozmiar, smak…",
+        "openLink": "Otwórz link",
         "title": "Zakupy",
         "noLists": "Brak list",
         "noListsDescription": "Utwórz listę przyciskiem +.",

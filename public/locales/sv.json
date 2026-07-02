@@ -253,6 +253,12 @@
         "selectTask": "Välj uppgift"
     },
     "shopping": {
+        "detailsLabel": "Detaljer för {{name}}",
+        "urlLabel": "Länk",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "Anteckning",
+        "notesPlaceholder": "t.ex. märke, storlek, smak…",
+        "openLink": "Öppna länk",
         "title": "Shopping",
         "noLists": "Inga listor",
         "noListsDescription": "Skapa en lista med + knappen.",

@@ -253,6 +253,12 @@
         "selectTask": "Select task"
     },
     "shopping": {
+        "detailsLabel": "Λεπτομέρειες για {{name}}",
+        "urlLabel": "Σύνδεσμος",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "Σημείωση",
+        "notesPlaceholder": "π.χ. μάρκα, μέγεθος, γεύση…",
+        "openLink": "Άνοιγμα συνδέσμου",
         "title": "Αγορές",
         "noLists": "Δεν υπάρχουν λίστες",
         "noListsDescription": "Δημιουργήστε μια λίστα με το κουμπί +.",

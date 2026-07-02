@@ -8,7 +8,7 @@ import { api } from '/api.js';
 import { stagger, vibrate } from '/utils/ux.js';
 import { t } from '/i18n.js';
 import { esc } from '/utils/html.js';
-import { promptModal } from '/components/modal.js';
+import { promptModal, openModal, closeModal } from '/components/modal.js';
 import { DEFAULT_CATEGORY_NAME, categoryLabel } from '/utils/shopping-categories.js';
 import { renderKitchenTabsBar } from '/utils/kitchen-tabs.js';
 import '/components/shopping-category-manager.js';
@@ -232,6 +232,18 @@ function renderItems() {
     </div>`).join('');
 }
 
+/**
+ * Dezente Inline-Indikatoren (Progressive Disclosure): zeigen an, dass ein
+ * Artikel zusätzliche Details (Link/Notiz) trägt, ohne die Zeile zu überladen.
+ * Rein visuell (aria-hidden) — der Zugang läuft über den beschrifteten Details-Button.
+ */
+function renderItemMeta(item) {
+  const bits = [];
+  if (item.url)   bits.push('<i data-lucide="link" class="item-meta__icon" aria-hidden="true"></i>');
+  if (item.notes) bits.push('<i data-lucide="sticky-note" class="item-meta__icon" aria-hidden="true"></i>');
+  return bits.length ? `<span class="item-meta">${bits.join('')}</span>` : '';
+}
+
 function renderItem(item) {
   const isDone = Boolean(item.is_checked);
   return `
@@ -252,9 +264,13 @@ function renderItem(item) {
           <i data-lucide="check" class="item-check__icon" aria-hidden="true"></i>
         </button>
         <div class="item-body">
-          <div class="item-name">${esc(item.name)}</div>
+          <div class="item-name">${esc(item.name)}${renderItemMeta(item)}</div>
           ${item.quantity ? `<div class="item-quantity">${esc(item.quantity)}</div>` : ''}
         </div>
+        <button class="item-details" data-action="item-details" data-id="${item.id}"
+                aria-label="${t('shopping.detailsLabel', { name: esc(item.name) })}">
+          <i data-lucide="pencil" class="icon-md" aria-hidden="true"></i>
+        </button>
         <button class="item-delete" data-action="delete-item" data-id="${item.id}"
                 aria-label="${t('shopping.deleteItemLabel', { name: esc(item.name) })}">
           <i data-lucide="x" class="icon-md" aria-hidden="true"></i>
@@ -609,6 +625,93 @@ function updateItemRow(container, item) {
   }
 }
 
+/**
+ * Aktualisiert nur die Detail-Indikatoren (Link/Notiz) einer Zeile, ohne das
+ * .shopping-item-Element zu ersetzen — so bleiben die Swipe-Gesten-Closures
+ * (die die Karte einmalig referenzieren) intakt.
+ */
+function refreshItemMeta(container, item) {
+  const card = container.querySelector(`.shopping-item[data-item-id="${item.id}"]`);
+  const nameEl = card?.querySelector('.item-name');
+  if (!nameEl) return;
+  nameEl.querySelector('.item-meta')?.remove();
+  const metaHtml = renderItemMeta(item);
+  if (metaHtml) {
+    nameEl.insertAdjacentHTML('beforeend', metaHtml);
+    if (window.lucide) window.lucide.createIcons({ el: nameEl });
+  }
+}
+
+/**
+ * Detail-Drawer (Progressive Disclosure): bearbeitet die optionalen Rich-Felder
+ * URL + Notiz eines Artikels. Der Quick-Add bleibt bewusst schlank; alles
+ * Weiterführende lebt hier. Speichern per PATCH, danach nur die Zeile auffrischen.
+ */
+function openItemDetails(itemId, container) {
+  const item = state.items.find((i) => i.id === itemId);
+  if (!item) return;
+
+  const linkPreview = (value) => {
+    const v = String(value ?? '').trim();
+    if (!/^https?:\/\//i.test(v)) return '';
+    return `
+      <a class="item-details__link" href="${esc(v)}" target="_blank" rel="noopener noreferrer">
+        <i data-lucide="external-link" class="icon-sm" aria-hidden="true"></i>${t('shopping.openLink')}
+      </a>`;
+  };
+
+  openModal({
+    title: item.name,
+    size: 'md',
+    content: `
+      <form id="item-details-form" class="item-details-form" novalidate autocomplete="off">
+        <div class="form-group">
+          <label class="form-label" for="item-details-url">${t('shopping.urlLabel')}</label>
+          <input class="form-input" type="url" id="item-details-url" inputmode="url"
+                 placeholder="${t('shopping.urlPlaceholder')}" value="${esc(item.url || '')}">
+          <div class="item-details__link-wrap" id="item-details-link">${linkPreview(item.url)}</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="item-details-notes">${t('shopping.notesLabel')}</label>
+          <textarea class="form-input" id="item-details-notes" rows="4"
+                    placeholder="${t('shopping.notesPlaceholder')}">${esc(item.notes || '')}</textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn--primary">${t('common.save')}</button>
+        </div>
+      </form>`,
+    onSave: (panel) => {
+      const form    = panel.querySelector('#item-details-form');
+      const urlEl   = panel.querySelector('#item-details-url');
+      const notesEl = panel.querySelector('#item-details-notes');
+      const preview = panel.querySelector('#item-details-link');
+
+      urlEl?.addEventListener('input', () => {
+        preview.replaceChildren();
+        const html = linkPreview(urlEl.value);
+        if (html) {
+          preview.insertAdjacentHTML('beforeend', html);
+          if (window.lucide) window.lucide.createIcons({ el: preview });
+        }
+      });
+
+      form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const notes = notesEl.value.trim() || null;
+        const url   = urlEl.value.trim() || null;
+        try {
+          const data = await api.patch(`/shopping/items/${item.id}`, { notes, url });
+          Object.assign(item, data.data);
+          refreshItemMeta(container, item);
+          closeModal();
+        } catch (err) {
+          window.yuvomi.showToast(err.message, 'danger');
+        }
+      });
+    },
+  });
+}
+
 function updateItemsList(container) {
   const listEl = container.querySelector('#items-list');
   if (listEl) {
@@ -767,6 +870,11 @@ function wireListContentEvents(container) {
       const id      = Number(target.dataset.id);
       const checked = Number(target.dataset.checked);
       await toggleShoppingItem(id, checked, container);
+    }
+
+    // ---- Artikel-Details (URL/Notiz) bearbeiten ----
+    if (action === 'item-details') {
+      openItemDetails(Number(target.dataset.id), container);
     }
 
     // ---- Artikel löschen (mit Undo, 5s Fenster) ----

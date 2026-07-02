@@ -68,6 +68,8 @@ const MIGRATIONS_SQL = {
       category        TEXT    NOT NULL DEFAULT 'Sonstiges',
       is_checked      INTEGER NOT NULL DEFAULT 0,
       added_from_meal INTEGER REFERENCES meals(id) ON DELETE SET NULL,
+      notes           TEXT,
+      url             TEXT,
       created_at      TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
       updated_at      TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
     );
@@ -579,7 +581,7 @@ const MIGRATIONS_SQL = {
 
     CREATE TRIGGER trg_search_items_ai AFTER INSERT ON shopping_items BEGIN
       INSERT INTO search_index (entity, entity_id, title, body)
-      VALUES ('item', NEW.id, COALESCE(NEW.name, ''), '');
+      VALUES ('item', NEW.id, COALESCE(NEW.name, ''), COALESCE(NEW.notes, ''));
     END;
     CREATE TRIGGER trg_search_items_ad AFTER DELETE ON shopping_items BEGIN
       DELETE FROM search_index WHERE entity = 'item' AND entity_id = OLD.id;
@@ -587,7 +589,7 @@ const MIGRATIONS_SQL = {
     CREATE TRIGGER trg_search_items_au AFTER UPDATE ON shopping_items BEGIN
       DELETE FROM search_index WHERE entity = 'item' AND entity_id = OLD.id;
       INSERT INTO search_index (entity, entity_id, title, body)
-      VALUES ('item', NEW.id, COALESCE(NEW.name, ''), '');
+      VALUES ('item', NEW.id, COALESCE(NEW.name, ''), COALESCE(NEW.notes, ''));
     END;
 
     INSERT INTO search_index (entity, entity_id, title, body)
@@ -600,7 +602,7 @@ const MIGRATIONS_SQL = {
       SELECT 'contact', id, COALESCE(name, ''),
              COALESCE(phone, '') || ' ' || COALESCE(email, '') FROM contacts;
     INSERT INTO search_index (entity, entity_id, title, body)
-      SELECT 'item', id, COALESCE(name, ''), '' FROM shopping_items;
+      SELECT 'item', id, COALESCE(name, ''), COALESCE(notes, '') FROM shopping_items;
   `,
   61: `
     ALTER TABLE users ADD COLUMN calendar_feed_token TEXT;

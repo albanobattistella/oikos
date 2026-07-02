@@ -253,6 +253,12 @@
         "navLabelOverdue": "Tasks, {{count}} overdue"
     },
     "shopping": {
+        "detailsLabel": "Details for {{name}}",
+        "urlLabel": "Link",
+        "urlPlaceholder": "https://…",
+        "notesLabel": "Note",
+        "notesPlaceholder": "e.g. brand, size, flavor…",
+        "openLink": "Open link",
         "title": "Shopping",
         "noLists": "No lists",
         "noListsDescription": "Create a list with the + button.",
