@@ -2383,7 +2383,8 @@
             "visibility": {
                 "private": "Privado",
                 "family": "Família"
-            }
+            },
+            "sparse": "Poucas medições para mostrar uma tendência."
         },
         "meds": {
             "title": "Medicamentos",
@@ -2412,7 +2413,7 @@
                 "empty": "Não há nada para hoje."
             },
             "adherence": {
-                "title": "Adesão terapêutica",
+                "title": "Adesão",
                 "period": "Últimos {{days}} dias",
                 "noData": "Ainda sem doses planeadas no período.",
                 "summary": "{{taken}} de {{planned}} tomadas"

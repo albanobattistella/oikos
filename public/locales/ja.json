@@ -2383,7 +2383,8 @@
             "visibility": {
                 "private": "非公開",
                 "family": "家族"
-            }
+            },
+            "sparse": "傾向を表示するには測定値が少なすぎます。"
         },
         "meds": {
             "title": "薬",
@@ -2412,7 +2413,7 @@
                 "empty": "今日の予定はありません。"
             },
             "adherence": {
-                "title": "治療遵守",
+                "title": "服薬遵守",
                 "period": "過去{{days}}日間",
                 "noData": "この期間に予定された服用はまだありません。",
                 "summary": "{{planned}}回中{{taken}}回服用"

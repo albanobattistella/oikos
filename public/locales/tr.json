@@ -2383,7 +2383,8 @@
             "visibility": {
                 "private": "Özel",
                 "family": "Aile"
-            }
+            },
+            "sparse": "Bir eğilim göstermek için ölçüm sayısı çok az."
         },
         "meds": {
             "title": "İlaçlar",
@@ -2412,7 +2413,7 @@
                 "empty": "Bugün yapılacak bir şey yok."
             },
             "adherence": {
-                "title": "Tedavi uyumu",
+                "title": "Kullanım uyumu",
                 "period": "Son {{days}} gün",
                 "noData": "Bu dönemde henüz planlanmış doz yok.",
                 "summary": "{{planned}} dozdan {{taken}} tanesi alındı"

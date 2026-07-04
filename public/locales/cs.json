@@ -2383,7 +2383,8 @@
             "visibility": {
                 "private": "Soukromé",
                 "family": "Rodina"
-            }
+            },
+            "sparse": "Příliš málo měření pro zobrazení trendu."
         },
         "meds": {
             "title": "Léky",
@@ -2412,7 +2413,7 @@
                 "empty": "Dnes není nic k vyřízení."
             },
             "adherence": {
-                "title": "Dodržování léčby",
+                "title": "Dodržování",
                 "period": "Posledních {{days}} dní",
                 "noData": "V období zatím nejsou žádné plánované dávky.",
                 "summary": "Užito {{taken}} z {{planned}}"

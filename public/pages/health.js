@@ -536,7 +536,6 @@ function chartMarkup(metric, series) {
   const PAD_X = 10;
   const PAD_Y = 16;
   const pts = series.points;
-  const n = pts.length;
 
   // Aktive Kanäle: die, die im Zeitraum mindestens einen Wert tragen.
   const channels = metric.channels
@@ -544,6 +543,16 @@ function chartMarkup(metric, series) {
     .filter(({ key }) => pts.some((p) => p[key] !== null));
   if (!channels.length) {
     return `<div class="empty-state health-chart-empty"><div class="empty-state__title">${esc(t('health.vitals.noData'))}</div></div>`;
+  }
+
+  // Buckets mit mindestens einem Messwert. Weniger als zwei ergeben keine Kurve —
+  // dann ein ehrlicher Low-Data-Hinweis statt eines einzelnen Punkts im Leerraum.
+  const dataIdx = pts
+    .map((p, i) => ({ p, i }))
+    .filter(({ p }) => channels.some(({ key }) => p[key] !== null))
+    .map(({ i }) => i);
+  if (dataIdx.length < 2) {
+    return `<div class="empty-state health-chart-empty"><div class="empty-state__title">${esc(t('health.vitals.sparse'))}</div></div>`;
   }
 
   const allValues = channels.flatMap(({ key }) => pts.map((p) => p[key]).filter((v) => v !== null));
@@ -554,7 +563,11 @@ function chartMarkup(metric, series) {
   const pad = span * 0.1;
   min -= pad; max += pad;
 
-  const x = (i) => PAD_X + (n <= 1 ? 0 : (i * (W - 2 * PAD_X)) / (n - 1));
+  // X-Domäne an die tatsächliche Datenspanne klemmen (erster bis letzter Bucket mit
+  // Wert), damit dünne Daten die volle Breite nutzen statt mittig zusammenzukleben.
+  const firstIdx = dataIdx[0];
+  const lastIdx = dataIdx[dataIdx.length - 1];
+  const x = (i) => PAD_X + ((i - firstIdx) * (W - 2 * PAD_X)) / (lastIdx - firstIdx);
   const y = (v) => H - PAD_Y - ((v - min) / (max - min)) * (H - 2 * PAD_Y);
 
   const seriesSvg = channels.map(({ key, idx }) => {

@@ -2383,7 +2383,8 @@
             "visibility": {
                 "private": "Privat",
                 "family": "Familj"
-            }
+            },
+            "sparse": "För få mätvärden för att visa en trend."
         },
         "meds": {
             "title": "Mediciner",
@@ -2412,7 +2413,7 @@
                 "empty": "Inget att göra idag."
             },
             "adherence": {
-                "title": "Behandlingsföljsamhet",
+                "title": "Följsamhet",
                 "period": "Senaste {{days}} dagarna",
                 "noData": "Inga planerade doser under perioden ännu.",
                 "summary": "{{taken}} av {{planned}} tagna"

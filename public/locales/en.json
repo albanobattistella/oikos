@@ -2383,7 +2383,8 @@
             "visibility": {
                 "private": "Private",
                 "family": "Family"
-            }
+            },
+            "sparse": "Too few readings to show a trend."
         },
         "meds": {
             "title": "Medications",

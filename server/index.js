@@ -368,7 +368,12 @@ app.use('/api/v1/health', healthRouter);
 // --------------------------------------------------------
 // Health-Check (für Docker)
 // --------------------------------------------------------
-app.get('/health', (req, res) => {
+app.get('/health', (req, res, next) => {
+  // Browser-Navigation (Deep-Link/Reload/Bookmark auf den Gesundheit-Übersicht-Tab,
+  // Client-Route ebenfalls /health) erwartet die SPA, nicht den JSON-Healthcheck.
+  // Docker/Monitoring senden Accept: */* (ohne text/html) und bekommen weiter JSON,
+  // damit der Container-Healthcheck nicht mit der SPA-Wurzelroute kollidiert.
+  if (req.headers.accept && req.headers.accept.includes('text/html')) return next();
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 

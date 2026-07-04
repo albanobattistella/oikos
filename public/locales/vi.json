@@ -2383,7 +2383,8 @@
             "visibility": {
                 "private": "Riêng tư",
                 "family": "Gia đình"
-            }
+            },
+            "sparse": "Quá ít số đo để hiển thị xu hướng."
         },
         "meds": {
             "title": "Thuốc",
@@ -2412,7 +2413,7 @@
                 "empty": "Hôm nay không có gì cần làm."
             },
             "adherence": {
-                "title": "Tuân thủ điều trị",
+                "title": "Tuân thủ dùng thuốc",
                 "period": "{{days}} ngày qua",
                 "noData": "Chưa có liều được lên lịch trong kỳ.",
                 "summary": "Đã dùng {{taken}} trong {{planned}}"

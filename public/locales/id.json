@@ -2383,7 +2383,8 @@
             "visibility": {
                 "private": "Privat",
                 "family": "Keluarga"
-            }
+            },
+            "sparse": "Terlalu sedikit pengukuran untuk menampilkan tren."
         },
         "meds": {
             "title": "Obat",
@@ -2412,7 +2413,7 @@
                 "empty": "Tidak ada yang jatuh tempo hari ini."
             },
             "adherence": {
-                "title": "Kepatuhan terapi",
+                "title": "Kepatuhan minum obat",
                 "period": "{{days}} hari terakhir",
                 "noData": "Belum ada dosis terjadwal pada periode ini.",
                 "summary": "{{taken}} dari {{planned}} diminum"

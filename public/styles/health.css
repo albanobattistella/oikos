@@ -313,7 +313,7 @@
 }
 
 .health-chart__axis {
-  font-size: var(--text-2xs);
+  font-size: var(--text-xs);
   fill: var(--color-text-secondary);
 }
 
@@ -399,8 +399,9 @@
 
 .health-dose {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2) var(--space-3);
   padding: var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -414,9 +415,12 @@
   flex: 0 0 auto;
 }
 
+/* Der Name darf nicht unter ~8rem schrumpfen. So bricht bei Enge (Mobil) die
+ * Aktions-Gruppe in die zweite Zeile um, statt den Namen auf 0px zu verschlucken —
+ * bei einem Medikamenten-Tracker muss immer sichtbar sein, WELCHES Präparat gemeint ist. */
 .health-dose__name {
   flex: 1 1 auto;
-  min-width: 0;
+  min-width: 8rem;
   color: var(--color-text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -427,6 +431,7 @@
   display: inline-flex;
   gap: var(--space-2);
   flex: 0 0 auto;
+  margin-inline-start: auto;
 }
 
 .health-dose__status {
@@ -436,6 +441,7 @@
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
   flex: 0 0 auto;
+  margin-inline-start: auto;
 }
 
 .health-dose__status i { width: 16px; height: 16px; }
@@ -598,6 +604,19 @@ button.health-med-card:hover {
   gap: var(--space-2);
   font-size: var(--text-sm);
   color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+/* Checkbox im Modul-Akzent statt Browser-Default-Blau; größeres Tap-Ziel als die
+ * nativen 13px. Das umschließende Label vergrößert die Trefferfläche zusätzlich. */
+.health-check input[type="checkbox"] {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: 0 0 auto;
+  /* Modals werden außerhalb von .health-page gerendert, wo --module-accent nicht
+   * gescoped ist. Der Router setzt --active-module-accent global; --module-health
+   * ist der Fallback (beide global verfügbar). */
+  accent-color: var(--active-module-accent, var(--module-health));
   cursor: pointer;
 }
 
@@ -1224,10 +1243,11 @@ button.health-med-card:hover {
   color: var(--color-text-secondary);
 }
 
-/* Karten-Raster: zwei Spalten ab Tablet, eine auf Mobil. */
+/* Karten-Raster: füllt die verfügbare Breite (1 Spalte Mobil, 2 Tablet, 3 auf
+ * breitem Desktop), statt starr bei zwei Spalten mit rechter Leergasse zu bleiben. */
 .health-overview__grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   gap: var(--space-4);
   align-items: start;
 }
@@ -1361,9 +1381,12 @@ button.health-med-card:hover {
   gap: var(--space-2);
 }
 
-@media (max-width: 720px) {
-  .health-overview__grid {
-    grid-template-columns: 1fr;
+/* Untere Reihe der Aktivität-Toolbar auf Mobil: der „Erfassen"-Button nimmt die
+ * volle Breite, statt asymmetrisch rechts unter dem Wochen-Stepper zu hängen. */
+@media (max-width: 640px) {
+  .health-activity__toolbar .health-activity__add {
+    flex: 1 1 100%;
+    justify-content: center;
   }
 }
 

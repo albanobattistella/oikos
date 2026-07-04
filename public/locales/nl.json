@@ -2383,7 +2383,8 @@
             "visibility": {
                 "private": "Privé",
                 "family": "Gezin"
-            }
+            },
+            "sparse": "Te weinig metingen om een trend te tonen."
         },
         "meds": {
             "title": "Medicijnen",

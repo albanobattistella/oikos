@@ -2383,7 +2383,8 @@
             "visibility": {
                 "private": "Privato",
                 "family": "Famiglia"
-            }
+            },
+            "sparse": "Troppe poche misurazioni per mostrare un andamento."
         },
         "meds": {
             "title": "Farmaci",
@@ -2412,7 +2413,7 @@
                 "empty": "Oggi non c'è nulla in scadenza."
             },
             "adherence": {
-                "title": "Aderenza terapeutica",
+                "title": "Aderenza",
                 "period": "Ultimi {{days}} giorni",
                 "noData": "Ancora nessuna dose pianificata nel periodo.",
                 "summary": "{{taken}} su {{planned}} assunte"

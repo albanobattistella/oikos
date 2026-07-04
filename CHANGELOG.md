@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.89.0] - 2026-07-04
+
+### Fixed
+- **Medication doses now show their name on mobile** — in the Health overview and Medications tab, the "Due today" rows squeezed the medication name to zero width behind the Take/Skip buttons on narrow screens, so you couldn't tell which medication a dose belonged to. The row now wraps: the name stays on its own line and the actions drop below it.
+- **Reloading the Health overview loads the app, not JSON** — refreshing or bookmarking `/health` returned the container health-check JSON instead of the app. Browsers (requesting HTML) now get the app; Docker and monitoring health checks still receive the JSON status as before.
+- **Vitals trend chart handles sparse data** — the chart no longer clusters a few readings in the middle of an empty plot: the x-axis now spans the actual data range, and periods with fewer than two readings show a clear "too few readings for a trend" hint instead of a single floating dot. Axis labels are slightly larger.
+
+### Changed
+- **Consistent adherence wording** — medication adherence now uses the same term in the Overview and the Medications tab (they previously showed two different words in most languages).
+- **Clearer mark-as-taken action (German)** — the button now reads "Einnehmen" (an action) instead of "Genommen", which is also the taken-status label.
+- **Health overview uses the full width on large screens** — the overview now flows into up to three columns instead of a fixed two-column layout that left an empty right gutter.
+- **Themed, larger Health checkboxes** — checkboxes in Health forms now use the module accent colour and a bigger, easier-to-tap size instead of the small browser default.
+
 ## [0.88.2] - 2026-07-04
 
 ### Fixed

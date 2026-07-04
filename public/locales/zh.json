@@ -2383,7 +2383,8 @@
             "visibility": {
                 "private": "私密",
                 "family": "家庭"
-            }
+            },
+            "sparse": "测量数据太少，无法显示趋势。"
         },
         "meds": {
             "title": "药物",
@@ -2412,7 +2413,7 @@
                 "empty": "今日无待办。"
             },
             "adherence": {
-                "title": "治疗依从性",
+                "title": "服药依从性",
                 "period": "最近 {{days}} 天",
                 "noData": "该时段内暂无计划的剂量。",
                 "summary": "已服用 {{planned}} 次中的 {{taken}} 次"

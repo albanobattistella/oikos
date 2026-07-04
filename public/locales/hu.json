@@ -2383,7 +2383,8 @@
             "visibility": {
                 "private": "Privát",
                 "family": "Család"
-            }
+            },
+            "sparse": "Túl kevés mérés a trend megjelenítéséhez."
         },
         "meds": {
             "title": "Gyógyszerek",
@@ -2412,7 +2413,7 @@
                 "empty": "Ma nincs teendő."
             },
             "adherence": {
-                "title": "Terápiahűség",
+                "title": "Szedési fegyelem",
                 "period": "Utolsó {{days}} nap",
                 "noData": "Az időszakban még nincsenek tervezett adagok.",
                 "summary": "{{planned}} adagból {{taken}} bevéve"

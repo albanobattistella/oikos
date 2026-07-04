@@ -2383,7 +2383,8 @@
             "visibility": {
                 "private": "비공개",
                 "family": "가족"
-            }
+            },
+            "sparse": "추세를 표시하기에 측정값이 너무 적습니다."
         },
         "meds": {
             "title": "약",

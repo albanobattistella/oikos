@@ -2383,7 +2383,8 @@
             "visibility": {
                 "private": "Privat",
                 "family": "Familie"
-            }
+            },
+            "sparse": "Zu wenige Messwerte für einen Trend."
         },
         "meds": {
             "title": "Medikamente",
@@ -2405,14 +2406,14 @@
             "nameRequired": "Name ist erforderlich.",
             "noMeds": "Noch keine Medikamente.",
             "personsLabel": "Person",
-            "take": "Genommen",
+            "take": "Einnehmen",
             "skip": "Überspringen",
             "dueToday": {
                 "title": "Heute fällig",
                 "empty": "Heute ist nichts fällig."
             },
             "adherence": {
-                "title": "Therapietreue",
+                "title": "Einnahmetreue",
                 "period": "Letzte {{days}} Tage",
                 "noData": "Noch keine geplanten Dosen im Zeitraum.",
                 "summary": "{{taken}} von {{planned}} genommen"
