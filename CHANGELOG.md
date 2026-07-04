@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.91.0] - 2026-07-04
+
+### Changed
+- **Calmer, more legible calendar** — event chips now use a single fill colour instead of a diagonal two-colour split for multi-person events (the people are shown as an avatar stack), and the text colour is chosen for readable contrast on every fill.
+- **Readable month view on phones** — the calendar month grid now shows compact event dots instead of chips squeezed down to a single letter; a "+N more" marker covers busy days, and the repeat icon no longer clutters the tiny cells.
+- **Consistent date entry in the calendar** — calendar event dates now use the same locale-aware date field as the task dialog and the rest of the app.
+- **Consistent reminder controls** — calendar event reminders now have the same on/off toggle as task reminders instead of a bare drop-down.
+- **Compact assignment picker** — assigning people to a task or event now uses a wrapping row of chips (tinted in the module colour) instead of a scrolling checkbox list.
+- **Tidier task list on mobile** — filter chips wrap onto a second row instead of being cut off at the screen edge, the redundant per-row category label is hidden (the section heading already carries it), and the floating add button no longer overlaps the last card.
+- **More visible task completion control** — the round complete-task control is no longer near-invisible on the dark background.
+
+### Fixed
+- **Calendar header no longer shows a stale week number** — switching from the week view to month or agenda now updates the header instead of keeping the previous "KW NN" label.
+- **Recurrence fields hide correctly** — the repeat interval and end-date fields in the task dialog are now hidden when "no repeat" is selected.
+- **Correct ISO-8601 week numbers** — the calendar week number is now accurate around year boundaries.
+
 ## [0.90.0] - 2026-07-04
 
 ### Added

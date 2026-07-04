@@ -618,7 +618,9 @@
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: var(--space-2) var(--space-4) var(--space-6);
+  /* Bottom-Freiraum für den schwebenden FAB, damit das letzte Event nicht
+   * unter der Aktion verschwindet. */
+  padding: var(--space-2) var(--space-4) calc(var(--space-16) + var(--space-4));
 }
 
 .agenda-day {
@@ -1202,6 +1204,56 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+}
+
+/* --------------------------------------------------------
+ * Monat auf Mobile: Ereignis-Punkte statt unlesbarer 1-Buchstaben-Chips.
+ * Titel bleiben Agenda/Tag vorbehalten; hier zählt nur „etwas ist los".
+ * (Nach der kanonischen .month-day__holiday-Regel platziert, damit die
+ *  Reihenfolge stimmt und die Punkt-Overrides greifen.)
+ * -------------------------------------------------------- */
+@media (max-width: 640px) {
+  .month-day {
+    min-height: 54px;
+    padding: var(--space-0h);
+  }
+
+  .month-day .month-day__event,
+  .month-day .cal-task-chip,
+  .month-day .month-day__holiday {
+    display: inline-flex;
+    width: var(--space-2);
+    height: var(--space-2);
+    min-width: var(--space-2);
+    padding: 0;
+    margin: 0 var(--space-0h) var(--space-0h) 0;
+    border: none;
+    box-shadow: none;
+    border-radius: var(--radius-full);
+    vertical-align: middle;
+    overflow: hidden;
+  }
+
+  .month-day .month-day__holiday {
+    background: var(--holi-color, var(--color-text-secondary));
+  }
+
+  /* Task-Punkte durch einen dünnen Ring von Termin-Punkten unterscheidbar. */
+  .month-day .cal-task-chip {
+    box-shadow: inset 0 0 0 var(--space-px) var(--color-surface-work);
+  }
+
+  .month-day .month-day__event > *,
+  .month-day .cal-task-chip > *,
+  .month-day .month-day__holiday > * {
+    display: none;
+  }
+
+  .month-day .month-day__more {
+    font-size: var(--text-2xs);
+    line-height: 1;
+    margin-top: var(--space-0h);
+  }
 }
 
 /* Week/Day view: holiday chip in the all-day row */

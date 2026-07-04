@@ -23,13 +23,15 @@
 
 .tasks-body {
   padding: var(--space-4);
-  padding-bottom: var(--space-16);
+  /* Freiraum für den schwebenden FAB (52px + Abstand), damit die letzte
+   * Karte nicht darunter verschwindet. */
+  padding-bottom: calc(var(--space-16) + var(--space-8));
 }
 
 @media (min-width: 1024px) {
   .tasks-body {
     padding: var(--space-8);
-    padding-bottom: var(--space-16);
+    padding-bottom: calc(var(--space-16) + var(--space-6));
   }
 }
 
@@ -166,15 +168,11 @@
  * -------------------------------------------------------- */
 .tasks-filters {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   margin-bottom: var(--space-4);
-  overflow-x: auto;
   padding-bottom: var(--space-1);
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
 }
-
-.tasks-filters::-webkit-scrollbar { display: none; }
 
 .filter-chip {
   display: inline-flex;
@@ -461,8 +459,22 @@
   width: var(--space-5);
   height: var(--space-5);
   border-radius: var(--radius-full);
-  border: 2px solid var(--color-border);
+  /* Kräftigerer Ring: das meistgenutzte Steuerelement der Zeile darf nicht
+   * das blasseste sein (vorher --color-border, im Dark Mode kaum sichtbar). */
+  border: 2px solid var(--color-text-tertiary);
   transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.task-status-btn:hover::after {
+  border-color: var(--module-accent, var(--color-accent));
+}
+
+/* Auf Mobile trägt die Kategorie-Section-Überschrift die Kategorie bereits —
+ * das Inline-Label je Zeile ist dort redundant und kostet Platz. */
+@media (max-width: 639px) {
+  .task-card .task-card__meta .task-card__category {
+    display: none;
+  }
 }
 
 .task-status-btn--done {

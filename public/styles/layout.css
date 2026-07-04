@@ -2192,6 +2192,12 @@ html.fab-anim-done .page-fab {
   border-radius: var(--radius-sm);
 }
 
+/* Progressive Disclosure: bei „keine Wiederholung" trägt das Element das
+ * hidden-Attribut — display:flex oben darf es nicht überstimmen. */
+.rrule-details[hidden] {
+  display: none;
+}
+
 .rrule-row {
   display: flex;
   align-items: flex-end;

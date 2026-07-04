@@ -213,7 +213,7 @@ function renderTaskCard(task, opts = {}) {
             ${renderStartDateBadge(task.start_date)}
             ${renderDueDate(task.due_date, task.due_time)}
             ${task.is_recurring ? `<span class="due-date" aria-label="${t('tasks.recurring')}"><i data-lucide="repeat" class="icon-sm" aria-hidden="true"></i></span>` : ''}
-            ${task.category !== 'misc' ? `<span class="due-date">${CATEGORY_LABELS()[task.category] ?? task.category}</span>` : ''}
+            ${task.category !== 'misc' ? `<span class="due-date task-card__category">${CATEGORY_LABELS()[task.category] ?? task.category}</span>` : ''}
           </div>
         </div>
 

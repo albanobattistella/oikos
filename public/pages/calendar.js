@@ -322,7 +322,12 @@ function getContrastColor(hex) {
     const b = parseInt(hex.slice(5, 7), 16) / 255;
     const lin = (c) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
-    return L > 0.30 ? '#3D3D3D' : null; // null → CSS-Standard (weiß) bleibt
+    // WCAG-Kontrast gegen Weiß bzw. dunkle Tinte vergleichen und die
+    // besser lesbare Textfarbe wählen — statt eines starren Luminanz-Cutoffs,
+    // der mittelhelle Fills (Orange/Coral/Pink) mit zu schwachem Weiß beließ.
+    const contrastWhite = 1.05 / (L + 0.05);
+    const contrastDark  = (L + 0.05) / 0.05;
+    return contrastDark > contrastWhite ? '#1D1D1B' : null; // null → CSS-Standard (weiß) bleibt
   } catch { return null; }
 }
 
@@ -346,22 +351,14 @@ function resolveEventColor(ev) {
 }
 
 /**
- * Gibt einen CSS-Farbwert oder einen CSS-Gradienten zurück.
- * - Kein Assignee → manuelle Event-Farbe → Kalenderfarbe → Grau (immer einfarbig)
- * - 1 Assignee → dessen Avatar-Farbe
- * - N Assignees → diagonaler Gradient aller Avatar-Farben (135°, gleichmäßig aufgeteilt)
+ * Gibt eine einzelne CSS-Füllfarbe zurück (nie ein Gradient).
+ * Eine Farbachse: 1. erster Assignee, 2. manuelle Event-Farbe, 3. Kalenderfarbe, 4. Grau.
+ * Mehrere Zugewiesene werden über den Avatar-Stack kommuniziert, nicht über eine
+ * diagonal geteilte Füllung — die wirkte wie ein Render-Artefakt und blieb bei der
+ * zweiten Farbe ungeprüft im Kontrast.
  */
 function resolveEventBackground(ev) {
-  const assignees = ev.assigned_users ?? [];
-  if (assignees.length === 0) return ev.color || ev.cal_color || FALLBACK_COLOR;
-  if (assignees.length === 1) return assignees[0].color || FALLBACK_COLOR;
-  const colors = assignees.map((u) => u.color || FALLBACK_COLOR);
-  const step = 100 / colors.length;
-  const stops = colors.flatMap((c, i) => [
-    `${c} ${i * step}%`,
-    `${c} ${(i + 1) * step}%`,
-  ]);
-  return `linear-gradient(135deg, ${stops.join(', ')})`;
+  return resolveEventColor(ev);
 }
 
 // --------------------------------------------------------
@@ -1032,6 +1029,7 @@ function renderToolbar() {
         b.classList.toggle('cal-toolbar__view-btn--active', b.dataset.view === state.view)
       );
       await reloadForView();
+      updateLabel();
       renderView();
     });
   });
@@ -1051,9 +1049,17 @@ function updateLabel() {
 }
 
 function getWeekNumber(dateStr) {
-  const d   = new Date(dateStr + 'T00:00:00');
-  const jan = new Date(d.getFullYear(), 0, 1);
-  return Math.ceil(((d - jan) / 86400000 + jan.getDay() + 1) / 7);
+  // ISO-8601: Woche 1 enthält den ersten Donnerstag des Jahres; Wochen beginnen
+  // montags. Verhindert die Off-by-one-Abweichung des naiven Jan-1-Ansatzes an
+  // Jahresgrenzen.
+  const d = new Date(dateStr + 'T00:00:00');
+  const target = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNr = (target.getUTCDay() + 6) % 7; // Mo=0 … So=6
+  target.setUTCDate(target.getUTCDate() - dayNr + 3); // Donnerstag dieser Woche
+  const firstThursday = new Date(Date.UTC(target.getUTCFullYear(), 0, 4));
+  const firstDayNr = (firstThursday.getUTCDay() + 6) % 7;
+  firstThursday.setUTCDate(firstThursday.getUTCDate() - firstDayNr + 3);
+  return 1 + Math.round((target - firstThursday) / (7 * 86400000));
 }
 
 async function navigate(dir) {
@@ -1236,7 +1242,7 @@ function renderMonthDay(date, inMonth) {
          data-id="${ev.id}"
          style="background:${esc(bg)};${fg ? `color:${fg};` : ''}"
          title="${esc(ev.title)}${ev.cal_name ? ' · ' + ev.cal_name : ''}"
-    >${eventIconHtml(ev.icon, 'event-icon event-icon--compact')}<span>${esc(ev.title)}</span>${(ev.recurrence_rule || ev.is_recurring_instance) ? calendarRepeatIconHtml() : ''}</div>
+    >${eventIconHtml(ev.icon, 'event-icon event-icon--compact')}<span>${esc(ev.title)}</span></div>
   `;
   }).join('');
 
@@ -1850,29 +1856,39 @@ function reminderStartValue(startDatetime) {
 function renderCalendarReminderSection(reminder = null, event = null) {
   const currentOffset = event ? reminderOffsetFromEvent(event, reminder) : '';
   const custom = customReminderFromEvent(event, reminder);
+  const enabled = currentOffset !== '';
   return `
     <div class="reminder-section">
-      <div class="form-group reminder-section__group">
-        <label class="form-label" for="modal-reminder-offset">${t('reminders.offsetLabel')}</label>
-        <select class="form-input" id="modal-reminder-offset">
-          ${REMINDER_OFFSETS().map((o) =>
-            `<option value="${o.value}" ${currentOffset === o.value ? 'selected' : ''}>${esc(o.label)}</option>`
-          ).join('')}
-        </select>
+      <div class="reminder-section__header">
+        <label class="toggle" style="margin:0">
+          <input type="checkbox" id="modal-reminder-toggle" ${enabled ? 'checked' : ''}>
+          <span class="toggle__track"></span>
+          <span class="reminder-section__title">${t('reminders.enableLabel')}</span>
+        </label>
       </div>
-      <div class="modal-grid modal-grid--2 reminder-custom" id="modal-reminder-custom" ${currentOffset === 'custom' ? '' : 'hidden'}>
-        <div class="form-group" style="margin:0">
-          <label class="form-label" for="modal-reminder-custom-amount">${t('reminders.customAmountLabel')}</label>
-          <input class="form-input" type="number" id="modal-reminder-custom-amount" min="1" max="999" value="${custom.amount}">
-        </div>
-        <div class="form-group" style="margin:0">
-          <label class="form-label" for="modal-reminder-custom-unit">${t('reminders.customUnitLabel')}</label>
-          <select class="form-input" id="modal-reminder-custom-unit">
-            <option value="minutes" ${custom.unit === 'minutes' ? 'selected' : ''}>${t('reminders.customMinutes')}</option>
-            <option value="hours" ${custom.unit === 'hours' ? 'selected' : ''}>${t('reminders.customHours')}</option>
-            <option value="days" ${custom.unit === 'days' ? 'selected' : ''}>${t('reminders.customDays')}</option>
-            <option value="weeks" ${custom.unit === 'weeks' ? 'selected' : ''}>${t('reminders.customWeeks')}</option>
+      <div id="modal-reminder-fields" class="reminder-fields" ${enabled ? '' : 'style="display:none"'}>
+        <div class="form-group reminder-section__group">
+          <label class="form-label" for="modal-reminder-offset">${t('reminders.offsetLabel')}</label>
+          <select class="form-input" id="modal-reminder-offset">
+            ${REMINDER_OFFSETS().map((o) =>
+              `<option value="${o.value}" ${currentOffset === o.value ? 'selected' : ''}>${esc(o.label)}</option>`
+            ).join('')}
           </select>
+        </div>
+        <div class="modal-grid modal-grid--2 reminder-custom" id="modal-reminder-custom" ${currentOffset === 'custom' ? '' : 'hidden'}>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" for="modal-reminder-custom-amount">${t('reminders.customAmountLabel')}</label>
+            <input class="form-input" type="number" id="modal-reminder-custom-amount" min="1" max="999" value="${custom.amount}">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" for="modal-reminder-custom-unit">${t('reminders.customUnitLabel')}</label>
+            <select class="form-input" id="modal-reminder-custom-unit">
+              <option value="minutes" ${custom.unit === 'minutes' ? 'selected' : ''}>${t('reminders.customMinutes')}</option>
+              <option value="hours" ${custom.unit === 'hours' ? 'selected' : ''}>${t('reminders.customHours')}</option>
+              <option value="days" ${custom.unit === 'days' ? 'selected' : ''}>${t('reminders.customDays')}</option>
+              <option value="weeks" ${custom.unit === 'weeks' ? 'selected' : ''}>${t('reminders.customWeeks')}</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>`;
@@ -2176,6 +2192,23 @@ function openEventModal({ mode, event = null, date = null, reminder = null, time
         if (reminderCustom) reminderCustom.hidden = reminderOffset.value !== 'custom';
       });
 
+      // Erinnerungs-Toggle (konsistent zum Aufgaben-Modul): An/Aus blendet die
+      // Felder ein/aus. „Aus" setzt den Offset auf '' (= keine Erinnerung, wie
+      // vom Save interpretiert); „An" wählt bei leerem Wert die Startzeit.
+      const reminderToggle = panel.querySelector('#modal-reminder-toggle');
+      const reminderFields  = panel.querySelector('#modal-reminder-fields');
+      reminderToggle?.addEventListener('change', () => {
+        const on = reminderToggle.checked;
+        if (reminderFields) reminderFields.style.display = on ? '' : 'none';
+        if (!reminderOffset) return;
+        if (!on) {
+          reminderOffset.value = '';
+          if (reminderCustom) reminderCustom.hidden = true;
+        } else if (reminderOffset.value === '') {
+          reminderOffset.value = '0';
+        }
+      });
+
       // Load unified sync targets (Google + CalDAV)
       const syncTargetSelect = panel.querySelector('#event-sync-target');
       if (syncTargetSelect) {
@@ -2341,7 +2374,7 @@ function buildEventModalContent({ mode, event, date, reminder = null, time = nul
       <div class="modal-grid modal-grid--2">
         <div class="form-group">
           <label class="form-label" for="modal-start-date">${t('calendar.startDateLabel')}</label>
-          <input type="date" class="form-input" id="modal-start-date" value="${startDate}">
+          <input type="text" class="form-input js-date-input" id="modal-start-date" value="${formatDateInput(startDate)}" placeholder="${dateInputPlaceholder()}" inputmode="text">
         </div>
         <div class="form-group">
           <label class="form-label" for="modal-start-time">${t('calendar.startTimeLabel')}</label>
@@ -2351,7 +2384,7 @@ function buildEventModalContent({ mode, event, date, reminder = null, time = nul
       <div class="modal-grid modal-grid--2">
         <div class="form-group">
           <label class="form-label" for="modal-end-date">${t('calendar.endDateLabel')}</label>
-          <input type="date" class="form-input" id="modal-end-date" value="${endDate}">
+          <input type="text" class="form-input js-date-input" id="modal-end-date" value="${formatDateInput(endDate)}" placeholder="${dateInputPlaceholder()}" inputmode="text">
         </div>
         <div class="form-group">
           <label class="form-label" for="modal-end-time">${t('calendar.endTimeLabel')}</label>
@@ -2364,11 +2397,11 @@ function buildEventModalContent({ mode, event, date, reminder = null, time = nul
       <div class="modal-grid modal-grid--2">
         <div class="form-group">
           <label class="form-label" for="modal-allday-start">${t('calendar.fromLabel')}</label>
-          <input type="date" class="form-input" id="modal-allday-start" value="${startDate}">
+          <input type="text" class="form-input js-date-input" id="modal-allday-start" value="${formatDateInput(startDate)}" placeholder="${dateInputPlaceholder()}" inputmode="text">
         </div>
         <div class="form-group">
           <label class="form-label" for="modal-allday-end">${t('calendar.toLabel')}</label>
-          <input type="date" class="form-input" id="modal-allday-end" value="${endDate}">
+          <input type="text" class="form-input js-date-input" id="modal-allday-end" value="${formatDateInput(endDate)}" placeholder="${dateInputPlaceholder()}" inputmode="text">
         </div>
       </div>
     </div>
