@@ -373,7 +373,9 @@ function storageBadgeHtml(doc) {
   if (backend === 'dms') {
     return `<span class="doc-badge doc-badge--dms">${t('documents.storageDms')}</span>`;
   }
-  return `<span class="doc-badge doc-badge--local">${t('documents.storageLocal')}</span>`;
+  // Lokal ist der Standardfall: kein Badge — nur abweichende Ziele (DMS/WebDAV/
+  // nicht verfügbar) tragen ein Badge, damit es ein bedeutungstragendes Signal bleibt.
+  return '';
 }
 
 function renderActions(doc) {
@@ -388,7 +390,7 @@ function renderActions(doc) {
       <i data-lucide="download" class="icon-md" aria-hidden="true"></i>
     </a>
     <button class="btn btn--ghost btn--icon btn--icon-sm" data-action="edit" data-id="${doc.id}" title="${t('documents.editAction')}" aria-label="${t('documents.editAction')}">
-      <i data-lucide="settings" class="icon-md" aria-hidden="true"></i>
+      <i data-lucide="pencil" class="icon-md" aria-hidden="true"></i>
     </button>
     <button class="btn btn--ghost btn--icon btn--icon-sm" data-action="archive" data-id="${doc.id}" data-archived="${doc.status === 'archived'}" title="${doc.status === 'archived' ? t('documents.restoreAction') : t('documents.archiveAction')}" aria-label="${doc.status === 'archived' ? t('documents.restoreAction') : t('documents.archiveAction')}">
       <i data-lucide="${doc.status === 'archived' ? 'archive-restore' : 'archive'}" class="icon-md" aria-hidden="true"></i>

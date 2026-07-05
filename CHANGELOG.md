@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.95.1] - 2026-07-05
+
+### Fixed
+- **Documents toolbar restored on tablet and desktop** — the view switcher, "Add folder" button and the status, category and folder filters (including access to archived documents) were hidden and unreachable at tablet and desktop widths; they are now always visible there.
+
+### Changed
+- **Denser Documents grid** — document cards size to their content instead of a fixed minimum height, tablets show two columns, and the folder browser collapses into a horizontal chip bar on tablet and mobile so the grid uses the full width.
+- **Cleaner document cards** — the redundant "Local" storage badge is gone (badges now appear only for external DMS/WebDAV storage) and the edit action uses a pencil icon.
+
 ## [0.95.0] - 2026-07-05
 
 ### Added

@@ -104,6 +104,19 @@
   gap: var(--space-3);
 }
 
+/* Ab Tablet ist der Slider-Trigger (summary) ausgeblendet und das <details>
+ * bleibt standardmäßig geschlossen. Modernes Chromium versteckt den Inhalt eines
+ * geschlossenen <details> über ::details-content { content-visibility: hidden };
+ * das `display: flex` am Panel überschreibt das NICHT mehr — die komplette
+ * Sekundär-Toolbar (Ansicht, Ordner, Filter) wäre unsichtbar. Daher den
+ * Inhalt ab 768px explizit sichtbar halten. (Ältere Engines verstecken via
+ * display:none, was das Panel-`display:flex` bereits abdeckt.) */
+@media (min-width: 768px) {
+  .documents-secondary-controls::details-content {
+    content-visibility: visible;
+  }
+}
+
 .documents-filter-field {
   display: grid;
   gap: var(--space-1);
@@ -211,9 +224,12 @@
   margin-top: var(--space-4);
 }
 
+/* minmax so gewählt, dass jede Karte breit genug für die volle Aktionszeile
+ * (5 Icon-Buttons à 44px Touch-Target) bleibt — verhindert den Umbruch des
+ * Lösch-Buttons in eine eigene Zeile. */
 .documents-list--grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
   gap: var(--space-4);
 }
 
@@ -249,8 +265,10 @@
   box-shadow: var(--glass-shadow-md);
 }
 
+/* Inhaltsgetriebene Höhe statt fixer min-height: kompaktere Karten, weniger
+ * Leerraum. In mehrspaltigen Grids gleichen sich Karten je Reihe automatisch an
+ * (align-items: stretch); body { flex: 1 } hält die Aktionen unten bündig. */
 .document-card {
-  min-height: 230px;
   display: flex;
   flex-direction: column;
   padding: var(--space-4);
@@ -456,6 +474,36 @@
   font-size: var(--text-sm);
 }
 
+/* Bis Tablet: Ordner-Browser als horizontale Chip-Leiste statt fixer Seitenspalte,
+ * damit das Dokument-Grid die volle Breite bekommt (zwei komfortable Spalten auf
+ * Tablet statt einer schmalen). Das Sekundär-Steuerungs-Dropdown bleibt davon
+ * unberührt — es klappt erst ab ≤767px zum Slider-Menü auf. */
+@media (max-width: 1023px) {
+  .documents-browser-layout {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .documents-folder-browser {
+    position: static;
+    width: 100%;
+  }
+
+  .documents-folder-browser__list {
+    flex-direction: row;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .documents-folder-browser__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .documents-folder-item {
+    min-width: 160px;
+  }
+}
+
 @media (min-width: 768px) and (max-width: 1023px) {
   .documents-toolbar {
     flex-wrap: wrap;
@@ -517,30 +565,6 @@
 
   .documents-filter-select {
     max-width: none;
-  }
-
-  .documents-browser-layout {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .documents-folder-browser {
-    position: static;
-    width: 100%;
-  }
-
-  .documents-folder-browser__list {
-    flex-direction: row;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .documents-folder-browser__list::-webkit-scrollbar {
-    display: none;
-  }
-
-  .documents-folder-item {
-    min-width: 160px;
   }
 
   .document-row {
@@ -799,11 +823,6 @@
 .doc-badge--dms {
   background: var(--color-info-light);
   color: var(--color-info);
-}
-
-.doc-badge--local {
-  background: var(--color-surface-2);
-  color: var(--color-text-secondary);
 }
 
 .doc-badge--webdav {
