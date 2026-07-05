@@ -2202,7 +2202,7 @@
         "statusFilter": "Filtra per stato",
         "statusAll": "Tutti gli stati",
         "statusActive": "Attivo",
-        "statusDisabled": "Disattivato"
+        "statusDisabled": "Disattivato",
         "sortLabel": "Ordina abbonamenti",
         "sortDue": "Prossima scadenza",
         "sortCostDesc": "Costo mensile più alto",
